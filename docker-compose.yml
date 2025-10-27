@@ -1,0 +1,29 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: tu_repe_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - tu_repe_network
+
+  adminer:
+    image: adminer
+    container_name: tu_repe_adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - tu_repe_network
+
+networks:
+  tu_repe_network:
+    driver: bridge
