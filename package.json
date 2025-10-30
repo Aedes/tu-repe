@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
+    "dev-test": "NODE_ENV=test ts-node-dev src/index.ts",
     "test": "NODE_ENV=test jest --runInBand"
   },
   "keywords": [],
@@ -20,8 +21,10 @@
     "@types/express": "^5.0.4",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.9.1",
+    "@types/supertest": "^6.0.3",
     "dotenv": "^17.2.3",
     "jest": "^30.2.0",
+    "supertest": "^7.1.4",
     "ts-jest": "^29.4.5",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
