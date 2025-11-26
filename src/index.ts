@@ -2,6 +2,8 @@ import express from "express"
 import cors from "cors"
 import { PORT, FRONTEND_URL } from "./config/config"
 import { clubRouter } from "./routes/club.routes"
+import { courtRouter } from "./routes/court.routes"
+import { videoRouter } from "./routes/video.routes"
 
 const app = express()
 
@@ -13,6 +15,8 @@ app.use(cors({
 app.use(express.json())
 
 app.use("/clubs", clubRouter)
+app.use("/courts", courtRouter)
+app.use("/videos", videoRouter)
 
 app.get("/", (_req, res) => {
     res.send("Hello world")

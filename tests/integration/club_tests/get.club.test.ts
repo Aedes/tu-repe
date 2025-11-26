@@ -20,6 +20,20 @@ describe("GET Club routes", () => {
         expect(res.body.length).toBeGreaterThanOrEqual(2)
     })
 
+    test("GET /clubs/c/:id - debería obtener un club por ID", async () => {
+        const club = new Club("Club By ID", "09:00", "21:00")
+        const savedClub = await ClubService.createClub(club)
+
+        const res = await request("http://localhost:5000")
+            .get(`/clubs/c/${savedClub.id}`)
+
+        expect(res.status).toBe(200)
+        expect(res.body).toHaveProperty("id", savedClub.id)
+        expect(res.body.name).toBe("Club By ID")
+        expect(res.body.openTime).toBe("09:00:00")
+        expect(res.body.closeTime).toBe("21:00:00")
+    })
+
     test("GET /clubs/with-courts - debería obtener todos los clubs con sus canchas", async () => {
         const club1 = new Club("Club One", "08:00", "22:00")
         const club2 = new Club("Club Two", "08:00", "22:00")
@@ -41,19 +55,4 @@ describe("GET Club routes", () => {
         expect(res.body[0].courts.length).toBeGreaterThanOrEqual(1)
         expect(res.body[0].courts[0]).toHaveProperty("name")
     })
-
-    test("GET /clubs/c/:id - debería obtener un club por ID", async () => {
-        const club = new Club("Club By ID", "09:00", "21:00")
-        const savedClub = await ClubService.createClub(club)
-
-        const res = await request("http://localhost:5000")
-            .get(`/clubs/c/${savedClub.id}`)
-
-        expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedClub.id)
-        expect(res.body.name).toBe("Club By ID")
-        expect(res.body.openTime).toBe("09:00:00")
-        expect(res.body.closeTime).toBe("21:00:00")
-    })
-
 })

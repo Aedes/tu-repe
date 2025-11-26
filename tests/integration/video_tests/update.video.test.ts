@@ -1,0 +1,39 @@
+import request from "supertest"
+import { Club } from "../../../src/models/Club"
+import { ClubService } from "../../../src/services/ClubService"
+import { Court } from "../../../src/models/Court"
+import { CourtService } from "../../../src/services/CourtService"
+import { Video } from "../../../src/models/Video"
+import { VideoService } from "../../../src/services/VideoService"
+
+describe("PUT Video routes", () => {
+    test("PUT /videos/v/:id - debería actualizar un video existente", async () => {
+        const startTime = new Date("2024-01-01T13:00:00Z")
+        const endTime = new Date("2024-01-01T13:10:00Z")
+
+        const club = new Club("Club for Video Update", "09:00", "21:00")
+        const savedClub = await ClubService.createClub(club)
+
+        const court = new Court(savedClub.id!, "Court for Video Update", "rtsp://example.com/courtforvideoupdate")
+        const savedCourt = await CourtService.createCourt(court)
+
+        const video = new Video(savedCourt.id!, "video_to_update.mp4", startTime, endTime, "http://example.com/video_to_update")
+        const savedVideo = await VideoService.createVideo(video)
+
+        const res = await request("http://localhost:5000")
+            .put(`/videos/v/${savedVideo.id}`)
+            .send({
+                fileName: "updated_video.mp4",
+                startTime: "2024-01-01T14:00:00Z",
+                endTime: "2024-01-01T14:10:00Z",
+                b2Url: "http://example.com/updated_video"
+            })
+
+        expect(res.status).toBe(200)
+        expect(res.body).toHaveProperty("id", savedVideo.id)
+        expect(res.body.fileName).toBe("updated_video.mp4")
+        expect(new Date(res.body.startTime).toISOString()).toBe("2024-01-01T14:00:00.000Z")
+        expect(new Date(res.body.endTime).toISOString()).toBe("2024-01-01T14:10:00.000Z")
+        expect(res.body.b2Url).toBe("http://example.com/updated_video")
+    })
+})

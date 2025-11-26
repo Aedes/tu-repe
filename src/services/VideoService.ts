@@ -12,6 +12,10 @@ export class VideoService {
         return this.VideoRepository.findById(id)
     }
 
+    static getAllVideos(): Promise<IVideo[]> {
+        return this.VideoRepository.findAll()
+    }
+
     static getVideosByCourtId(courtId: number): Promise<IVideo[]> {
         return this.VideoRepository.findByCourtId(courtId)
     }
