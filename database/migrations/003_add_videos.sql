@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS videos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  court_id INT NOT NULL,
+  file_name VARCHAR(255),
+  start_time DATETIME,
+  end_time DATETIME,
+  b2_url VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE CASCADE
+);
