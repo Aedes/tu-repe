@@ -7,9 +7,11 @@ import { CourtService } from "../../../src/services/CourtService"
 import { VideoService } from "../../../src/services/VideoService"
 
 describe("GET Videos routes", () => {
-    test("GET /videos - debería obtener todas las canchas", async () => {
-        const startTime = new Date("2024-01-01T10:00:00Z")
-        const endTime = new Date("2024-01-01T10:10:00Z")
+    test("GET /videos - debería obtener todos los videos", async () => {
+        const startTime1 = new Date("2024-01-01T10:00:00Z")
+        const endTime1 = new Date("2024-01-01T10:10:00Z")
+        const startTime2 = new Date("2024-01-01T11:00:00Z")
+        const endTime2 = new Date("2024-01-01T11:10:00Z")
 
         const club1 = new Club("Club One", "08:00", "22:00")
         const savedClub1 = await ClubService.createClub(club1)
@@ -17,8 +19,8 @@ describe("GET Videos routes", () => {
         const court1 = new Court(savedClub1.id!, "Court 1", "rtsp://example.com/court1")
         const savedCourt1 = await CourtService.createCourt(court1)
 
-        const video1 = new Video(savedCourt1.id!, "video1.mp4", startTime, endTime, "http://example.com/video1")
-        const video2 = new Video(savedCourt1.id!, "video2.mp4", startTime, endTime, "http://example.com/video2")
+        const video1 = new Video(savedCourt1.id!, "video1.mp4", startTime1, endTime1, "http://example.com/video1")
+        const video2 = new Video(savedCourt1.id!, "video2.mp4", startTime2, endTime2, "http://example.com/video2")
 
         await VideoService.createVideo(video1)
         await VideoService.createVideo(video2)
@@ -54,8 +56,10 @@ describe("GET Videos routes", () => {
     })
 
     test("GET /videos/c/:id - debería devolver los videos de una cancha", async () => {
-        const startTime = new Date("2024-01-01T12:00:00Z")
-        const endTime = new Date("2024-01-01T12:10:00Z")
+        const startTime1 = new Date("2024-01-01T10:00:00Z")
+        const endTime1 = new Date("2024-01-01T10:10:00Z")
+        const startTime2 = new Date("2024-01-01T11:00:00Z")
+        const endTime2 = new Date("2024-01-01T11:10:00Z")
 
         const club3 = new Club("Club Three", "08:00", "22:00")
         const savedClub3 = await ClubService.createClub(club3)
@@ -63,8 +67,8 @@ describe("GET Videos routes", () => {
         const court3 = new Court(savedClub3.id!, "Court 3", "rtsp://example.com/court3")
         const savedCourt3 = await CourtService.createCourt(court3)
 
-        const video1 = new Video(savedCourt3.id!, "court3_video1.mp4", startTime, endTime, "http://example.com/court3_video1")
-        const video2 = new Video(savedCourt3.id!, "court3_video2.mp4", startTime, endTime, "http://example.com/court3_video2")
+        const video1 = new Video(savedCourt3.id!, "court3_video1.mp4", startTime1, endTime1, "http://example.com/court3_video1")
+        const video2 = new Video(savedCourt3.id!, "court3_video2.mp4", startTime2, endTime2, "http://example.com/court3_video2")
 
         await VideoService.createVideo(video1)
         await VideoService.createVideo(video2)

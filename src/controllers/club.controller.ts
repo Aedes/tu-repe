@@ -10,7 +10,7 @@ export const createClub = async (req: Request, res: Response): Promise<void | Re
         const newClub = await ClubService.createClub(club)
 
         if (!newClub) {
-            return res.status(400).json({ mesDELETEsage: "Error creating club" })
+            return res.status(400).json({ message: "Error creating club" })
         }
 
         return res.status(201).json(newClub)
