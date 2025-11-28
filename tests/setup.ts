@@ -1,5 +1,5 @@
 import { pool } from "../src/config/db"
-import { clearDatabase } from "./helpers/clearDatabse"
+import { clearDatabase } from "./helpers/clearDatabase"
 
 beforeEach(async () => {
     await clearDatabase()

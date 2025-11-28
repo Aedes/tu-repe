@@ -7,7 +7,9 @@
     "dev-test": "NODE_ENV=test ts-node-dev src/index.ts",
     "test": "NODE_ENV=test jest --runInBand",
     "migrate:dev": "ts-node-dev database/migrate.ts",
-    "migrate:test": "NODE_ENV=test ts-node-dev database/migrate.ts"
+    "migrate:test": "NODE_ENV=test ts-node-dev database/migrate.ts",
+    "clear-db:test": "NODE_ENV=test ts-node-dev src/utils/clearDatabase.ts",
+    "clear-db:dev": "ts-node-dev src/utils/clearDatabase.ts"
   },
   "keywords": [],
   "author": "",

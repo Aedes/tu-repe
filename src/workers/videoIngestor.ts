@@ -7,7 +7,7 @@ export const initVideoIngestor = () => {
 
     const watcher = chokidar.watch(WATCH_DIR, {
         persistent: true,
-        ignoreInitial: false
+        ignoreInitial: true
     })
 
     watcher.on("add", async (filePath) => {
