@@ -22,6 +22,7 @@ describe("POST Court routes", () => {
                         fs.rmSync(clubPath, { recursive: true, force: true })
                     }
                 } catch (error) {
+                    console.log("Error checking/removing club directory:", error);
                 }
             }
         }
