@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { CourtService } from "../services/CourtService";
 import { Court } from "../models/Court";
-import { createCourtDirectories } from "../utils/createCourtDirectories";
 
 export const createCourt = async (req: Request, res: Response): Promise<void | Response> => {
     try {
@@ -13,8 +12,6 @@ export const createCourt = async (req: Request, res: Response): Promise<void | R
         if (!newCourt) {
             return res.status(400).json({ message: "Error creating court" })
         }
-
-        createCourtDirectories(clubId, newCourt.id!)
 
         return res.status(201).json(newCourt)
     } catch (error: any) {

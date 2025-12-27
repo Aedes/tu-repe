@@ -3,31 +3,6 @@ import fs from "fs"
 import path from "path"
 
 describe("POST Court routes", () => {
-    let clubId: number
-    let courtId: number
-
-    afterEach(() => {
-        if (courtId) {
-            const clubPath = path.join("/var/videos", `club_${clubId}`)
-            const courtPath = path.join(clubPath, `court_${courtId}`)
-
-            if (fs.existsSync(courtPath)) {
-                fs.rmSync(courtPath, { recursive: true, force: true })
-            }
-
-            if (fs.existsSync(clubPath)) {
-                try {
-                    const files = fs.readdirSync(clubPath)
-                    if (files.length === 0) {
-                        fs.rmSync(clubPath, { recursive: true, force: true })
-                    }
-                } catch (error) {
-                    console.log("Error checking/removing club directory:", error);
-                }
-            }
-        }
-    })
-
     test("POST /courts - debería crear una nueva cancha y el directorio correspondiente", async () => {
         const clubRes = await request("http://localhost:5000")
             .post("/clubs")
@@ -38,7 +13,7 @@ describe("POST Court routes", () => {
             })
 
         expect(clubRes.status).toBe(201)
-        clubId = clubRes.body.id
+        const clubId = clubRes.body.id
 
         const res = await request("http://localhost:5000")
             .post("/courts")
@@ -54,7 +29,7 @@ describe("POST Court routes", () => {
         expect(res.body.rtspUrl).toBe("rtsp://example.com/newcourt")
         expect(res.body.clubId).toBe(clubId)
 
-        courtId = res.body.id
+        const courtId = res.body.id
         const clubPath = path.join("/var/videos", `club_${clubId}`)
         const courtPath = path.join(clubPath, `court_${courtId}`)
 
