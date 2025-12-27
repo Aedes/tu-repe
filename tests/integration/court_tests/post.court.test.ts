@@ -1,7 +1,9 @@
 import request from "supertest"
+import fs from "fs"
+import path from "path"
 
 describe("POST Court routes", () => {
-    test("POST /courts - debería crear una nueva cancha", async () => {
+    test("POST /courts - debería crear una nueva cancha y el directorio correspondiente", async () => {
         const clubRes = await request("http://localhost:5000")
             .post("/clubs")
             .send({
@@ -26,5 +28,12 @@ describe("POST Court routes", () => {
         expect(res.body.name).toBe("New Court")
         expect(res.body.rtspUrl).toBe("rtsp://example.com/newcourt")
         expect(res.body.clubId).toBe(clubId)
+
+        const courtId = res.body.id
+        const clubPath = path.join("/var/videos", `club_${clubId}`)
+        const courtPath = path.join(clubPath, `court_${courtId}`)
+
+        expect(fs.existsSync(clubPath)).toBe(true)
+        expect(fs.existsSync(courtPath)).toBe(true)
     })
 })

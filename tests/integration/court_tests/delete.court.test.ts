@@ -5,9 +5,10 @@ import { Video } from "../../../src/models/Video"
 import { ClubService } from "../../../src/services/ClubService"
 import { CourtService } from "../../../src/services/CourtService"
 import { VideoService } from "../../../src/services/VideoService"
+import fs from "fs"
 
 describe("DELETE Court routes", () => {
-    test("DELETE /courts/c/:id - debería eliminar una cancha existente y sus videos asociados", async () => {
+    test("DELETE /courts/c/:id - debería eliminar una cancha existente, sus videos asociados y los directorios de la misma", async () => {
         const club = new Club("Club for Court Deletion", "09:00", "21:00")
         const savedClub = await ClubService.createClub(club)
 
@@ -35,5 +36,10 @@ describe("DELETE Court routes", () => {
         const getClubRes = await request("http://localhost:5000")
             .get(`/clubs/c/${savedClub.id!}`)
         expect(getClubRes.status).toBe(200)
+
+        console.log(`Cancha ${savedCourt.id} de club ${savedClub.id} eliminada, verificando directorios...`)
+
+        const courtPath = `/var/videos/club_${savedClub.id}/court_${savedCourt.id}`
+        expect(fs.existsSync(courtPath)).toBe(false)
     })
 })

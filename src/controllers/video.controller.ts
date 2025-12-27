@@ -6,7 +6,22 @@ export const createVideo = async (req: Request, res: Response): Promise<void | R
     try {
         const { courtId, fileName, b2Url, startTime, endTime } = req.body
 
-        const video = new Video(courtId, fileName, new Date(startTime), new Date(endTime), b2Url)
+        if (!courtId || !fileName || !b2Url || !startTime || !endTime) {
+            return res.status(400).json({ message: "Missing required fields." });
+        }
+
+        const start = new Date(startTime)
+        const end = new Date(endTime)
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return res.status(400).json({ message: "Invalid date format." });
+        }
+
+        if (start >= end) {
+            return res.status(400).json({ message: "startTime must be before endTime." });
+        }
+
+        const video = new Video(courtId, fileName, start, end, b2Url)
         const newVideo = await VideoService.createVideo(video)
 
         return res.status(201).json(newVideo)

@@ -39,4 +39,24 @@ export class VideoRepository extends BaseRepository<IVideo> {
             throw new Error(`Error al buscar videos por rango de fechas y courtId: ${error.message}`);
         }
     }
+
+    async findOverlappingVideos(courtId: number, startTime: Date, endTime: Date): Promise<IVideo[]> {
+        try {
+            const [rows]: any = await pool.query(
+                `SELECT * FROM ${this.tableName} 
+                WHERE court_id = ? 
+                AND NOT (end_time <= ? OR start_time >= ?)`,
+                [courtId, startTime, endTime]
+            );
+
+            return rows.map((row: any) => this.mapColumnsToFields(row));
+        } catch (error: any) {
+            throw new Error(`Error al buscar videos superpuestos: ${error.message}`);
+        }
+    }
+
+    async findByFileNameOrUrl(fileName: string, url: string): Promise<IVideo | null> {
+        const results = await this.findBy({ fileName, b2Url: url } as Partial<IVideo>);
+        return results.length > 0 ? results[0] : null;
+    }
 }

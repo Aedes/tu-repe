@@ -1,10 +1,20 @@
-import { VideoRepository } from "../repositories";
+import { CourtRepository, VideoRepository } from "../repositories";
 import { IVideo } from "../types";
 
 export class VideoService {
     private static readonly VideoRepository = new VideoRepository()
+    private static readonly CourtRepository = new CourtRepository()
 
-    static createVideo(video: IVideo) {
+    static async createVideo(video: IVideo) {
+        const court = await this.CourtRepository.findById(video.courtId)
+        if (!court) throw new Error("Court not found")
+
+        const overLappingVideos = await this.VideoRepository.findOverlappingVideos(video.courtId, video.startTime, video.endTime)
+        if (overLappingVideos.length > 0) throw new Error("Overlapping videos found for the given court and time range")
+
+        const duplicated = await this.VideoRepository.findByFileNameOrUrl(video.fileName, video.b2Url)
+        if (duplicated) throw new Error("A video with the same fileName or URL already exists")
+
         return this.VideoRepository.create(video)
     }
 
