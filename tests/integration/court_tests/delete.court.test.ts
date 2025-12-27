@@ -37,8 +37,6 @@ describe("DELETE Court routes", () => {
             .get(`/clubs/c/${savedClub.id!}`)
         expect(getClubRes.status).toBe(200)
 
-        console.log(`Cancha ${savedCourt.id} de club ${savedClub.id} eliminada, verificando directorios...`)
-
         const courtPath = `/var/videos/club_${savedClub.id}/court_${savedCourt.id}`
         expect(fs.existsSync(courtPath)).toBe(false)
     })
