@@ -49,7 +49,7 @@ export class B2Service {
         }
     }
 
-    static async getFileUrl(b2FilePath: string): Promise<string> {
+    static async getDownloadUrl(b2FilePath: string): Promise<string> {
         try {
             const authResponse = await b2.authorize();
 
