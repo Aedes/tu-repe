@@ -32,13 +32,13 @@ describe("POST Video routes", () => {
                 fileName: "new_video.mp4",
                 startTime: "2024-01-01T10:00:00Z",
                 endTime: "2024-01-01T10:10:00Z",
-                b2Url: "http://example.com/new_video"
+                b2FilePath: "/example/path/new_video.mp4"
             })
 
         expect(res.status).toBe(201)
         expect(res.body).toHaveProperty("id")
         expect(res.body.fileName).toBe("new_video.mp4")
         expect(res.body.courtId).toBe(courtId)
-        expect(res.body.b2Url).toBe("http://example.com/new_video")
+        expect(res.body.b2FilePath).toBe("/example/path/new_video.mp4")
     })
 })

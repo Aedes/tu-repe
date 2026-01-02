@@ -18,7 +18,7 @@ export interface IVideo {
     fileName: string;
     startTime: Date;
     endTime: Date;
-    b2Url: string;
+    b2FilePath: string;
 }
 
 export type ClubCreateDTO = Omit<IClub, 'id'>;

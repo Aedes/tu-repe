@@ -13,3 +13,7 @@ export const MYSQL_DATABASE = process.env.MYSQL_DATABASE
 export const MYSQL_USER = process.env.MYSQL_USER
 export const MYSQL_PASSWORD = process.env.MYSQL_PASSWORD
 export const DATABASE_URL = `mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}/${MYSQL_DATABASE}`;
+export const B2_APPLICATION_KEY_ID = process.env.B2_APPLICATION_KEY_ID || "";
+export const B2_APPLICATION_KEY = process.env.B2_APPLICATION_KEY || "";
+export const B2_BUCKET_ID = process.env.B2_BUCKET_ID || ""
+export const B2_BUCKET_NAME = process.env.B2_BUCKET_NAME || ""

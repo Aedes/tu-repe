@@ -27,7 +27,7 @@ export const initVideoIngestor = () => {
             await VideoService.createVideo({
                 courtId,
                 fileName,
-                b2Url: "http://example.com/new_videos/" + fileName,
+                b2FilePath: `/example/path/${fileName}`,
                 startTime,
                 endTime
             });

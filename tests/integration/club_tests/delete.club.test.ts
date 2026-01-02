@@ -14,7 +14,7 @@ describe("DELETE Club routes", () => {
         const court = new Court(savedClub.id!, "Court for Deletion", "rtsp://example.com/courtfordeletion")
         const savedCourt = await CourtService.createCourt(court)
 
-        const video = new Video(savedCourt.id!, "video_for_deletion.mp4", new Date("2024-01-01T16:00:00Z"), new Date("2024-01-01T16:10:00Z"), "http://example.com/video_for_deletion")
+        const video = new Video(savedCourt.id!, "video_for_deletion.mp4", new Date("2024-01-01T16:00:00Z"), new Date("2024-01-01T16:10:00Z"), "example/path/video_for_deletion")
         const savedVideo = await VideoService.createVideo(video)
 
         const deleteRes = await request("http://localhost:5000")

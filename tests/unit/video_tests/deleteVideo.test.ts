@@ -15,7 +15,7 @@ test("debería eliminar un video correctamente", async () => {
     const startTime = new Date("2024-01-01T10:00:00Z");
     const endTime = new Date("2024-01-01T10:10:00Z");
 
-    const video = new Video(savedCourt.id!, "video_to_delete.mp4", startTime, endTime, "http://example.com/video_delete");
+    const video = new Video(savedCourt.id!, "video_to_delete.mp4", startTime, endTime, "/example/path/video1.mp4");
     const savedVideo = await VideoService.createVideo(video);
 
     const deletionResult = await VideoService.deleteVideo(savedVideo.id!);

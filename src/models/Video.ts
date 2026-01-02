@@ -7,9 +7,9 @@ export class Video implements IVideo {
         readonly fileName: string,
         readonly startTime: Date,
         readonly endTime: Date,
-        readonly b2Url: string,
+        readonly b2FilePath: string,
         readonly id?: number
     ) {
-        VideoValidator.validate({ courtId, fileName, startTime, endTime, b2Url })
+        VideoValidator.validate({ courtId, fileName, startTime, endTime, b2FilePath })
     }
 }

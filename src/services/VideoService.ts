@@ -12,7 +12,7 @@ export class VideoService {
         const overLappingVideos = await this.VideoRepository.findOverlappingVideos(video.courtId, video.startTime, video.endTime)
         if (overLappingVideos.length > 0) throw new Error("Overlapping videos found for the given court and time range")
 
-        const duplicated = await this.VideoRepository.findByFileNameOrUrl(video.fileName, video.b2Url)
+        const duplicated = await this.VideoRepository.findByFileNameOrB2FilePath(video.fileName, video.b2FilePath)
         if (duplicated) throw new Error("A video with the same fileName or URL already exists")
 
         return this.VideoRepository.create(video)

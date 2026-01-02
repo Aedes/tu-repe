@@ -19,8 +19,8 @@ describe("GET Videos routes", () => {
         const court1 = new Court(savedClub1.id!, "Court 1", "rtsp://example.com/court1")
         const savedCourt1 = await CourtService.createCourt(court1)
 
-        const video1 = new Video(savedCourt1.id!, "video1.mp4", startTime1, endTime1, "http://example.com/video1")
-        const video2 = new Video(savedCourt1.id!, "video2.mp4", startTime2, endTime2, "http://example.com/video2")
+        const video1 = new Video(savedCourt1.id!, "video1.mp4", startTime1, endTime1, "/example/path/video1.mp4")
+        const video2 = new Video(savedCourt1.id!, "video2.mp4", startTime2, endTime2, "/example/path/video2.mp4")
 
         await VideoService.createVideo(video1)
         await VideoService.createVideo(video2)
@@ -43,7 +43,7 @@ describe("GET Videos routes", () => {
         const court2 = new Court(savedClub2.id!, "Court 2", "rtsp://example.com/court2")
         const savedCourt2 = await CourtService.createCourt(court2)
 
-        const video = new Video(savedCourt2.id!, "video_by_id.mp4", startTime, endTime, "http://example.com/video_by_id")
+        const video = new Video(savedCourt2.id!, "video_by_id.mp4", startTime, endTime, "/example/path/video_by_id.mp4")
         const savedVideo = await VideoService.createVideo(video)
 
         const res = await request("http://localhost:5000")
@@ -52,7 +52,7 @@ describe("GET Videos routes", () => {
         expect(res.status).toBe(200)
         expect(res.body).toHaveProperty("id", savedVideo.id)
         expect(res.body.fileName).toBe("video_by_id.mp4")
-        expect(res.body.b2Url).toBe("http://example.com/video_by_id")
+        expect(res.body.b2FilePath).toBe("/example/path/video_by_id.mp4")
     })
 
     test("GET /videos/c/:id - debería devolver los videos de una cancha", async () => {
@@ -67,8 +67,8 @@ describe("GET Videos routes", () => {
         const court3 = new Court(savedClub3.id!, "Court 3", "rtsp://example.com/court3")
         const savedCourt3 = await CourtService.createCourt(court3)
 
-        const video1 = new Video(savedCourt3.id!, "court3_video1.mp4", startTime1, endTime1, "http://example.com/court3_video1")
-        const video2 = new Video(savedCourt3.id!, "court3_video2.mp4", startTime2, endTime2, "http://example.com/court3_video2")
+        const video1 = new Video(savedCourt3.id!, "court3_video1.mp4", startTime1, endTime1, "/example/path/court3_video1.mp4")
+        const video2 = new Video(savedCourt3.id!, "court3_video2.mp4", startTime2, endTime2, "/example/path/court3_video2.mp4")
 
         await VideoService.createVideo(video1)
         await VideoService.createVideo(video2)
@@ -94,8 +94,8 @@ describe("GET Videos routes", () => {
         const court4 = new Court(savedClub4.id!, "Court 4", "rtsp://example.com/court4")
         const savedCourt4 = await CourtService.createCourt(court4)
 
-        const video1 = new Video(savedCourt4.id!, "date_video1.mp4", startTime1, endTime1, "http://example.com/date_video1")
-        const video2 = new Video(savedCourt4.id!, "date_video2.mp4", startTime2, endTime2, "http://example.com/date_video2")
+        const video1 = new Video(savedCourt4.id!, "date_video1.mp4", startTime1, endTime1, "/example/path/date_video1.mp4")
+        const video2 = new Video(savedCourt4.id!, "date_video2.mp4", startTime2, endTime2, "/example/path/date_video2.mp4")
 
         await VideoService.createVideo(video1)
         await VideoService.createVideo(video2)
@@ -123,8 +123,8 @@ describe("GET Videos routes", () => {
         const court4 = new Court(savedClub4.id!, "Court 4", "rtsp://example.com/court4")
         const savedCourt4 = await CourtService.createCourt(court4)
 
-        const video1 = new Video(savedCourt4.id!, "date_video1.mp4", startTime1, endTime1, "http://example.com/date_video1")
-        const video2 = new Video(savedCourt4.id!, "date_video2.mp4", startTime2, endTime2, "http://example.com/date_video2")
+        const video1 = new Video(savedCourt4.id!, "date_video1.mp4", startTime1, endTime1, "/example/path/date_video1")
+        const video2 = new Video(savedCourt4.id!, "date_video2.mp4", startTime2, endTime2, "/example/path/date_video2")
 
         await VideoService.createVideo(video1)
         await VideoService.createVideo(video2)

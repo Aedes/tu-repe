@@ -17,7 +17,7 @@ describe("PUT Video routes", () => {
         const court = new Court(savedClub.id!, "Court for Video Update", "rtsp://example.com/courtforvideoupdate")
         const savedCourt = await CourtService.createCourt(court)
 
-        const video = new Video(savedCourt.id!, "video_to_update.mp4", startTime, endTime, "http://example.com/video_to_update")
+        const video = new Video(savedCourt.id!, "video_to_update.mp4", startTime, endTime, "/example/path/video_to_update.mp4")
         const savedVideo = await VideoService.createVideo(video)
 
         const res = await request("http://localhost:5000")
@@ -26,7 +26,7 @@ describe("PUT Video routes", () => {
                 fileName: "updated_video.mp4",
                 startTime: "2024-01-01T14:00:00Z",
                 endTime: "2024-01-01T14:10:00Z",
-                b2Url: "http://example.com/updated_video"
+                b2FilePath: "/example/path/updated_video.mp4"
             })
 
         expect(res.status).toBe(200)
@@ -34,6 +34,6 @@ describe("PUT Video routes", () => {
         expect(res.body.fileName).toBe("updated_video.mp4")
         expect(new Date(res.body.startTime).toISOString()).toBe("2024-01-01T14:00:00.000Z")
         expect(new Date(res.body.endTime).toISOString()).toBe("2024-01-01T14:10:00.000Z")
-        expect(res.body.b2Url).toBe("http://example.com/updated_video")
+        expect(res.body.b2FilePath).toBe("/example/path/updated_video.mp4")
     })
 })
