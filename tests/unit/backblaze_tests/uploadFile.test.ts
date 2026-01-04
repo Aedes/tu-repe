@@ -1,7 +1,7 @@
-import { B2Service } from "../../../src/services/B2Service"
 import fs from "fs"
 import request from "supertest"
 import path from "path"
+import { VideoService } from "../../../src/services/VideoService"
 
 test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo localmente", async () => {
     const clubRes = await request("http://localhost:5000")
@@ -31,9 +31,13 @@ test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo loc
 
     fs.writeFileSync(videoFilePath, "Contenido de prueba para el video.")
 
-    const b2FilePath = await B2Service.uploadFileAndGetFilePath(videoFilePath, clubId, courtId, videoFileName)
+    await new Promise((resolve) => setTimeout(resolve, 5000))
 
-    expect(b2FilePath).toBe(`club_${clubId}/court_${courtId}/${videoFileName}`)
+    const videos = await VideoService.getVideosByCourtId(courtId)
+    const video = videos.find(v => v.fileName === videoFileName)
+
+    expect(video).toBeDefined()
+    expect(video!.b2FilePath).toBe(`club_${clubId}/court_${courtId}/${videoFileName}`)
 
     const fileExists = fs.existsSync(videoFilePath)
     expect(fileExists).toBe(false)

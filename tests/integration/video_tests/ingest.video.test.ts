@@ -31,8 +31,7 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
 
         fs.writeFileSync(videoFilePath, "")
 
-        // Esto podría simular la subida de el video a B2 y la obtención de la URL pública. Cuando termine, debería eliminar el archivo del servidor local.
-        await new Promise((resolve) => setTimeout(resolve, 3000))
+        await new Promise((resolve) => setTimeout(resolve, 5000))
 
         const videoRes = await request("http://localhost:5000")
             .get(`/videos/c/${courtId}`)
@@ -43,7 +42,7 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
 
         expect(ingestedVideo).toBeDefined()
         expect(ingestedVideo.courtId).toBe(courtId)
-        expect(ingestedVideo.b2FilePath).toBe("/example/path/" + videoFileName)
+        expect(ingestedVideo.b2FilePath).toBe(`club_${clubId}/court_${courtId}/${videoFileName}`)
         expect(new Date(ingestedVideo.startTime).toISOString()).toBe(new Date("2024-01-01T10:00:00.000").toISOString())
         expect(new Date(ingestedVideo.endTime).toISOString()).toBe(new Date("2024-01-01T10:10:00.000").toISOString())
     })

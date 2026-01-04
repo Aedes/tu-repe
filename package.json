@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
     "dev-test": "NODE_ENV=test ts-node-dev src/index.ts",
-    "test": "NODE_ENV=test jest --runInBand",
+    "test": "NODE_ENV=test jest --runInBand --testTimeout=30000",
     "migrate:dev": "ts-node-dev database/migrate.ts",
     "migrate:test": "NODE_ENV=test ts-node-dev database/migrate.ts",
     "clear-db:test": "NODE_ENV=test ts-node-dev src/utils/clearDatabase.ts",

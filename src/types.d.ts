@@ -28,3 +28,16 @@ export type VideoCreateDTO = Omit<IVideo, 'id'>;
 export interface ClubWithCourts extends IClub {
     courts: ICourt[];
 }
+
+export interface IFailedUpload {
+    id?: number;
+    filePath: string;
+    fileName: string;
+    clubId: number;
+    courtId: number;
+    errorMessage?: string;
+    attemptsCount: number;
+    lastAttemptAt?: Date;
+    createdAt?: Date;
+    status: 'pending' | 'retrying' | 'failed_permanently';
+}

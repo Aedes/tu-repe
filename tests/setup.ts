@@ -7,6 +7,7 @@ beforeEach(async () => {
 })
 
 afterAll(async () => {
+    await clearDatabase()
     await pool.end()
     const base = "/var/videos"
     if (fs.existsSync(base)) {
