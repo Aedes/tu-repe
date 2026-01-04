@@ -16,7 +16,7 @@ test("debería persistir un nuevo video en la base de datos", async () => {
     const court = new Court(savedClub.id!, "Court 1", "rtsp://example.com/stream")
     const savedCourt = await CourtService.createCourt(court)
 
-    const video = new Video(savedCourt.id!, "video1.mp4", startTime, endTime, "http://example.com/video")
+    const video = new Video(savedCourt.id!, "video1.mp4", startTime, endTime, "/example/path/video1.mp4")
     const savedVideo = await VideoService.createVideo(video)
 
     expect(savedVideo.id).toBeDefined()
@@ -24,5 +24,5 @@ test("debería persistir un nuevo video en la base de datos", async () => {
     expect(savedVideo.fileName).toBe("video1.mp4")
     expect(savedVideo.startTime).toEqual(startTime)
     expect(savedVideo.endTime).toEqual(endTime)
-    expect(savedVideo.b2Url).toBe("http://example.com/video")
+    expect(savedVideo.b2FilePath).toBe("/example/path/video1.mp4")
 })

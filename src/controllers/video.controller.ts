@@ -4,9 +4,9 @@ import { Video } from "../models/Video"
 
 export const createVideo = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const { courtId, fileName, b2Url, startTime, endTime } = req.body
+        const { courtId, fileName, b2FilePath, startTime, endTime } = req.body
 
-        if (!courtId || !fileName || !b2Url || !startTime || !endTime) {
+        if (!courtId || !fileName || !b2FilePath || !startTime || !endTime) {
             return res.status(400).json({ message: "Missing required fields." });
         }
 
@@ -21,7 +21,7 @@ export const createVideo = async (req: Request, res: Response): Promise<void | R
             return res.status(400).json({ message: "startTime must be before endTime." });
         }
 
-        const video = new Video(courtId, fileName, start, end, b2Url)
+        const video = new Video(courtId, fileName, start, end, b2FilePath)
         const newVideo = await VideoService.createVideo(video)
 
         return res.status(201).json(newVideo)
@@ -92,10 +92,10 @@ export const getVideosByDateRange = async (req: Request, res: Response): Promise
 export const updateVideo = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const videoId = parseInt(req.params.id, 10)
-        const { fileName, b2Url, startTime, endTime } = req.body
+        const { fileName, b2FilePath, startTime, endTime } = req.body
         const updatedVideo = await VideoService.updateVideo(videoId, {
             fileName,
-            b2Url,
+            b2FilePath,
             startTime: startTime ? new Date(startTime) : undefined,
             endTime: endTime ? new Date(endTime) : undefined
         })

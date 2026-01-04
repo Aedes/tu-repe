@@ -1,8 +1,14 @@
 import chokidar from "chokidar"
 import path from "path"
 import { VideoService } from "../services/VideoService"
+import { B2Service } from "../services/B2Service"
+import { FailedUploadService } from "../services/FailedUploadService"
+import { CourtService } from "../services/CourtService"
+import { extractMetadataFromFileName } from "../utils/extractMetadataFromFileName"
 
 export const initVideoIngestor = () => {
+    console.log("👀 Ingestor de video iniciado, monitoreando directorio de videos...")
+
     const WATCH_DIR = "/var/videos/**/**/*.mp4"
 
     const watcher = chokidar.watch(WATCH_DIR, {
@@ -19,33 +25,49 @@ export const initVideoIngestor = () => {
             const metadata = extractMetadataFromFileName(fileName);
             if (!metadata) {
                 console.error("No se pudo extraer metadata del archivo", fileName);
-                return;
+                return
             }
 
             const { courtId, startTime, endTime } = metadata;
 
+            const court = await CourtService.findCourtById(courtId);
+            if (!court) {
+                console.error("Court no encontrado:", courtId);
+                return
+            }
+
+            let b2FilePath: string;
+            try {
+                b2FilePath = await B2Service.uploadFileAndGetFilePath(
+                    filePath,
+                    court.clubId,
+                    courtId,
+                    fileName
+                )
+            } catch (uploadError: any) {
+                console.error("Error al subir archivo a B2, registrando para reintento:", uploadError.message);
+                await FailedUploadService.registerFailedUpload(
+                    filePath,
+                    fileName,
+                    court.clubId,
+                    courtId,
+                    uploadError.message
+                )
+                return
+            }
+
             await VideoService.createVideo({
                 courtId,
                 fileName,
-                b2Url: "http://example.com/new_videos/" + fileName,
+                b2FilePath,
                 startTime,
                 endTime
             });
 
             console.log("Video guardado en la BD:", fileName);
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error al procesar el video:", err);
         }
     })
 }
 
-const extractMetadataFromFileName = (fileName: string) => {
-    const parts = fileName.split("_");
-    if (parts.length < 3) return null;
-
-    const courtId = Number(parts[0].replace("cancha", ""));
-    const startTime = new Date(parts[1] + " " + parts[2].replace(".mp4", "").replace("-", ":"));
-    const endTime = new Date(startTime.getTime() + 600000);
-
-    return { courtId, startTime, endTime };
-};

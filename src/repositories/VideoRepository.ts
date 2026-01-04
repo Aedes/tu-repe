@@ -55,8 +55,8 @@ export class VideoRepository extends BaseRepository<IVideo> {
         }
     }
 
-    async findByFileNameOrUrl(fileName: string, url: string): Promise<IVideo | null> {
-        const results = await this.findBy({ fileName, b2Url: url } as Partial<IVideo>);
+    async findByFileNameOrB2FilePath(fileName: string, filePath: string): Promise<IVideo | null> {
+        const results = await this.findBy({ fileName, b2FilePath: filePath } as Partial<IVideo>);
         return results.length > 0 ? results[0] : null;
     }
 }

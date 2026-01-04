@@ -14,7 +14,7 @@ export class VideoValidator extends BaseValidator {
         this.validateRequired(data.endTime, 'endTime');
         this.validateDate(data.endTime, 'endTime');
 
-        this.validateRequired(data.b2Url, 'b2Url');
-        this.validateNonEmptyString(data.b2Url, 'b2Url');
+        this.validateRequired(data.b2FilePath, 'b2FilePath');
+        this.validateNonEmptyString(data.b2FilePath, 'b2FilePath');
     }
 }

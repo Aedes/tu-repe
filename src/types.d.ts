@@ -18,7 +18,7 @@ export interface IVideo {
     fileName: string;
     startTime: Date;
     endTime: Date;
-    b2Url: string;
+    b2FilePath: string;
 }
 
 export type ClubCreateDTO = Omit<IClub, 'id'>;
@@ -27,4 +27,17 @@ export type VideoCreateDTO = Omit<IVideo, 'id'>;
 
 export interface ClubWithCourts extends IClub {
     courts: ICourt[];
+}
+
+export interface IFailedUpload {
+    id?: number;
+    filePath: string;
+    fileName: string;
+    clubId: number;
+    courtId: number;
+    errorMessage?: string;
+    attemptsCount: number;
+    lastAttemptAt?: Date;
+    createdAt?: Date;
+    status: 'pending' | 'retrying' | 'failed_permanently';
 }

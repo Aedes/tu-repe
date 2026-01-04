@@ -15,14 +15,14 @@ test("debería actualizar un video correctamente", async () => {
     const startTime = new Date("2024-01-01T10:00:00Z")
     const endTime = new Date("2024-01-01T10:10:00Z")
 
-    const video = new Video(savedCourt.id!, "video1.mp4", startTime, endTime, "http://example.com/video")
+    const video = new Video(savedCourt.id!, "video1.mp4", startTime, endTime, "/example/path/video")
     const savedVideo = await VideoService.createVideo(video)
 
     savedVideo.fileName = "video_updated.mp4"
-    savedVideo.b2Url = "http://example.com/video_updated"
+    savedVideo.b2FilePath = "/club_updated/court_updated/video_updated.mp4"
 
     const updatedVideo = await VideoService.updateVideo(savedVideo.id!, savedVideo)
 
     expect(updatedVideo?.fileName).toBe("video_updated.mp4")
-    expect(updatedVideo?.b2Url).toBe("http://example.com/video_updated")
+    expect(updatedVideo?.b2FilePath).toBe("/club_updated/court_updated/video_updated.mp4")
 })

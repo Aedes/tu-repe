@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
     "dev-test": "NODE_ENV=test ts-node-dev src/index.ts",
-    "test": "NODE_ENV=test jest --runInBand",
+    "test": "NODE_ENV=test jest --runInBand --testTimeout=30000",
     "migrate:dev": "ts-node-dev database/migrate.ts",
     "migrate:test": "NODE_ENV=test ts-node-dev database/migrate.ts",
     "clear-db:test": "NODE_ENV=test ts-node-dev src/utils/clearDatabase.ts",
@@ -16,11 +16,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "backblaze-b2": "^1.7.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "mysql2": "^3.15.3"
   },
   "devDependencies": {
+    "@types/backblaze-b2": "^1.5.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.4",
     "@types/jest": "^30.0.0",

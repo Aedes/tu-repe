@@ -15,7 +15,7 @@ describe("DELETE Court routes", () => {
         const court = new Court(savedClub.id!, "Court to Delete", "rtsp://example.com/courtdelete")
         const savedCourt = await CourtService.createCourt(court)
 
-        const video = new Video(savedCourt.id!, "video_for_deletion.mp4", new Date("2024-01-01T16:00:00Z"), new Date("2024-01-01T16:10:00Z"), "http://example.com/video_for_deletion")
+        const video = new Video(savedCourt.id!, "video_for_deletion.mp4", new Date("2024-01-01T16:00:00Z"), new Date("2024-01-01T16:10:00Z"), "/example/path/video_for_deletion")
         const savedVideo = await VideoService.createVideo(video)
 
         const deleteRes = await request("http://localhost:5000")
@@ -36,8 +36,6 @@ describe("DELETE Court routes", () => {
         const getClubRes = await request("http://localhost:5000")
             .get(`/clubs/c/${savedClub.id!}`)
         expect(getClubRes.status).toBe(200)
-
-        console.log(`Cancha ${savedCourt.id} de club ${savedClub.id} eliminada, verificando directorios...`)
 
         const courtPath = `/var/videos/club_${savedClub.id}/court_${savedCourt.id}`
         expect(fs.existsSync(courtPath)).toBe(false)

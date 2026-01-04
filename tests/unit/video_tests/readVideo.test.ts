@@ -16,7 +16,7 @@ describe("lectura de videos", () => {
         const startTime = new Date("2024-01-01T10:00:00Z")
         const endTime = new Date("2024-01-01T10:10:00Z")
 
-        const video = new Video(savedCourt.id!, "video1.mp4", startTime, endTime, "http://example.com/video")
+        const video = new Video(savedCourt.id!, "video1.mp4", startTime, endTime, "/example/path/video1.mp4")
         const savedVideo = await VideoService.createVideo(video)
 
         const fetchedVideo = await VideoService.findVideoById(savedVideo.id!)
@@ -26,7 +26,7 @@ describe("lectura de videos", () => {
         expect(fetchedVideo?.fileName).toBe(savedVideo.fileName)
         expect(fetchedVideo?.startTime).toEqual(savedVideo.startTime)
         expect(fetchedVideo?.endTime).toEqual(savedVideo.endTime)
-        expect(fetchedVideo?.b2Url).toEqual(savedVideo.b2Url)
+        expect(fetchedVideo?.b2FilePath).toEqual(savedVideo.b2FilePath)
     })
 
     test("debería obtener todos los videos de un court específico", async () => {
@@ -41,8 +41,8 @@ describe("lectura de videos", () => {
         const startTime2 = new Date("2024-02-01T10:00:00Z")
         const endTime2 = new Date("2024-02-01T10:10:00Z")
 
-        const video1 = new Video(savedCourt.id!, "video1.mp4", startTime1, endTime1, "http://example.com/video1")
-        const video2 = new Video(savedCourt.id!, "video2.mp4", startTime2, endTime2, "http://example.com/video2")
+        const video1 = new Video(savedCourt.id!, "video1.mp4", startTime1, endTime1, "/example/path/video1.mp4")
+        const video2 = new Video(savedCourt.id!, "video2.mp4", startTime2, endTime2, "/example/path/video2.mp4")
 
         const savedVideo1 = await VideoService.createVideo(video1)
         const savedVideo2 = await VideoService.createVideo(video2)
@@ -67,8 +67,8 @@ describe("lectura de videos", () => {
         const startTime2 = new Date("2024-02-01T10:00:00Z")
         const endTime2 = new Date("2024-02-01T10:10:00Z")
 
-        const video1 = new Video(savedCourt.id!, "video1.mp4", startTime1, endTime1, "http://example.com/video1")
-        const video2 = new Video(savedCourt.id!, "video2.mp4", startTime2, endTime2, "http://example.com/video2")
+        const video1 = new Video(savedCourt.id!, "video1.mp4", startTime1, endTime1, "/example/path/video1.mp4")
+        const video2 = new Video(savedCourt.id!, "video2.mp4", startTime2, endTime2, "/example/path/video2.mp4")
 
         await VideoService.createVideo(video1)
         const savedVideo2 = await VideoService.createVideo(video2)
@@ -95,8 +95,8 @@ describe("lectura de videos", () => {
         const startTime2 = new Date("2024-02-01T10:00:00Z")
         const endTime2 = new Date("2024-02-01T10:10:00Z")
 
-        const video1 = new Video(savedCourt.id!, "video1.mp4", startTime1, endTime1, "http://example.com/video1")
-        const video2 = new Video(savedCourt.id!, "video2.mp4", startTime2, endTime2, "http://example.com/video2")
+        const video1 = new Video(savedCourt.id!, "video1.mp4", startTime1, endTime1, "/example/path/video1.mp4")
+        const video2 = new Video(savedCourt.id!, "video2.mp4", startTime2, endTime2, "/example/path/video2.mp4")
 
         await VideoService.createVideo(video1)
         const savedVideo2 = await VideoService.createVideo(video2)

@@ -5,6 +5,8 @@ import { clubRouter } from "./routes/club.routes"
 import { courtRouter } from "./routes/court.routes"
 import { videoRouter } from "./routes/video.routes"
 import { initVideoIngestor } from "./workers/videoIngestor"
+import { initRetryUploadWorker } from "./workers/retryUploadWorker"
+import { initCleanupWorker } from "./workers/cleanupWorker"
 
 const app = express()
 
@@ -16,6 +18,8 @@ app.use(cors({
 app.use(express.json())
 
 initVideoIngestor()
+initRetryUploadWorker()
+initCleanupWorker()
 
 app.use("/clubs", clubRouter)
 app.use("/courts", courtRouter)
@@ -26,5 +30,5 @@ app.get("/", (_req, res) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`)
+    console.log(`🚀 Server listening on port ${PORT}`)
 })
