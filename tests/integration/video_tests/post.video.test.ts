@@ -8,7 +8,8 @@ describe("POST Video routes", () => {
             .send({
                 name: "Club for Court Creation",
                 openTime: "08:00",
-                closeTime: "22:00"
+                closeTime: "22:00",
+                appointmentDuration: 60
             })
 
         expect(clubRes.status).toBe(201)

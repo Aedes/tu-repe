@@ -13,7 +13,7 @@ describe("GET Videos routes", () => {
         const startTime2 = new Date("2024-01-01T11:00:00Z")
         const endTime2 = new Date("2024-01-01T11:10:00Z")
 
-        const club1 = new Club("Club One", "08:00", "22:00")
+        const club1 = new Club("Club One", "08:00", "22:00", 60)
         const savedClub1 = await ClubService.createClub(club1)
 
         const court1 = new Court(savedClub1.id!, "Court 1", "rtsp://example.com/court1")
@@ -37,7 +37,7 @@ describe("GET Videos routes", () => {
         const startTime = new Date("2024-01-01T11:00:00Z")
         const endTime = new Date("2024-01-01T11:10:00Z")
 
-        const club2 = new Club("Club Two", "08:00", "22:00")
+        const club2 = new Club("Club Two", "08:00", "22:00", 60)
         const savedClub2 = await ClubService.createClub(club2)
 
         const court2 = new Court(savedClub2.id!, "Court 2", "rtsp://example.com/court2")
@@ -61,7 +61,7 @@ describe("GET Videos routes", () => {
         const startTime2 = new Date("2024-01-01T11:00:00Z")
         const endTime2 = new Date("2024-01-01T11:10:00Z")
 
-        const club3 = new Club("Club Three", "08:00", "22:00")
+        const club3 = new Club("Club Three", "08:00", "22:00", 60)
         const savedClub3 = await ClubService.createClub(club3)
 
         const court3 = new Court(savedClub3.id!, "Court 3", "rtsp://example.com/court3")
@@ -88,7 +88,7 @@ describe("GET Videos routes", () => {
         const startTime2 = new Date("2024-02-05T10:00:00Z")
         const endTime2 = new Date("2024-02-05T10:10:00Z")
 
-        const club4 = new Club("Club Four", "08:00", "22:00")
+        const club4 = new Club("Club Four", "08:00", "22:00", 60)
         const savedClub4 = await ClubService.createClub(club4)
 
         const court4 = new Court(savedClub4.id!, "Court 4", "rtsp://example.com/court4")

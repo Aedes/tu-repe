@@ -8,7 +8,7 @@ import { VideoService } from "../../../src/services/VideoService"
 
 describe("DELETE Club routes", () => {
     test("DELETE /clubs/c/:id - debería eliminar un club y sus canchas y videos asociados", async () => {
-        const club = new Club("Club to Delete with Courts and Videos", "08:00", "22:00")
+        const club = new Club("Club to Delete with Courts and Videos", "08:00", "22:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court for Deletion", "rtsp://example.com/courtfordeletion")

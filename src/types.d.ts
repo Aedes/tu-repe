@@ -3,6 +3,7 @@ export interface IClub {
     name: string;
     openTime: string;
     closeTime: string;
+    appointmentDuration: number;
 }
 
 export interface ICourt {

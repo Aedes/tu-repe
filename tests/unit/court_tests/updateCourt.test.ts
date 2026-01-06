@@ -7,7 +7,7 @@ import { VideoService } from "../../../src/services/VideoService"
 
 describe("eliminar cancha", () => {
     test("debería actualizar una cancha correctamente", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Cancha Antigua", "rtsp://example.com/antigua")
@@ -23,7 +23,7 @@ describe("eliminar cancha", () => {
     })
 
     test("debería borrar una cancha y en cascada sus videos asociados", async () => {
-        const club = new Club("Club to Delete", "08:00", "22:00")
+        const club = new Club("Club to Delete", "08:00", "22:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court to Delete with Club", "rtsp://example.com/delete_with_club")

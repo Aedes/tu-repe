@@ -7,7 +7,8 @@ describe("POST Club routes", () => {
             .send({
                 name: "Club Integration Test",
                 openTime: "07:00",
-                closeTime: "23:00"
+                closeTime: "23:00",
+                appointmentDuration: 90
             })
 
         expect(res.status).toBe(201)
@@ -15,5 +16,6 @@ describe("POST Club routes", () => {
         expect(res.body.name).toBe("Club Integration Test")
         expect(res.body.openTime).toEqual("07:00:00")
         expect(res.body.closeTime).toBe("23:00:00")
+        expect(res.body.appointmentDuration).toBe(90)
     })
 })

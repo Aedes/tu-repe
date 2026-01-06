@@ -5,7 +5,7 @@ import { CourtService } from "../../../src/services/CourtService"
 import { FailedUploadService } from "../../../src/services/FailedUploadService"
 
 test("debería registrar un fallo de subida en la base de datos", async () => {
-    const club = new Club("Test Club", "08:00", "22:00")
+    const club = new Club("Test Club", "08:00", "22:00", 60)
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Test Court", "rtsp://example.com/stream")

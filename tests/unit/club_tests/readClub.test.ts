@@ -5,7 +5,7 @@ import { CourtService } from "../../../src/services/CourtService"
 
 describe("lectura de club", () => {
     test("debería obtener un club persistido en la base de datos por su id", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const fetchedClub = await ClubService.findClubById(savedClub.id!)
@@ -17,7 +17,7 @@ describe("lectura de club", () => {
     })
 
     test("debería obtener un club persistido en la base de datos por su nombre", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const fetchedClub = await ClubService.findClubByName(savedClub.name)
@@ -29,8 +29,8 @@ describe("lectura de club", () => {
     })
 
     test("debería obtener todos los clubs en la base de datos", async () => {
-        const club1 = new Club("Aedes Padel", "08:00", "22:00")
-        const club2 = new Club("Beta Padel", "09:00", "21:00")
+        const club1 = new Club("Aedes Padel", "08:00", "22:00", 60)
+        const club2 = new Club("Beta Padel", "09:00", "21:00", 60)
         await ClubService.createClub(club1)
         await ClubService.createClub(club2)
 
@@ -43,8 +43,8 @@ describe("lectura de club", () => {
     })
 
     test("debería obtener todos los clubs en la base de datos con sus courts", async () => {
-        const club1 = new Club("Aedes Padel", "08:00", "22:00")
-        const club2 = new Club("Beta Padel", "09:00", "21:00")
+        const club1 = new Club("Aedes Padel", "08:00", "22:00", 60)
+        const club2 = new Club("Beta Padel", "09:00", "21:00", 60)
         const savedClub1 = await ClubService.createClub(club1)
         const savedClub2 = await ClubService.createClub(club2)
 

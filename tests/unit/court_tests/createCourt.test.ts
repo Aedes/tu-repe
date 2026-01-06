@@ -6,7 +6,7 @@ import fs from "fs"
 import path from "path"
 
 test("debería persistir una nueva cancha en la base de datos y crear los directorios para esta", async () => {
-    const club = new Club("Aedes Padel", "08:00", "22:00")
+    const club = new Club("Aedes Padel", "08:00", "22:00", 60)
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Court 1", "rtsp://example.com/stream")

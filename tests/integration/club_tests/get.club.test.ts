@@ -6,8 +6,8 @@ import { CourtService } from "../../../src/services/CourtService"
 
 describe("GET Club routes", () => {
     test("GET /clubs - debería obtener todos los clubs", async () => {
-        const club1 = new Club("Club One", "08:00", "22:00")
-        const club2 = new Club("Club Two", "08:00", "22:00")
+        const club1 = new Club("Club One", "08:00", "22:00", 60)
+        const club2 = new Club("Club Two", "08:00", "22:00", 60)
 
         await ClubService.createClub(club1)
         await ClubService.createClub(club2)
@@ -21,7 +21,7 @@ describe("GET Club routes", () => {
     })
 
     test("GET /clubs/c/:id - debería obtener un club por ID", async () => {
-        const club = new Club("Club By ID", "09:00", "21:00")
+        const club = new Club("Club By ID", "09:00", "21:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const res = await request("http://localhost:5000")
@@ -35,8 +35,8 @@ describe("GET Club routes", () => {
     })
 
     test("GET /clubs/with-courts - debería obtener todos los clubs con sus canchas", async () => {
-        const club1 = new Club("Club One", "08:00", "22:00")
-        const club2 = new Club("Club Two", "08:00", "22:00")
+        const club1 = new Club("Club One", "08:00", "22:00", 60)
+        const club2 = new Club("Club Two", "08:00", "22:00", 60)
         const savedClub1 = await ClubService.createClub(club1)
         const savedClub2 = await ClubService.createClub(club2)
 

@@ -18,6 +18,7 @@ export class ClubRepository extends BaseRepository<IClub> {
                     c.name as club_name, 
                     c.open_time, 
                     c.close_time,
+                    c.appointment_duration,
                     ct.id as court_id,
                     ct.name as court_name,
                     ct.rtsp_url
@@ -35,6 +36,7 @@ export class ClubRepository extends BaseRepository<IClub> {
                         name: row.club_name,
                         openTime: row.open_time,
                         closeTime: row.close_time,
+                        appointmentDuration: row.appointment_duration,
                         courts: []
                     });
                 }

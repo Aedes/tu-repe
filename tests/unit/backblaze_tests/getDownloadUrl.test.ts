@@ -10,7 +10,8 @@ test("debería obtener la URL de descarga de un archivo de Backblaze B2 correcta
         .send({
             name: "Club for Upload Test",
             openTime: "08:00",
-            closeTime: "22:00"
+            closeTime: "22:00",
+            appointmentDuration: 60
         })
 
     expect(clubRes.status).toBe(201)

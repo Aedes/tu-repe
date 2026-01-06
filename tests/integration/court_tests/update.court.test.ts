@@ -6,7 +6,7 @@ import { ClubService } from "../../../src/services/ClubService"
 
 describe("PUT Court routes", () => {
     test("PUT /courts/c/:id - debería actualizar una cancha existente", async () => {
-        const club = new Club("Club for Court Update", "09:00", "21:00")
+        const club = new Club("Club for Court Update", "09:00", "21:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court To Update", "rtsp://example.com/courtupdate")

@@ -6,7 +6,7 @@ import { CourtService } from "../../../src/services/CourtService";
 import { VideoService } from "../../../src/services/VideoService";
 
 test("debería eliminar un video correctamente", async () => {
-    const club = new Club("Club for Video Deletion", "08:00", "22:00");
+    const club = new Club("Club for Video Deletion", "08:00", "22:00", 60);
     const savedClub = await ClubService.createClub(club);
 
     const court = new Court(savedClub.id!, "Court for Video Deletion", "rtsp://example.com/video_delete");
