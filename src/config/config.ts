@@ -17,3 +17,4 @@ export const B2_APPLICATION_KEY_ID = process.env.B2_APPLICATION_KEY_ID || "";
 export const B2_APPLICATION_KEY = process.env.B2_APPLICATION_KEY || "";
 export const B2_BUCKET_ID = process.env.B2_BUCKET_ID || ""
 export const B2_BUCKET_NAME = process.env.B2_BUCKET_NAME || ""
+export const STABILITY_THRESHOLD = process.env.STABILITY_THRESHOLD ? Number(process.env.STABILITY_THRESHOLD) : 10_000

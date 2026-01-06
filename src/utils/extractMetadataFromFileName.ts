@@ -3,8 +3,14 @@ export const extractMetadataFromFileName = (fileName: string) => {
     if (parts.length < 3) return null;
 
     const courtId = Number(parts[0].replace("cancha", ""));
-    const startTime = new Date(parts[1] + " " + parts[2].replace(".mp4", "").replace("-", ":"));
+    const dateStr = parts[1];
+    const timeStr = parts[2].replace(".mp4", "").replace("-", ":").replace(/-/g, ":");
+    const startTime = new Date(`${dateStr}T${timeStr}Z`);
     const endTime = new Date(startTime.getTime() + 600000);
 
-    return { courtId, startTime, endTime };
+    return {
+        courtId,
+        startTime,
+        endTime
+    };
 };

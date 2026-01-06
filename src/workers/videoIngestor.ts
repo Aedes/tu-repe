@@ -5,6 +5,7 @@ import { B2Service } from "../services/B2Service"
 import { FailedUploadService } from "../services/FailedUploadService"
 import { CourtService } from "../services/CourtService"
 import { extractMetadataFromFileName } from "../utils/extractMetadataFromFileName"
+import { STABILITY_THRESHOLD } from "../config/config"
 
 export const initVideoIngestor = () => {
     console.log("👀 Ingestor de video iniciado, monitoreando directorio de videos...")
@@ -13,12 +14,16 @@ export const initVideoIngestor = () => {
 
     const watcher = chokidar.watch(WATCH_DIR, {
         persistent: true,
-        ignoreInitial: true
+        ignoreInitial: true,
+        awaitWriteFinish: {
+            stabilityThreshold: STABILITY_THRESHOLD,
+            pollInterval: 1_000
+        }
     })
 
     watcher.on("add", async (filePath) => {
         try {
-            console.log("Nuevo video detectado:", filePath);
+            console.log("Nuevo video detectado:", filePath)
 
             const fileName = path.basename(filePath);
 

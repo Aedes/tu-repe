@@ -1,5 +1,5 @@
 import { b2 } from "../config/backblaze_b2";
-import { B2_BUCKET_ID } from "../config/config";
+import { B2_BUCKET_ID, B2_BUCKET_NAME } from "../config/config";
 import fs from "fs";
 
 export class B2Service {
@@ -63,7 +63,7 @@ export class B2Service {
                 validDurationInSeconds: 60 * 15
             })
 
-            const downloadUrl = `${authResponse.data.downloadUrl}/file/${B2_BUCKET_ID}/${b2FilePath}?Authorization=${data.authorizationToken}`;
+            const downloadUrl = `${authResponse.data.downloadUrl}/file/${B2_BUCKET_NAME}/${b2FilePath}?Authorization=${data.authorizationToken}`;
 
             return downloadUrl;
         } catch (error: any) {
