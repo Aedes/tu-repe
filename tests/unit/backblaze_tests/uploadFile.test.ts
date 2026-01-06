@@ -9,7 +9,8 @@ test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo loc
         .send({
             name: "Club for Upload Test",
             openTime: "08:00",
-            closeTime: "22:00"
+            closeTime: "22:00",
+            appointmentDuration: 60
         })
 
     expect(clubRes.status).toBe(201)

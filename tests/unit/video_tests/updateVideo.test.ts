@@ -6,7 +6,7 @@ import { CourtService } from "../../../src/services/CourtService"
 import { VideoService } from "../../../src/services/VideoService"
 
 test("debería actualizar un video correctamente", async () => {
-    const club = new Club("Aedes Padel", "08:00", "22:00")
+    const club = new Club("Aedes Padel", "08:00", "22:00", 60)
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Court 1", "rtsp://example.com/stream")

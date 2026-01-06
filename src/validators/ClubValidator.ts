@@ -10,5 +10,8 @@ export class ClubValidator extends BaseValidator {
 
         this.validateRequired(data.closeTime, 'closeTime');
         this.validateNonEmptyString(data.closeTime, 'closeTime');
+
+        this.validateRequired(data.appointmentDuration, 'appointmentDuration');
+        this.validateNumber(data.appointmentDuration, 'appointmentDuration');
     }
 }

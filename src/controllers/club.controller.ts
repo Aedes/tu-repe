@@ -4,9 +4,9 @@ import { ClubService } from "../services/ClubService"
 
 export const createClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const { name, openTime, closeTime } = req.body
+        const { name, openTime, closeTime, appointmentDuration } = req.body
 
-        const club = new Club(name, openTime, closeTime)
+        const club = new Club(name, openTime, closeTime, appointmentDuration)
         const newClub = await ClubService.createClub(club)
 
         if (!newClub) {
@@ -55,8 +55,8 @@ export const getClubById = async (req: Request, res: Response): Promise<void | R
 export const updateClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const clubId = parseInt(req.params.id, 10)
-        const { name, openTime, closeTime } = req.body
-        const updatedClub = await ClubService.updateClub(clubId, { name, openTime, closeTime })
+        const { name, openTime, closeTime, appointmentDuration } = req.body
+        const updatedClub = await ClubService.updateClub(clubId, { name, openTime, closeTime, appointmentDuration })
 
         if (!updatedClub) {
             return res.status(404).json({ message: "Club not found" })

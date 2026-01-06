@@ -6,8 +6,9 @@ export class Club implements IClub {
         readonly name: string,
         readonly openTime: string,
         readonly closeTime: string,
+        readonly appointmentDuration: number,
         readonly id?: number
     ) {
-        ClubValidator.validate({ name, openTime, closeTime })
+        ClubValidator.validate({ name, openTime, closeTime, appointmentDuration })
     }
 }

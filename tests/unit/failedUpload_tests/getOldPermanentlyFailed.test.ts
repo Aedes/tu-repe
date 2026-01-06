@@ -6,7 +6,7 @@ import { FailedUploadService } from "../../../src/services/FailedUploadService"
 import { pool } from "../../../src/config/db"
 
 test("debería obtener fallos permanentemente fallidos más antiguos que X días", async () => {
-    const club = new Club("Test Club", "08:00", "22:00")
+    const club = new Club("Test Club", "08:00", "22:00", 60)
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Test Court", "rtsp://example.com/stream")
@@ -38,7 +38,7 @@ test("debería obtener fallos permanentemente fallidos más antiguos que X días
 })
 
 test("no debería obtener fallos permanentemente fallidos más recientes que X días", async () => {
-    const club = new Club("Test Club", "08:00", "22:00")
+    const club = new Club("Test Club", "08:00", "22:00", 60)
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Test Court", "rtsp://example.com/stream")

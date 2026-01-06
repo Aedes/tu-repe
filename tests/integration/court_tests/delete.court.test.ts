@@ -9,7 +9,7 @@ import fs from "fs"
 
 describe("DELETE Court routes", () => {
     test("DELETE /courts/c/:id - debería eliminar una cancha existente, sus videos asociados y los directorios de la misma", async () => {
-        const club = new Club("Club for Court Deletion", "09:00", "21:00")
+        const club = new Club("Club for Court Deletion", "09:00", "21:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court to Delete", "rtsp://example.com/courtdelete")

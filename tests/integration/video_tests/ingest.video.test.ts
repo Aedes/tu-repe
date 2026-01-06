@@ -9,7 +9,8 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
             .send({
                 name: "Club for Video Ingestor",
                 openTime: "08:00",
-                closeTime: "22:00"
+                closeTime: "22:00",
+                appointmentDuration: 60
             })
 
         expect(clubRes.status).toBe(201)
@@ -44,6 +45,6 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
         expect(ingestedVideo.courtId).toBe(courtId)
         expect(ingestedVideo.b2FilePath).toBe(`club_${clubId}/court_${courtId}/${videoFileName}`)
         expect(new Date(ingestedVideo.startTime).toISOString()).toBe(new Date("2024-01-01T10:00:00.000Z").toISOString())
-        expect(new Date(ingestedVideo.endTime).toISOString()).toBe(new Date("2024-01-01T10:10:00.000Z").toISOString())
+        expect(new Date(ingestedVideo.endTime).toISOString()).toBe(new Date("2024-01-01T10:00:30.000Z").toISOString())
     })
 })

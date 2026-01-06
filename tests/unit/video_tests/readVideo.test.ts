@@ -7,7 +7,7 @@ import { VideoService } from "../../../src/services/VideoService"
 
 describe("lectura de videos", () => {
     test("debería obtener un video persistido en la base de datos por su id", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court 1", "rtsp://example.com/stream")
@@ -30,7 +30,7 @@ describe("lectura de videos", () => {
     })
 
     test("debería obtener todos los videos de un court específico", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court 1", "rtsp://example.com/stream")
@@ -56,7 +56,7 @@ describe("lectura de videos", () => {
     })
 
     test("debería obtener todos los videos entre 2 fechas", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court 1", "rtsp://example.com/stream")
@@ -84,7 +84,7 @@ describe("lectura de videos", () => {
     })
 
     test("debería obtener todos los videos entre 2 fechas para un court específico", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 60)
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court 1", "rtsp://example.com/stream")
