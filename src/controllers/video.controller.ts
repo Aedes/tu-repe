@@ -67,20 +67,13 @@ export const getVideosByDateRange = async (req: Request, res: Response): Promise
     try {
         const { startTime, endTime, courtId } = req.query
 
-        if (!startTime || !endTime) {
-            return res.status(400).json({ message: "startTime and endTime are required" })
+        if (!startTime || !endTime || !courtId) {
+            return res.status(400).json({ message: "startTime, endTime and courtId are required" })
         }
 
         const start = new Date(startTime as string)
         const end = new Date(endTime as string)
-
-        let videos
-
-        if (courtId) {
-            videos = await VideoService.getVideosBetweenDatesAndCourtId(start, end, parseInt(courtId as string, 10))
-        } else {
-            videos = await VideoService.getVideosBetweenDates(start, end)
-        }
+        const videos = await VideoService.getVideosBetweenDatesAndCourtId(start, end, parseInt(courtId as string, 10))
 
         return res.status(200).json(videos)
 
