@@ -29,7 +29,7 @@ export class VideoRepository extends BaseRepository<IVideo> {
         try {
             const [rows]: any = await pool.query(
                 `SELECT * FROM ${this.tableName} 
-                WHERE start_time >= ? AND end_time <= ? AND court_id = ? 
+                WHERE start_time >= ? AND start_time <= ? AND court_id = ? 
                 ORDER BY start_time ASC`,
                 [startTime, endTime, courtId]
             );

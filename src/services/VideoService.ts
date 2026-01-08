@@ -1,5 +1,7 @@
 import { CourtRepository, VideoRepository } from "../repositories";
 import { IVideo } from "../types";
+import { ClubService } from "./ClubService";
+import { B2Service } from "./B2Service";
 
 export class VideoService {
     private static readonly VideoRepository = new VideoRepository()
@@ -44,5 +46,23 @@ export class VideoService {
 
     static deleteVideo(id: number): Promise<boolean> {
         return this.VideoRepository.delete(id)
+    }
+
+    static async getVideoDownloadUrlsForAppointment(startTime: Date, courtId: number): Promise<string[]> {
+        const court = await this.CourtRepository.findById(courtId)
+        if (!court) throw new Error("Court not found")
+
+        const club = await ClubService.findClubById(court.clubId)
+        if (!club) throw new Error("Club not found")
+
+        const endTime = new Date(startTime.getTime() + club.appointmentDuration * 60 * 1000)
+
+        const videos = await this.getVideosBetweenDatesAndCourtId(startTime, endTime, courtId)
+
+        const downloadUrls = await Promise.all(
+            videos.map(video => B2Service.getDownloadUrl(video.b2FilePath))
+        )
+
+        return downloadUrls
     }
 }

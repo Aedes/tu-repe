@@ -82,6 +82,23 @@ export const getVideosByDateRange = async (req: Request, res: Response): Promise
     }
 }
 
+export const getVideoDownloadUrlsForAppointment = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const { startTime, courtId } = req.query
+
+        if (!startTime || !courtId) {
+            return res.status(400).json({ message: "startTime and courtId are required" })
+        }
+
+        const start = new Date(startTime as string)
+        const urls = await VideoService.getVideoDownloadUrlsForAppointment(start, parseInt(courtId as string, 10))
+
+        return res.status(200).json(urls)
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 export const updateVideo = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const videoId = parseInt(req.params.id, 10)
