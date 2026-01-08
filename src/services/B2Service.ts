@@ -60,7 +60,7 @@ export class B2Service {
             const { data } = await b2.getDownloadAuthorization({
                 bucketId: B2_BUCKET_ID,
                 fileNamePrefix: b2FilePath,
-                validDurationInSeconds: 60 * 15
+                validDurationInSeconds: 60 * 60 * 2
             })
 
             const downloadUrl = `${authResponse.data.downloadUrl}/file/${B2_BUCKET_NAME}/${b2FilePath}?Authorization=${data.authorizationToken}`;
