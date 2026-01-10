@@ -1,3 +1,5 @@
+import { ChildProcess } from "child_process";
+
 export interface IClub {
     id?: number;
     name: string;
@@ -41,4 +43,12 @@ export interface IFailedUpload {
     lastAttemptAt?: Date;
     createdAt?: Date;
     status: 'pending' | 'retrying' | 'failed_permanently';
+}
+
+export interface ActiveRecording {
+    courtId: number;
+    clubId: number;
+    process: ChildProcess;
+    outputPath: string;
+    startTime: Date;
 }

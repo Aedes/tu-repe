@@ -42,11 +42,15 @@ export class VideoRepository extends BaseRepository<IVideo> {
 
     async findOverlappingVideos(courtId: number, startTime: Date, endTime: Date): Promise<IVideo[]> {
         try {
+            const TOLERANCE_SECONDS = 10;
+            const startTimeWithTolerance = new Date(startTime.getTime() + (TOLERANCE_SECONDS * 1000));
+            const endTimeWithTolerance = new Date(endTime.getTime() - (TOLERANCE_SECONDS * 1000));
+
             const [rows]: any = await pool.query(
                 `SELECT * FROM ${this.tableName} 
                 WHERE court_id = ? 
                 AND NOT (end_time <= ? OR start_time >= ?)`,
-                [courtId, startTime, endTime]
+                [courtId, startTimeWithTolerance, endTimeWithTolerance]
             );
 
             return rows.map((row: any) => this.mapColumnsToFields(row));

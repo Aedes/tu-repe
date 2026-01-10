@@ -7,6 +7,7 @@ import { videoRouter } from "./routes/video.routes"
 import { initVideoIngestor } from "./workers/videoIngestor"
 import { initRetryUploadWorker } from "./workers/retryUploadWorker"
 import { initCleanupWorker } from "./workers/cleanupWorker"
+import { initRecordingScheduler } from "./workers/recordingScheduler"
 
 const app = express()
 
@@ -20,6 +21,7 @@ app.use(express.json())
 initVideoIngestor()
 initRetryUploadWorker()
 initCleanupWorker()
+initRecordingScheduler()
 
 app.use("/clubs", clubRouter)
 app.use("/courts", courtRouter)
