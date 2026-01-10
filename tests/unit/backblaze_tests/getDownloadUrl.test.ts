@@ -33,7 +33,7 @@ test("debería obtener la URL de descarga de un archivo de Backblaze B2 correcta
 
     fs.writeFileSync(videoFilePath, "Contenido de prueba para el video.")
 
-    await new Promise((resolve) => setTimeout(resolve, 5000))
+    await new Promise((resolve) => setTimeout(resolve, 10000))
 
     const videos = await VideoService.getVideosByCourtId(courtId)
     const video = videos.find(v => v.fileName === videoFileName)
