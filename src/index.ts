@@ -7,7 +7,9 @@ import { videoRouter } from "./routes/video.routes"
 import { initVideoIngestor } from "./workers/videoIngestor"
 import { initRetryUploadWorker } from "./workers/retryUploadWorker"
 import { initCleanupWorker } from "./workers/cleanupWorker"
-import { initRecordingScheduler } from "./workers/recordingScheduler"
+import { clipRouter } from "./routes/clip.routes"
+import { ensureUploadsDir } from "./config/initUploads"
+//import { initRecordingScheduler } from "./workers/recordingScheduler"
 
 const app = express()
 
@@ -21,11 +23,13 @@ app.use(express.json())
 initVideoIngestor()
 initRetryUploadWorker()
 initCleanupWorker()
-initRecordingScheduler()
+//initRecordingScheduler()
+ensureUploadsDir()
 
 app.use("/clubs", clubRouter)
 app.use("/courts", courtRouter)
 app.use("/videos", videoRouter)
+app.use("/clips", clipRouter)
 
 app.get("/", (_req, res) => {
     res.send("Hello world")
