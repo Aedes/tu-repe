@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node build/src/index.js",
+    "build": "tsc",
     "dev": "ts-node-dev src/index.ts",
     "dev-test": "NODE_ENV=test ts-node-dev src/index.ts",
     "test": "NODE_ENV=test jest --runInBand --testTimeout=30000",
