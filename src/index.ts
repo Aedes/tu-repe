@@ -35,6 +35,6 @@ app.get("/", (_req, res) => {
     res.send("Hello world")
 })
 
-app.listen(PORT, () => {
+app.listen(PORT, "127.0.0.1", () => {
     console.log(`🚀 Server listening on port ${PORT}`)
 })
