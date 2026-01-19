@@ -19,3 +19,6 @@ export const B2_BUCKET_ID = process.env.B2_BUCKET_ID || ""
 export const B2_BUCKET_NAME = process.env.B2_BUCKET_NAME || ""
 export const STABILITY_THRESHOLD = process.env.STABILITY_THRESHOLD ? Number(process.env.STABILITY_THRESHOLD) : 10_000
 export const VIDEO_CHUNK_DURATION_MS = Number(process.env.VIDEO_CHUNK_DURATION_MS) || 60 * 15 * 1000
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD
+export const JWT_SECRET = process.env.JWT_SECRET

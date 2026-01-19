@@ -1,9 +1,13 @@
 import request from "supertest"
+import { generateAdminToken } from "../../helpers/generateToken"
 
 describe("POST Club routes", () => {
     test("POST /clubs - debería crear un club nuevo", async () => {
+        const token = generateAdminToken()
+
         const res = await request("http://localhost:5000")
             .post("/clubs")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "Club Integration Test",
                 openTime: "07:00",

@@ -1,11 +1,15 @@
 import request from "supertest"
 import fs from "fs"
 import path from "path"
+import { generateAdminToken } from "../../helpers/generateToken"
 
 describe("POST Court routes", () => {
     test("POST /courts - debería crear una nueva cancha y el directorio correspondiente", async () => {
+        const token = generateAdminToken()
+
         const clubRes = await request("http://localhost:5000")
             .post("/clubs")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "Club for Court Creation",
                 openTime: "08:00",
@@ -18,6 +22,7 @@ describe("POST Court routes", () => {
 
         const res = await request("http://localhost:5000")
             .post("/courts")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 clubId: clubId,
                 name: "New Court",

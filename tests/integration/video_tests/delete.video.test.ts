@@ -5,9 +5,12 @@ import { Court } from "../../../src/models/Court"
 import { CourtService } from "../../../src/services/CourtService"
 import { Video } from "../../../src/models/Video"
 import { VideoService } from "../../../src/services/VideoService"
+import { generateAdminToken } from "../../helpers/generateToken"
 
 describe("DELETE Video routes", () => {
     test("DELETE /videos/v/:id - debería eliminar un video existente", async () => {
+        const token = generateAdminToken()
+
         const club = new Club("Club for Video Deletion", "10:00", "20:00", 60)
         const savedClub = await ClubService.createClub(club)
 
@@ -19,6 +22,7 @@ describe("DELETE Video routes", () => {
 
         const deleteRes = await request("http://localhost:5000")
             .delete(`/videos/v/${savedVideo.id}`)
+            .set("Authorization", `Bearer ${token}`)
 
         expect(deleteRes.status).toBe(200)
         expect(deleteRes.body).toHaveProperty("message", "Video deleted successfully")

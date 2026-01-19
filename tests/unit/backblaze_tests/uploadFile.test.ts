@@ -2,10 +2,14 @@ import fs from "fs"
 import request from "supertest"
 import path from "path"
 import { VideoService } from "../../../src/services/VideoService"
+import { generateAdminToken } from "../../helpers/generateToken"
 
 test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo localmente", async () => {
+    const token = generateAdminToken()
+
     const clubRes = await request("http://localhost:5000")
         .post("/clubs")
+        .set("Authorization", `Bearer ${token}`)
         .send({
             name: "Club for Upload Test",
             openTime: "08:00",
@@ -18,6 +22,7 @@ test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo loc
 
     const courtRes = await request("http://localhost:5000")
         .post("/courts")
+        .set("Authorization", `Bearer ${token}`)
         .send({
             clubId: clubId,
             name: "Court for Upload Test",
@@ -32,7 +37,7 @@ test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo loc
 
     fs.writeFileSync(videoFilePath, "Contenido de prueba para el video.")
 
-    await new Promise((resolve) => setTimeout(resolve, 5000))
+    await new Promise((resolve) => setTimeout(resolve, 10000))
 
     const videos = await VideoService.getVideosByCourtId(courtId)
     const video = videos.find(v => v.fileName === videoFileName)
