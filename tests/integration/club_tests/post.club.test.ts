@@ -12,7 +12,11 @@ describe("POST Club routes", () => {
                 name: "Club Integration Test",
                 openTime: "07:00",
                 closeTime: "23:00",
-                appointmentDuration: 90
+                appointmentDuration: 90,
+                country: "Argentina",
+                province: "Mendoza",
+                city: "San Rafael",
+                address: "Comandante Salas 660"
             })
 
         expect(res.status).toBe(201)
@@ -21,5 +25,9 @@ describe("POST Club routes", () => {
         expect(res.body.openTime).toEqual("07:00:00")
         expect(res.body.closeTime).toBe("23:00:00")
         expect(res.body.appointmentDuration).toBe(90)
+        expect(res.body.country).toBe("Argentina")
+        expect(res.body.province).toBe("Mendoza")
+        expect(res.body.city).toBe("San Rafael")
+        expect(res.body.address).toBe("Comandante Salas 660")
     })
 })

@@ -6,6 +6,17 @@ export interface IClub {
     openTime: string;
     closeTime: string;
     appointmentDuration: number;
+    country: string;
+    province: string;
+    city: string;
+    address: string;
+    phone?: string;
+    instagramHandle?: string;
+    description?: string;
+    profileImageUrl?: string;
+    coverImageUrl?: string;
+    profileImagePublicId?: string;
+    coverImagePublicId?: string;
 }
 
 export interface ICourt {

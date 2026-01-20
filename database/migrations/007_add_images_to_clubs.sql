@@ -1,0 +1,3 @@
+ALTER TABLE clubs
+ADD COLUMN profile_image_url VARCHAR(255) NULL,
+ADD COLUMN cover_image_url VARCHAR(255) NULL;

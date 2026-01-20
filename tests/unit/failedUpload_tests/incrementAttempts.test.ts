@@ -5,7 +5,7 @@ import { CourtService } from "../../../src/services/CourtService"
 import { FailedUploadService } from "../../../src/services/FailedUploadService"
 
 test("debería incrementar el contador de intentos y actualizar el estado", async () => {
-    const club = new Club("Test Club", "08:00", "22:00", 60)
+    const club = new Club("Test Club", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Test Court", "rtsp://example.com/stream")
@@ -35,7 +35,7 @@ test("debería incrementar el contador de intentos y actualizar el estado", asyn
 })
 
 test("debería incrementar múltiples veces el contador de intentos", async () => {
-    const club = new Club("Test Club", "08:00", "22:00", 60)
+    const club = new Club("Test Club", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Test Court", "rtsp://example.com/stream")

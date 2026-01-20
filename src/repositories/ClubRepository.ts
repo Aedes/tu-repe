@@ -19,6 +19,13 @@ export class ClubRepository extends BaseRepository<IClub> {
                     c.open_time, 
                     c.close_time,
                     c.appointment_duration,
+                    c.country,
+                    c.province,
+                    c.city,
+                    c.address,
+                    c.phone,
+                    c.instagram_handle,
+                    c.description,
                     ct.id as court_id,
                     ct.name as court_name,
                     ct.rtsp_url
@@ -37,6 +44,13 @@ export class ClubRepository extends BaseRepository<IClub> {
                         openTime: row.open_time,
                         closeTime: row.close_time,
                         appointmentDuration: row.appointment_duration,
+                        country: row.country,
+                        province: row.province,
+                        city: row.city,
+                        address: row.address,
+                        phone: row.phone,
+                        instagramHandle: row.instagram_handle,
+                        description: row.description,
                         courts: []
                     });
                 }

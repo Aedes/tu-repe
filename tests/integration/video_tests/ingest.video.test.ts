@@ -14,7 +14,11 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
                 name: "Club for Video Ingestor",
                 openTime: "08:00",
                 closeTime: "22:00",
-                appointmentDuration: 60
+                appointmentDuration: 60,
+                country: "Argentina",
+                province: "Mendoza",
+                city: "San Rafael",
+                address: "Comandante Salas 660"
             })
 
         expect(clubRes.status).toBe(201)

@@ -11,7 +11,7 @@ describe("PUT Video routes", () => {
         const startTime = new Date("2024-01-01T13:00:00Z")
         const endTime = new Date("2024-01-01T13:10:00Z")
 
-        const club = new Club("Club for Video Update", "09:00", "21:00", 60)
+        const club = new Club("Club for Video Update", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court for Video Update", "rtsp://example.com/courtforvideoupdate")

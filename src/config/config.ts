@@ -22,3 +22,6 @@ export const VIDEO_CHUNK_DURATION_MS = Number(process.env.VIDEO_CHUNK_DURATION_M
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD
 export const JWT_SECRET = process.env.JWT_SECRET
+export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || ""
+export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || ""
+export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || ""

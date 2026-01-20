@@ -14,7 +14,11 @@ test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo loc
             name: "Club for Upload Test",
             openTime: "08:00",
             closeTime: "22:00",
-            appointmentDuration: 60
+            appointmentDuration: 60,
+            country: "Argentina",
+            province: "Mendoza",
+            city: "San Rafael",
+            address: "Comandante Salas 660"
         })
 
     expect(clubRes.status).toBe(201)

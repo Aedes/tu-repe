@@ -15,7 +15,11 @@ test("debería obtener la URL de descarga de un archivo de Backblaze B2 correcta
             name: "Club for Upload Test",
             openTime: "08:00",
             closeTime: "22:00",
-            appointmentDuration: 60
+            appointmentDuration: 60,
+            country: "Argentina",
+            province: "Mendoza",
+            city: "San Rafael",
+            address: "Comandante Salas 660"
         })
 
     expect(clubRes.status).toBe(201)

@@ -4,9 +4,21 @@ import { ClubService } from "../services/ClubService"
 
 export const createClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const { name, openTime, closeTime, appointmentDuration } = req.body
+        const {
+            name,
+            openTime,
+            closeTime,
+            appointmentDuration,
+            country,
+            province,
+            city,
+            address,
+            phone,
+            instagramHandle,
+            description
+        } = req.body
 
-        const club = new Club(name, openTime, closeTime, appointmentDuration)
+        const club = new Club(name, openTime, closeTime, appointmentDuration, country, province, city, address, phone, instagramHandle, description)
         const newClub = await ClubService.createClub(club)
 
         if (!newClub) {
@@ -55,8 +67,27 @@ export const getClubById = async (req: Request, res: Response): Promise<void | R
 export const updateClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const clubId = parseInt(req.params.id, 10)
-        const { name, openTime, closeTime, appointmentDuration } = req.body
-        const updatedClub = await ClubService.updateClub(clubId, { name, openTime, closeTime, appointmentDuration })
+        const updatableFields = [
+            "name",
+            "openTime",
+            "closeTime",
+            "appointmentDuration",
+            "country",
+            "province",
+            "city",
+            "address",
+            "phone",
+            "instagramHandle",
+            "description"
+        ];
+        const updateData: any = {};
+        for (const field of updatableFields) {
+            if (req.body[field] !== undefined) {
+                updateData[field] = req.body[field];
+            }
+        }
+
+        const updatedClub = await ClubService.updateClub(clubId, updateData)
 
         if (!updatedClub) {
             return res.status(404).json({ message: "Club not found" })
@@ -64,6 +95,7 @@ export const updateClub = async (req: Request, res: Response): Promise<void | Re
 
         return res.status(200).json(updatedClub)
     } catch (error: any) {
+        console.log(error)
         res.status(500).json({ message: error.message })
     }
 }
