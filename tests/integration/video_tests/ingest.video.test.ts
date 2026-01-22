@@ -1,16 +1,24 @@
 import request from "supertest"
 import fs from "fs"
 import path from "path"
+import { generateAdminToken } from "../../helpers/generateToken"
 
 describe("debería detectar un video nuevo en el directorio de ingestión y procesarlo correctamente", () => {
     test("Ingestor de video procesa nuevo archivo", async () => {
+        const token = generateAdminToken()
+
         const clubRes = await request("http://localhost:5000")
             .post("/clubs")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "Club for Video Ingestor",
                 openTime: "08:00",
                 closeTime: "22:00",
-                appointmentDuration: 60
+                appointmentDuration: 60,
+                country: "Argentina",
+                province: "Mendoza",
+                city: "San Rafael",
+                address: "Comandante Salas 660"
             })
 
         expect(clubRes.status).toBe(201)
@@ -18,6 +26,7 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
 
         const courtRes = await request("http://localhost:5000")
             .post("/courts")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 clubId: clubId,
                 name: "Court for Video Ingestor",
@@ -32,7 +41,7 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
 
         fs.writeFileSync(videoFilePath, "")
 
-        await new Promise((resolve) => setTimeout(resolve, 5000))
+        await new Promise((resolve) => setTimeout(resolve, 10000))
 
         const videoRes = await request("http://localhost:5000")
             .get(`/videos/c/${courtId}`)

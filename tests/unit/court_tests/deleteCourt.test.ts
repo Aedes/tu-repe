@@ -6,7 +6,7 @@ import fs from "fs"
 import path from "path"
 
 test("debería eliminar una cancha y sus directorios correctamente", async () => {
-    const club = new Club("Club for Court Deletion", "08:00", "22:00", 60);
+    const club = new Club("Club for Court Deletion", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123");
     const savedClub = await ClubService.createClub(club);
 
     const court = new Court(savedClub.id!, "Court to Delete", "rtsp://example.com/delete");

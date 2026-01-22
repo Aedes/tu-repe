@@ -57,6 +57,22 @@ export const getCourtsByClubId = async (req: Request, res: Response): Promise<vo
 export const updateCourt = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const courtId = parseInt(req.params.id, 10)
+        const { name } = req.body
+        const updatedCourt = await CourtService.updateCourt(courtId, { name })
+
+        if (!updatedCourt) {
+            return res.status(404).json({ message: "Court not found" })
+        }
+
+        return res.status(200).json(updatedCourt)
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+export const updateCourtAdmin = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const courtId = parseInt(req.params.id, 10)
         const { name, rtspUrl } = req.body
         const updatedCourt = await CourtService.updateCourt(courtId, { name, rtspUrl })
 

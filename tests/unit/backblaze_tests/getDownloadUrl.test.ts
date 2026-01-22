@@ -3,15 +3,23 @@ import request from "supertest"
 import path from "path"
 import fs from "fs"
 import { VideoService } from "../../../src/services/VideoService"
+import { generateAdminToken } from "../../helpers/generateToken"
 
 test("debería obtener la URL de descarga de un archivo de Backblaze B2 correctamente", async () => {
+    const token = generateAdminToken()
+
     const clubRes = await request("http://localhost:5000")
         .post("/clubs")
+        .set("Authorization", `Bearer ${token}`)
         .send({
             name: "Club for Upload Test",
             openTime: "08:00",
             closeTime: "22:00",
-            appointmentDuration: 60
+            appointmentDuration: 60,
+            country: "Argentina",
+            province: "Mendoza",
+            city: "San Rafael",
+            address: "Comandante Salas 660"
         })
 
     expect(clubRes.status).toBe(201)
@@ -19,6 +27,7 @@ test("debería obtener la URL de descarga de un archivo de Backblaze B2 correcta
 
     const courtRes = await request("http://localhost:5000")
         .post("/courts")
+        .set("Authorization", `Bearer ${token}`)
         .send({
             clubId: clubId,
             name: "Court for Upload Test",

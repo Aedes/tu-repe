@@ -1,15 +1,22 @@
 import request from "supertest"
+import { generateAdminToken } from "../../helpers/generateToken"
 
 describe("POST Video routes", () => {
     test("POST /videos - debería crear un nuevo video", async () => {
+        const token = generateAdminToken()
 
         const clubRes = await request("http://localhost:5000")
             .post("/clubs")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "Club for Court Creation",
                 openTime: "08:00",
                 closeTime: "22:00",
-                appointmentDuration: 60
+                appointmentDuration: 60,
+                country: "Argentina",
+                province: "Mendoza",
+                city: "San Rafael",
+                address: "Comandante Salas 660"
             })
 
         expect(clubRes.status).toBe(201)
@@ -17,6 +24,7 @@ describe("POST Video routes", () => {
 
         const courtRes = await request("http://localhost:5000")
             .post("/courts")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 clubId: clubId,
                 name: "New Court",
@@ -28,6 +36,7 @@ describe("POST Video routes", () => {
 
         const res = await request("http://localhost:5000")
             .post("/videos")
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 courtId: courtId,
                 fileName: "new_video.mp4",

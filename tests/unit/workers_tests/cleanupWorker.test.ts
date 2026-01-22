@@ -8,7 +8,7 @@ import fs from "fs"
 import path from "path"
 
 test("debería obtener fallos permanentemente fallidos antiguos para limpieza", async () => {
-    const club = new Club("Test Club", "08:00", "22:00", 60)
+    const club = new Club("Test Club", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Test Court", "rtsp://example.com/stream")
@@ -53,7 +53,7 @@ test("debería obtener fallos permanentemente fallidos antiguos para limpieza", 
 })
 
 test("debería limpiar múltiples archivos permanentemente fallidos", async () => {
-    const club = new Club("Test Club", "08:00", "22:00", 60)
+    const club = new Club("Test Club", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Test Court", "rtsp://example.com/stream")

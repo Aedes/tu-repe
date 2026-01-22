@@ -9,7 +9,7 @@ import path from "path"
 
 describe("debería registrar un fallo cuando no puede subir el video a B2", () => {
     test("debería registrar fallo y no crear video cuando B2Service falla", async () => {
-        const club = new Club("Test Club", "08:00", "22:00", 60)
+        const club = new Club("Test Club", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Test Court", "rtsp://example.com/stream")

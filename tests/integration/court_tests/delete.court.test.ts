@@ -6,10 +6,13 @@ import { ClubService } from "../../../src/services/ClubService"
 import { CourtService } from "../../../src/services/CourtService"
 import { VideoService } from "../../../src/services/VideoService"
 import fs from "fs"
+import { generateAdminToken } from "../../helpers/generateToken"
 
 describe("DELETE Court routes", () => {
     test("DELETE /courts/c/:id - debería eliminar una cancha existente, sus videos asociados y los directorios de la misma", async () => {
-        const club = new Club("Club for Court Deletion", "09:00", "21:00", 60)
+        const token = generateAdminToken()
+
+        const club = new Club("Club for Court Deletion", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court to Delete", "rtsp://example.com/courtdelete")
@@ -20,6 +23,7 @@ describe("DELETE Court routes", () => {
 
         const deleteRes = await request("http://localhost:5000")
             .delete(`/courts/c/${savedCourt.id}`)
+            .set("Authorization", `Bearer ${token}`)
 
         expect(deleteRes.status).toBe(200)
         expect(deleteRes.body).toHaveProperty("message", "Court deleted successfully")
