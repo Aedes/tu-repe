@@ -100,6 +100,52 @@ export const updateClub = async (req: Request, res: Response): Promise<void | Re
     }
 }
 
+export const updateClubImage = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const clubId = parseInt(req.params.id, 10)
+        const imageContext = req.params.context
+
+        if (imageContext === "logo" || imageContext === "cover") {
+            if (!req.file) {
+                return res.status(400).json({ message: "No file uploaded" })
+            }
+
+            const updatedClub = await ClubService.updateClubImage(clubId, req.file, imageContext)
+
+            if (!updatedClub) {
+                return res.status(404).json({ message: "Club not found" })
+            }
+
+            return res.status(200).json(updatedClub)
+        }
+
+        return res.status(400).json({ message: "Invalid image context" })
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+export const deleteClubImage = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const clubId = parseInt(req.params.id, 10)
+        const imageContext = req.params.context
+
+        if (imageContext === "logo" || imageContext === "cover") {
+            const updatedClub = await ClubService.deleteClubImage(clubId, imageContext)
+
+            if (!updatedClub) {
+                return res.status(404).json({ message: "Club not found" })
+            }
+
+            return res.status(200).json(updatedClub)
+        }
+
+        return res.status(400).json({ message: "Invalid image context" })
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 export const deleteClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const clubId = parseInt(req.params.id, 10)

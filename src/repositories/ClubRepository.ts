@@ -26,6 +26,10 @@ export class ClubRepository extends BaseRepository<IClub> {
                     c.phone,
                     c.instagram_handle,
                     c.description,
+                    c.profile_image_url,
+                    c.profile_image_public_id,
+                    c.cover_image_url,
+                    c.cover_image_public_id,
                     ct.id as court_id,
                     ct.name as court_name,
                     ct.rtsp_url
@@ -51,6 +55,10 @@ export class ClubRepository extends BaseRepository<IClub> {
                         phone: row.phone,
                         instagramHandle: row.instagram_handle,
                         description: row.description,
+                        profileImageUrl: row.profile_image_url,
+                        profileImagePublicId: row.profile_image_public_id,
+                        coverImageUrl: row.cover_image_url,
+                        coverImagePublicId: row.cover_image_public_id,
                         courts: []
                     });
                 }
