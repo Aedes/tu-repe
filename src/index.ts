@@ -10,6 +10,7 @@ import { initCleanupWorker } from "./workers/cleanupWorker"
 import { clipRouter } from "./routes/clip.routes"
 import { ensureUploadsDir } from "./config/initUploads"
 //import { initRecordingScheduler } from "./workers/recordingScheduler"
+import { authRouter } from "./routes/auth.routes"
 
 const app = express()
 
@@ -30,6 +31,7 @@ app.use("/clubs", clubRouter)
 app.use("/courts", courtRouter)
 app.use("/videos", videoRouter)
 app.use("/clips", clipRouter)
+app.use("/auth", authRouter)
 
 app.get("/", (_req, res) => {
     res.send("Hello world")
