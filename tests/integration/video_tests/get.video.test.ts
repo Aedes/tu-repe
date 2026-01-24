@@ -16,7 +16,7 @@ describe("GET Videos routes", () => {
         const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub1 = await ClubService.createClub(club1)
 
-        const court1 = new Court(savedClub1.id!, "Court 1", "rtsp://example.com/court1")
+        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
         const savedCourt1 = await CourtService.createCourt(court1)
 
         const video1 = new Video(savedCourt1.id!, "video1.mp4", startTime1, endTime1, "/example/path/video1.mp4")
@@ -40,7 +40,7 @@ describe("GET Videos routes", () => {
         const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub2 = await ClubService.createClub(club2)
 
-        const court2 = new Court(savedClub2.id!, "Court 2", "rtsp://example.com/court2")
+        const court2 = new Court(savedClub2.id!, "Court 2", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
         const savedCourt2 = await CourtService.createCourt(court2)
 
         const video = new Video(savedCourt2.id!, "video_by_id.mp4", startTime, endTime, "/example/path/video_by_id.mp4")
@@ -64,7 +64,7 @@ describe("GET Videos routes", () => {
         const club3 = new Club("Club Three", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub3 = await ClubService.createClub(club3)
 
-        const court3 = new Court(savedClub3.id!, "Court 3", "rtsp://example.com/court3")
+        const court3 = new Court(savedClub3.id!, "Court 3", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
         const savedCourt3 = await CourtService.createCourt(court3)
 
         const video1 = new Video(savedCourt3.id!, "court3_video1.mp4", startTime1, endTime1, "/example/path/court3_video1.mp4")
@@ -91,7 +91,7 @@ describe("GET Videos routes", () => {
         const club4 = new Club("Club Four", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub4 = await ClubService.createClub(club4)
 
-        const court4 = new Court(savedClub4.id!, "Court 4", "rtsp://example.com/court4")
+        const court4 = new Court(savedClub4.id!, "Court 4", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
         const savedCourt4 = await CourtService.createCourt(court4)
 
         const video1 = new Video(savedCourt4.id!, "date_video1.mp4", startTime1, endTime1, "/example/path/date_video1")
