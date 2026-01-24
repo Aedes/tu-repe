@@ -11,8 +11,8 @@ describe("GET Court routes", () => {
         const savedClub1 = await ClubService.createClub(club1)
         const savedClub2 = await ClubService.createClub(club2)
 
-        const court1 = new Court(savedClub1.id!, "Court 1", "rtsp://example.com/court1")
-        const court2 = new Court(savedClub2.id!, "Court 2", "rtsp://example.com/court2")
+        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court2 = new Court(savedClub2.id!, "Court 2", "192.168.0.2", 554, "/stream1", "user1", "encryptedPass1")
         await CourtService.createCourt(court1)
         await CourtService.createCourt(court2)
 
@@ -28,7 +28,7 @@ describe("GET Court routes", () => {
         const club = new Club("Club By ID", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const court = new Court(savedClub.id!, "Court By ID", "rtsp://example.com/courtbyid")
+        const court = new Court(savedClub.id!, "Court By ID", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
         const res = await request("http://localhost:5000")
@@ -37,15 +37,18 @@ describe("GET Court routes", () => {
         expect(res.status).toBe(200)
         expect(res.body).toHaveProperty("id", savedCourt.id)
         expect(res.body.name).toBe("Court By ID")
-        expect(res.body.rtspUrl).toBe("rtsp://example.com/courtbyid")
+        expect(res.body.cameraHost).toBe("192.168.0.1")
+        expect(res.body.cameraPort).toBe(554)
+        expect(res.body.cameraPath).toBe("/stream1")
+        expect(res.body.rtspUsername).toBe("user1")
     })
 
     test("GET /courts/cl/:id - debería obtener todas las canchas de un club", async () => {
         const club = new Club("Club With Courts", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const court1 = new Court(savedClub.id!, "Court 1", "rtsp://example.com/court1")
-        const court2 = new Court(savedClub.id!, "Court 2", "rtsp://example.com/court2")
+        const court1 = new Court(savedClub.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court2 = new Court(savedClub.id!, "Court 2", "192.168.0.2", 554, "/stream1", "user1", "encryptedPass1")
         await CourtService.createCourt(court1)
         await CourtService.createCourt(court2)
 

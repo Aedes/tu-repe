@@ -31,7 +31,11 @@ test("debería obtener la URL de descarga de un archivo de Backblaze B2 correcta
         .send({
             clubId: clubId,
             name: "Court for Upload Test",
-            rtspUrl: "rtsp://example.com/uploadtest"
+            cameraHost: "192.168.0.1",
+            cameraPort: 554,
+            cameraPath: "/stream1",
+            rtspUsername: "user1",
+            rtspPassword: "cameraPassword123"
         })
 
     expect(courtRes.status).toBe(201)

@@ -13,7 +13,7 @@ test("debería persistir un nuevo video en la base de datos", async () => {
     const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
     const savedClub = await ClubService.createClub(club)
 
-    const court = new Court(savedClub.id!, "Court 1", "rtsp://example.com/stream")
+    const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
     const savedCourt = await CourtService.createCourt(court)
 
     const video = new Video(savedCourt.id!, "video1.mp4", startTime, endTime, "/example/path/video1.mp4")

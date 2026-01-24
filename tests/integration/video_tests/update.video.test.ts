@@ -14,7 +14,7 @@ describe("PUT Video routes", () => {
         const club = new Club("Club for Video Update", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const court = new Court(savedClub.id!, "Court for Video Update", "rtsp://example.com/courtforvideoupdate")
+        const court = new Court(savedClub.id!, "Court for Video Update", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
         const video = new Video(savedCourt.id!, "video_to_update.mp4", startTime, endTime, "/example/path/video_to_update.mp4")

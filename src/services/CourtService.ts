@@ -2,6 +2,7 @@ import { CourtRepository } from "../repositories";
 import { ICourt } from "../types";
 import fs from "fs";
 import path from "path";
+import { EncryptionService } from "./EncryptionService";
 
 export class CourtService {
     private static readonly CourtRepository = new CourtRepository()
@@ -67,5 +68,10 @@ export class CourtService {
         } catch (error: any) {
             console.error(`Error al eliminar directorios de la cancha: ${error.message}`)
         }
+    }
+
+    static buildRtspUrl(court: ICourt): string {
+        const password = EncryptionService.decrypt(court.rtspPasswordEncrypted)
+        return `rtsp://${court.rtspUsername}:${encodeURIComponent(password)}@${court.cameraHost}:${court.cameraPort}${court.cameraPath}`
     }
 }
