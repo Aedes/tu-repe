@@ -30,13 +30,20 @@ describe("POST Court routes", () => {
             .send({
                 clubId: clubId,
                 name: "New Court",
-                rtspUrl: "rtsp://example.com/newcourt"
+                cameraHost: "192.168.0.1",
+                cameraPort: 554,
+                cameraPath: "/stream1",
+                rtspUsername: "user1",
+                rtspPassword: "cameraPassword123"
             })
 
         expect(res.status).toBe(201)
         expect(res.body).toHaveProperty("id")
         expect(res.body.name).toBe("New Court")
-        expect(res.body.rtspUrl).toBe("rtsp://example.com/newcourt")
+        expect(res.body.cameraHost).toBe("192.168.0.1")
+        expect(res.body.cameraPort).toBe(554)
+        expect(res.body.cameraPath).toBe("/stream1")
+        expect(res.body.rtspUsername).toBe("user1")
         expect(res.body.clubId).toBe(clubId)
 
         const courtId = res.body.id

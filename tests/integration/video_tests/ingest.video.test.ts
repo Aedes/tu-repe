@@ -30,7 +30,11 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
             .send({
                 clubId: clubId,
                 name: "Court for Video Ingestor",
-                rtspUrl: "rtsp://example.com/ingestorcourt"
+                cameraHost: "192.168.0.1",
+                cameraPort: 554,
+                cameraPath: "/stream1",
+                rtspUsername: "user1",
+                rtspPassword: "cameraPassword123"
             })
 
         expect(courtRes.status).toBe(201)

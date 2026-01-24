@@ -28,7 +28,11 @@ describe("POST Video routes", () => {
             .send({
                 clubId: clubId,
                 name: "New Court",
-                rtspUrl: "rtsp://example.com/newcourt"
+                cameraHost: "192.168.0.1",
+                cameraPort: 554,
+                cameraPath: "/stream1",
+                rtspUsername: "user1",
+                rtspPassword: "cameraPassword123"
             })
 
         expect(courtRes.status).toBe(201)

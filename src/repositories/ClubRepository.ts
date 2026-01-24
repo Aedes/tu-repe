@@ -32,7 +32,10 @@ export class ClubRepository extends BaseRepository<IClub> {
                     c.cover_image_public_id,
                     ct.id as court_id,
                     ct.name as court_name,
-                    ct.rtsp_url
+                    ct.camera_host,
+                    ct.camera_port,
+                    ct.camera_path,
+                    ct.rtsp_username
                 FROM clubs c
                 LEFT JOIN courts ct ON c.id = ct.club_id
                 ORDER BY c.id, ct.id`
@@ -67,7 +70,10 @@ export class ClubRepository extends BaseRepository<IClub> {
                     clubsMap.get(row.club_id).courts.push({
                         id: row.court_id,
                         name: row.court_name,
-                        rtspUrl: row.rtsp_url
+                        cameraHost: row.camera_host,
+                        cameraPort: row.camera_port,
+                        cameraPath: row.camera_path,
+                        rtspUsername: row.rtsp_username,
                     });
                 }
             }

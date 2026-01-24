@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import { CourtService } from "../services/CourtService";
 import { Court } from "../models/Court";
+import { EncryptionService } from "../services/EncryptionService";
 
 export const createCourt = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const { name, rtspUrl, clubId } = req.body
+        const { name, clubId, cameraHost, cameraPort, cameraPath, rtspUsername, rtspPassword } = req.body
 
-        const court = new Court(clubId, name, rtspUrl)
+        const rtspPasswordEncrypted = EncryptionService.encrypt(rtspPassword)
+        const court = new Court(clubId, name, cameraHost, cameraPort, cameraPath, rtspUsername, rtspPasswordEncrypted)
         const newCourt = await CourtService.createCourt(court)
 
         if (!newCourt) {
@@ -73,8 +75,22 @@ export const updateCourt = async (req: Request, res: Response): Promise<void | R
 export const updateCourtAdmin = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const courtId = parseInt(req.params.id, 10)
-        const { name, rtspUrl } = req.body
-        const updatedCourt = await CourtService.updateCourt(courtId, { name, rtspUrl })
+
+        const updatableFields = [
+            "name",
+            "cameraHost",
+            "cameraPort",
+            "cameraPath",
+            "rtspUsername",
+        ];
+        const updateData: any = {};
+        for (const field of updatableFields) {
+            if (req.body[field] !== undefined) {
+                updateData[field] = req.body[field];
+            }
+        }
+
+        const updatedCourt = await CourtService.updateCourt(courtId, updateData)
 
         if (!updatedCourt) {
             return res.status(404).json({ message: "Court not found" })
