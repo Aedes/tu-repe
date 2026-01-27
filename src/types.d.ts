@@ -1,5 +1,13 @@
 import { ChildProcess } from "child_process";
 
+declare module "express-serve-static-core" {
+    interface Request {
+        user?: {
+            id: number;
+        };
+    }
+}
+
 export interface IClub {
     id?: number;
     name: string;
@@ -66,4 +74,15 @@ export interface ActiveRecording {
     process: ChildProcess;
     outputPath: string;
     startTime: Date;
+}
+
+export interface IUser {
+    id?: number;
+    email: string;
+    passwordHash: string;
+    name: string;
+}
+
+export interface UserWithClubs extends IUser {
+    clubs: IClub[]
 }
