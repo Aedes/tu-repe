@@ -66,7 +66,7 @@ export class CourtService {
                 fs.rmSync(courtPath, { recursive: true, force: true })
             }
         } catch (error: any) {
-            console.error(`Error al eliminar directorios de la cancha: ${error.message}`)
+            throw new Error(`Error al eliminar directorios de la cancha: ${error.message}`)
         }
     }
 
