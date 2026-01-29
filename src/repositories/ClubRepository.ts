@@ -35,7 +35,8 @@ export class ClubRepository extends BaseRepository<IClub> {
                     ct.camera_host,
                     ct.camera_port,
                     ct.camera_path,
-                    ct.rtsp_username
+                    ct.rtsp_username,
+                    ct.rtsp_password_encrypted
                 FROM clubs c
                 LEFT JOIN courts ct ON c.id = ct.club_id
                 ORDER BY c.id, ct.id`
@@ -74,6 +75,7 @@ export class ClubRepository extends BaseRepository<IClub> {
                         cameraPort: row.camera_port,
                         cameraPath: row.camera_path,
                         rtspUsername: row.rtsp_username,
+                        rtspPasswordEncrypted: row.rtsp_password_encrypted,
                     });
                 }
             }

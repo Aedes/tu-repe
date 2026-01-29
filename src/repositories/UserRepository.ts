@@ -30,7 +30,12 @@ export class UserRepository extends BaseRepository<IUser> {
                 return null;
             }
 
-            return rows[0] as IUser;
+            return {
+                id: rows[0].id,
+                email: rows[0].email,
+                passwordHash: rows[0].password_hash,
+                name: rows[0].name,
+            };
         } catch (error: any) {
             throw new Error(`Error finding user by email: ${error.message}`);
         }
