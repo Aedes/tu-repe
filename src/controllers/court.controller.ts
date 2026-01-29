@@ -102,6 +102,32 @@ export const updateCourtAdmin = async (req: Request, res: Response): Promise<voi
     }
 }
 
+export const updateCourtUser = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const courtId = parseInt(req.params.id, 10)
+
+        const updatableFields = [
+            "name",
+        ];
+        const updateData: any = {};
+        for (const field of updatableFields) {
+            if (req.body[field] !== undefined) {
+                updateData[field] = req.body[field];
+            }
+        }
+
+        const updatedCourt = await CourtService.updateCourt(courtId, updateData)
+
+        if (!updatedCourt) {
+            return res.status(404).json({ message: "Court not found" })
+        }
+
+        return res.status(200).json(updatedCourt)
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 export const deleteCourt = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const courtId = parseInt(req.params.id, 10)

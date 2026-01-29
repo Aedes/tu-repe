@@ -35,8 +35,13 @@ export const authUser = (req: Request, res: Response, next: NextFunction): void 
         const token = authHeader.split(" ")[1];
 
         const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
-            userId: number
+            userId: number,
+            role: string
         };
+
+        if (payload.role !== "user") {
+            return res.status(403).json({ message: "Acceso denegado" });
+        }
 
         req.user = { id: payload.userId }
 
@@ -48,7 +53,7 @@ export const authUser = (req: Request, res: Response, next: NextFunction): void 
 
 export const requireOwnerOfClub = async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
     const userId = req.user?.id;
-    const clubId = req.params.clubId;
+    const clubId = req.params.id;
 
     if (!userId || !clubId) {
         return res.status(401).json({ message: "No autorizado" });
@@ -65,7 +70,7 @@ export const requireOwnerOfClub = async (req: Request, res: Response, next: Next
 
 export const requireOwnerOfCourt = async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
     const userId = req.user?.id;
-    const courtId = req.params.courtId;
+    const courtId = req.params.id;
 
     if (!userId || !courtId) {
         return res.status(401).json({ message: "No autorizado" });
