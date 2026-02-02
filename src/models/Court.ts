@@ -6,20 +6,16 @@ export class Court implements ICourt {
         readonly clubId: number,
         readonly name: string,
         readonly cameraHost: string,
-        readonly cameraPort: number,
         readonly cameraPath: string,
-        readonly rtspUsername: string,
-        readonly rtspPasswordEncrypted: string,
+        readonly streamKey: string,
         readonly id?: number
     ) {
         CourtValidator.validate({
             clubId,
             name,
             cameraHost,
-            cameraPort,
             cameraPath,
-            rtspUsername,
-            rtspPasswordEncrypted
+            streamKey
         })
     }
 }

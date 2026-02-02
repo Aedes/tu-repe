@@ -5,6 +5,7 @@ import { Video } from "../../../src/models/Video"
 import { ClubService } from "../../../src/services/ClubService"
 import { CourtService } from "../../../src/services/CourtService"
 import { VideoService } from "../../../src/services/VideoService"
+import { PORT } from "../../../src/config/config"
 
 describe("GET Videos routes", () => {
     test("GET /videos - debería obtener todos los videos", async () => {
@@ -16,7 +17,7 @@ describe("GET Videos routes", () => {
         const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub1 = await ClubService.createClub(club1)
 
-        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt1 = await CourtService.createCourt(court1)
 
         const video1 = new Video(savedCourt1.id!, "video1.mp4", startTime1, endTime1, "/example/path/video1.mp4")
@@ -25,7 +26,7 @@ describe("GET Videos routes", () => {
         await VideoService.createVideo(video1)
         await VideoService.createVideo(video2)
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .get("/videos")
 
         expect(res.status).toBe(200)
@@ -40,13 +41,13 @@ describe("GET Videos routes", () => {
         const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub2 = await ClubService.createClub(club2)
 
-        const court2 = new Court(savedClub2.id!, "Court 2", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court2 = new Court(savedClub2.id!, "Court 2", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt2 = await CourtService.createCourt(court2)
 
         const video = new Video(savedCourt2.id!, "video_by_id.mp4", startTime, endTime, "/example/path/video_by_id.mp4")
         const savedVideo = await VideoService.createVideo(video)
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .get(`/videos/v/${savedVideo.id}`)
 
         expect(res.status).toBe(200)
@@ -64,7 +65,7 @@ describe("GET Videos routes", () => {
         const club3 = new Club("Club Three", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub3 = await ClubService.createClub(club3)
 
-        const court3 = new Court(savedClub3.id!, "Court 3", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court3 = new Court(savedClub3.id!, "Court 3", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt3 = await CourtService.createCourt(court3)
 
         const video1 = new Video(savedCourt3.id!, "court3_video1.mp4", startTime1, endTime1, "/example/path/court3_video1.mp4")
@@ -73,7 +74,7 @@ describe("GET Videos routes", () => {
         await VideoService.createVideo(video1)
         await VideoService.createVideo(video2)
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .get(`/videos/c/${savedCourt3.id}`)
 
         expect(res.status).toBe(200)
@@ -91,7 +92,7 @@ describe("GET Videos routes", () => {
         const club4 = new Club("Club Four", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub4 = await ClubService.createClub(club4)
 
-        const court4 = new Court(savedClub4.id!, "Court 4", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court4 = new Court(savedClub4.id!, "Court 4", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt4 = await CourtService.createCourt(court4)
 
         const video1 = new Video(savedCourt4.id!, "date_video1.mp4", startTime1, endTime1, "/example/path/date_video1")
@@ -100,7 +101,7 @@ describe("GET Videos routes", () => {
         await VideoService.createVideo(video1)
         await VideoService.createVideo(video2)
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .get(`/videos/range`)
             .query({ startTime: "2024-02-01", endTime: "2024-02-03", courtId: savedCourt4.id })
 

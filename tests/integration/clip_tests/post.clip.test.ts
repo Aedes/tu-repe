@@ -1,9 +1,10 @@
 import request from "supertest";
 import path from "path";
+import { PORT } from "../../../src/config/config";
 
 describe("POST /clips/convert", () => {
     test("convierte un clip y devuelve mp4", async () => {
-        const response = await request("http://localhost:5000")
+        const response = await request(`http://localhost:${PORT}`)
             .post("/clips/convert")
             .attach("clip", path.join(__dirname, "fixtures/test.webm"));
 

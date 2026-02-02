@@ -9,6 +9,8 @@ const clearDatabase = async () => {
         await pool.query('DELETE FROM clubs');
         await pool.query('DELETE FROM courts');
         await pool.query('DELETE FROM videos');
+        await pool.query('DELETE FROM users')
+        await pool.query('DELETE FROM club_users')
         await pool.query('DELETE FROM failed_uploads');
         await pool.query('SET FOREIGN_KEY_CHECKS = 1')
 

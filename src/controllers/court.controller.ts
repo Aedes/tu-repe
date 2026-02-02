@@ -1,14 +1,18 @@
 import { Request, Response } from "express";
 import { CourtService } from "../services/CourtService";
 import { Court } from "../models/Court";
-import { EncryptionService } from "../services/EncryptionService";
 
 export const createCourt = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const { name, clubId, cameraHost, cameraPort, cameraPath, rtspUsername, rtspPassword } = req.body
+        const { name, clubId, cameraHost } = req.body
 
-        const rtspPasswordEncrypted = EncryptionService.encrypt(rtspPassword)
-        const court = new Court(clubId, name, cameraHost, cameraPort, cameraPath, rtspUsername, rtspPasswordEncrypted)
+        const existingCourts = await CourtService.getCourtsByClubId(clubId)
+        const nextCourtNumber = existingCourts.length + 1
+
+        const streamKey = CourtService.generateStreamKey(nextCourtNumber.toString())
+        const cameraPath = `club_${clubId}/${streamKey}`
+
+        const court = new Court(clubId, name, cameraHost, cameraPath, streamKey)
         const newCourt = await CourtService.createCourt(court)
 
         if (!newCourt) {
@@ -79,9 +83,6 @@ export const updateCourtAdmin = async (req: Request, res: Response): Promise<voi
         const updatableFields = [
             "name",
             "cameraHost",
-            "cameraPort",
-            "cameraPath",
-            "rtspUsername",
         ];
         const updateData: any = {};
         for (const field of updatableFields) {
@@ -138,6 +139,30 @@ export const deleteCourt = async (req: Request, res: Response): Promise<void | R
         }
 
         return res.status(200).json({ message: "Court deleted successfully" })
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+export const verifyStream = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const { action, path } = req.body
+
+        if (action === "publish") {
+            console.log("Solicitud de streaming recibica. Verificando...")
+            if (!path) {
+                return res.status(400).send('Missing path');
+            }
+
+            const isValidStreaming = await CourtService.verifyStream(path)
+
+            if (!isValidStreaming) {
+                return res.status(400).send('Invalid Stream Key');
+            }
+            console.log("Streaming válido.")
+        }
+
+        return res.status(200).send('OK');
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }

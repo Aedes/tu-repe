@@ -3,6 +3,7 @@ import { Club } from "../../../src/models/Club"
 import { ClubService } from "../../../src/services/ClubService"
 import { Court } from "../../../src/models/Court"
 import { CourtService } from "../../../src/services/CourtService"
+import { PORT } from "../../../src/config/config"
 
 describe("GET Club routes", () => {
     test("GET /clubs - debería obtener todos los clubs", async () => {
@@ -12,7 +13,7 @@ describe("GET Club routes", () => {
         await ClubService.createClub(club1)
         await ClubService.createClub(club2)
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .get("/clubs")
 
         expect(res.status).toBe(200)
@@ -24,7 +25,7 @@ describe("GET Club routes", () => {
         const club = new Club("Club By ID", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .get(`/clubs/c/${savedClub.id}`)
 
         expect(res.status).toBe(200)
@@ -45,12 +46,12 @@ describe("GET Club routes", () => {
         const savedClub1 = await ClubService.createClub(club1)
         const savedClub2 = await ClubService.createClub(club2)
 
-        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
-        const court2 = new Court(savedClub2.id!, "Court 2", "192.168.0.2", 554, "/stream1", "user1", "encryptedPass1")
+        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
+        const court2 = new Court(savedClub2.id!, "Court 2", "192.168.0.2", "/stream1", "encryptedPass2")
         await CourtService.createCourt(court1)
         await CourtService.createCourt(court2)
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .get("/clubs/with-courts")
 
         expect(res.status).toBe(200)

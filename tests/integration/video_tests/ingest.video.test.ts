@@ -2,12 +2,13 @@ import request from "supertest"
 import fs from "fs"
 import path from "path"
 import { generateAdminToken } from "../../helpers/generateToken"
+import { PORT } from "../../../src/config/config"
 
 describe("debería detectar un video nuevo en el directorio de ingestión y procesarlo correctamente", () => {
     test("Ingestor de video procesa nuevo archivo", async () => {
         const token = generateAdminToken()
 
-        const clubRes = await request("http://localhost:5000")
+        const clubRes = await request(`http://localhost:${PORT}`)
             .post("/clubs")
             .set("Authorization", `Bearer ${token}`)
             .send({
@@ -24,17 +25,13 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
         expect(clubRes.status).toBe(201)
         const clubId = clubRes.body.id
 
-        const courtRes = await request("http://localhost:5000")
+        const courtRes = await request(`http://localhost:${PORT}`)
             .post("/courts")
             .set("Authorization", `Bearer ${token}`)
             .send({
                 clubId: clubId,
                 name: "Court for Video Ingestor",
                 cameraHost: "192.168.0.1",
-                cameraPort: 554,
-                cameraPath: "/stream1",
-                rtspUsername: "user1",
-                rtspPassword: "cameraPassword123"
             })
 
         expect(courtRes.status).toBe(201)
@@ -47,7 +44,7 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
 
         await new Promise((resolve) => setTimeout(resolve, 10000))
 
-        const videoRes = await request("http://localhost:5000")
+        const videoRes = await request(`http://localhost:${PORT}`)
             .get(`/videos/c/${courtId}`)
 
         expect(videoRes.status).toBe(200)

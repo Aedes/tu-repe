@@ -58,8 +58,8 @@ describe("lectura de club", () => {
         const savedClub1 = await ClubService.createClub(club1)
         const savedClub2 = await ClubService.createClub(club2)
 
-        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
-        const court2 = new Court(savedClub2.id!, "Court 2", "192.168.0.2", 554, "/stream1", "user1", "encryptedPass1")
+        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
+        const court2 = new Court(savedClub2.id!, "Court 2", "192.168.0.2", "/stream1", "encryptedPass2")
         await CourtService.createCourt(court1)
         await CourtService.createCourt(court2)
 

@@ -37,6 +37,7 @@ export class VideoRecordingService {
             const ffmpegArgs = [
                 "-rtsp_transport", "tcp",
                 "-i", rtspUrl,
+
                 "-c:v", "libx264",
                 "-preset", "veryfast",
                 "-profile:v", "main",
@@ -45,6 +46,7 @@ export class VideoRecordingService {
                 "-movflags", "+faststart",
                 "-g", "60",
                 "-sc_threshold", "0",
+
                 "-f", "segment",
                 "-segment_time", segmentDuration.toString(),
                 "-reset_timestamps", "1",

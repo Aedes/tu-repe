@@ -1,0 +1,2 @@
+ALTER TABLE clubs
+ADD COLUMN theme JSON NULL;

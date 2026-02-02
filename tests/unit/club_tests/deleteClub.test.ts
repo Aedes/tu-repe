@@ -22,7 +22,7 @@ describe("eliminar club", () => {
         const club = new Club("Club to Delete", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const court = new Court(savedClub.id!, "Court to Delete with Club", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court = new Court(savedClub.id!, "Court to Delete with Club", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
         const video = new Video(savedCourt.id!, "video_to_delete_with_club.mp4", new Date(), new Date(), "http://example.com/video_delete_with_club")

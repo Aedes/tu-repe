@@ -5,6 +5,7 @@ import { Court } from "../../../src/models/Court"
 import { CourtService } from "../../../src/services/CourtService"
 import { Video } from "../../../src/models/Video"
 import { VideoService } from "../../../src/services/VideoService"
+import { PORT } from "../../../src/config/config"
 
 describe("PUT Video routes", () => {
     test("PUT /videos/v/:id - debería actualizar un video existente", async () => {
@@ -14,13 +15,13 @@ describe("PUT Video routes", () => {
         const club = new Club("Club for Video Update", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const court = new Court(savedClub.id!, "Court for Video Update", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court = new Court(savedClub.id!, "Court for Video Update", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
         const video = new Video(savedCourt.id!, "video_to_update.mp4", startTime, endTime, "/example/path/video_to_update.mp4")
         const savedVideo = await VideoService.createVideo(video)
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .put(`/videos/v/${savedVideo.id}`)
             .send({
                 fileName: "updated_video.mp4",
