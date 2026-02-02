@@ -9,7 +9,7 @@ test("debería eliminar un video correctamente", async () => {
     const club = new Club("Club for Video Deletion", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123");
     const savedClub = await ClubService.createClub(club);
 
-    const court = new Court(savedClub.id!, "Court for Video Deletion", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1");
+    const court = new Court(savedClub.id!, "Court for Video Deletion", "192.168.0.1", "/stream1", "encryptedPass1");
     const savedCourt = await CourtService.createCourt(court);
 
     const startTime = new Date("2024-01-01T10:00:00Z");

@@ -8,7 +8,7 @@ describe("lectura de courts", () => {
         const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
         const fetchedCourt = await CourtService.findCourtById(savedCourt.id!)
@@ -17,16 +17,14 @@ describe("lectura de courts", () => {
         expect(fetchedCourt?.clubId).toBe(savedCourt.clubId)
         expect(fetchedCourt?.name).toBe(savedCourt.name)
         expect(fetchedCourt?.cameraHost).toBe("192.168.0.1")
-        expect(fetchedCourt?.cameraPort).toBe(554)
         expect(fetchedCourt?.cameraPath).toBe("/stream1")
-        expect(fetchedCourt?.rtspUsername).toBe("user1")
     })
 
     test("debería obtener un court persistido en la base de datos por su nombre y club", async () => {
         const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
+        const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
         const fetchedCourt = await CourtService.findCourtByNameAndClubId(savedCourt.name, savedCourt.clubId)
@@ -35,17 +33,14 @@ describe("lectura de courts", () => {
         expect(fetchedCourt?.clubId).toBe(savedCourt.clubId)
         expect(fetchedCourt?.name).toBe(savedCourt.name)
         expect(fetchedCourt?.cameraHost).toBe("192.168.0.1")
-        expect(fetchedCourt?.cameraPort).toBe(554)
-        expect(fetchedCourt?.cameraPath).toBe("/stream1")
-        expect(fetchedCourt?.rtspUsername).toBe("user1")
     })
 
     test("debería obtener todos los courts en la base de datos", async () => {
         const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const court1 = new Court(savedClub.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
-        const court2 = new Court(savedClub.id!, "Court 2", "192.168.0.2", 554, "/stream1", "user1", "encryptedPass1")
+        const court1 = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
+        const court2 = new Court(savedClub.id!, "Court 2", "192.168.0.2", "/stream1", "encryptedPass2")
         await CourtService.createCourt(court1)
         await CourtService.createCourt(court2)
 
@@ -63,9 +58,9 @@ describe("lectura de courts", () => {
         const savedClub1 = await ClubService.createClub(club1)
         const savedClub2 = await ClubService.createClub(club2)
 
-        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", 554, "/stream1", "user1", "encryptedPass1")
-        const court2 = new Court(savedClub1.id!, "Court 2", "192.168.0.2", 554, "/stream1", "user1", "encryptedPass1")
-        const court3 = new Court(savedClub2.id!, "Court 3", "192.168.0.3", 554, "/stream1", "user1", "encryptedPass1")
+        const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
+        const court2 = new Court(savedClub1.id!, "Court 2", "192.168.0.2", "/stream1", "encryptedPass2")
+        const court3 = new Court(savedClub2.id!, "Court 3", "192.168.0.3", "/stream1", "encryptedPass3")
         await CourtService.createCourt(court1)
         await CourtService.createCourt(court2)
         await CourtService.createCourt(court3)

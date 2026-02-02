@@ -8,6 +8,12 @@ declare module "express-serve-static-core" {
     }
 }
 
+export interface Theme {
+    primary: string
+    secondary: string
+    background: string
+}
+
 export interface IClub {
     id?: number;
     name: string;
@@ -25,6 +31,7 @@ export interface IClub {
     coverImageUrl?: string;
     profileImagePublicId?: string;
     coverImagePublicId?: string;
+    theme?: Theme
 }
 
 export interface ICourt {
@@ -32,10 +39,8 @@ export interface ICourt {
     clubId: number;
     name: string;
     cameraHost: string;
-    cameraPort: number;
     cameraPath: string;
-    rtspUsername: string;
-    rtspPasswordEncrypted: string;
+    streamKey: string;
 }
 
 export interface IVideo {

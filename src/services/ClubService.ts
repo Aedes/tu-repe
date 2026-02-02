@@ -1,5 +1,5 @@
 import { ClubRepository } from "../repositories";
-import { ClubWithCourts, IClub } from "../types";
+import { ClubWithCourts, IClub, Theme } from "../types";
 import { CloudinaryService } from "./CloudinaryService";
 
 export class ClubService {
@@ -70,6 +70,10 @@ export class ClubService {
         }
 
         return club
+    }
+
+    static updateClubTheme(id: number, theme: Theme): Promise<Theme | null> {
+        return this.ClubRepository.updateTheme(id, theme)
     }
 
     static deleteClub(id: number): Promise<boolean> {

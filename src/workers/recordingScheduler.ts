@@ -2,7 +2,6 @@ import cron from "node-cron";
 import { ClubService } from "../services/ClubService";
 import { VideoRecordingService } from "../services/VideoRecordingService";
 import { VIDEO_CHUNK_DURATION_MS } from "../config/config";
-import { CourtService } from "../services/CourtService";
 
 export const initRecordingScheduler = () => {
     console.log("⏰ Scheduler de grabación iniciado");
@@ -38,21 +37,18 @@ export async function checkAndManageRecordings() {
 
             const courts = club.courts || [];
             for (const court of courts) {
-                if (!court.id || !court.cameraHost || !court.cameraPort || !court.cameraPath || !court.rtspUsername || !court.rtspPasswordEncrypted) {
+                if (!court.id || !court.cameraHost || !court.cameraPath || !court.streamKey) {
                     continue;
                 }
 
                 const isCurrentlyRecording = VideoRecordingService.isRecording(court.id);
 
                 if (shouldBeRecording && !isCurrentlyRecording) {
-
-                    const rtspUrl = CourtService.buildRtspUrl(court)
-
                     try {
                         await VideoRecordingService.startRecording(
                             court.id,
                             club.id,
-                            rtspUrl,
+                            `rtsp://localhost:8554/${court.cameraPath}`,
                             VIDEO_CHUNK_DURATION_MS
                         );
                     } catch (error: any) {

@@ -10,6 +10,10 @@ export class CourtRepository extends BaseRepository<ICourt> {
         return await this.findBy({ clubId } as Partial<ICourt>);
     }
 
+    async findByStreamKey(streamKey: string): Promise<ICourt | null> {
+        return await this.findOneBy({ streamKey } as Partial<ICourt>);
+    }
+
     async findByNameAndClub(name: string, clubId: number): Promise<ICourt | null> {
         try {
             const [rows]: any = await pool.query(

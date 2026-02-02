@@ -1,11 +1,12 @@
 import request from "supertest"
 import { generateAdminToken } from "../../helpers/generateToken"
+import { PORT } from "../../../src/config/config"
 
 describe("POST Club routes", () => {
     test("POST /clubs - debería crear un club nuevo", async () => {
         const token = generateAdminToken()
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .post("/clubs")
             .set("Authorization", `Bearer ${token}`)
             .send({

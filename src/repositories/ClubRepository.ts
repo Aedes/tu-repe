@@ -1,10 +1,21 @@
 import { BaseRepository } from "./BaseRepository";
-import { ClubWithCourts, IClub } from "../types";
+import { ClubWithCourts, IClub, Theme } from "../types";
 import { pool } from "../config/db";
 
 export class ClubRepository extends BaseRepository<IClub> {
     protected tableName = "clubs";
     protected primaryKey = "id";
+
+    protected mapColumnsToFields(row: any): IClub {
+        const mapped = super.mapColumnsToFields(row);
+        if (mapped.theme && typeof mapped.theme === 'string') {
+            try {
+                mapped.theme = JSON.parse(mapped.theme);
+            } catch (e) {
+            }
+        }
+        return mapped;
+    }
 
     async findByName(name: string): Promise<IClub | null> {
         return await this.findOneBy({ name } as Partial<IClub>);
@@ -30,13 +41,12 @@ export class ClubRepository extends BaseRepository<IClub> {
                     c.profile_image_public_id,
                     c.cover_image_url,
                     c.cover_image_public_id,
+                    c.theme,
                     ct.id as court_id,
                     ct.name as court_name,
                     ct.camera_host,
-                    ct.camera_port,
                     ct.camera_path,
-                    ct.rtsp_username,
-                    ct.rtsp_password_encrypted
+                    ct.stream_key
                 FROM clubs c
                 LEFT JOIN courts ct ON c.id = ct.club_id
                 ORDER BY c.id, ct.id`
@@ -63,6 +73,7 @@ export class ClubRepository extends BaseRepository<IClub> {
                         profileImagePublicId: row.profile_image_public_id,
                         coverImageUrl: row.cover_image_url,
                         coverImagePublicId: row.cover_image_public_id,
+                        theme: row.theme,
                         courts: []
                     });
                 }
@@ -72,10 +83,8 @@ export class ClubRepository extends BaseRepository<IClub> {
                         id: row.court_id,
                         name: row.court_name,
                         cameraHost: row.camera_host,
-                        cameraPort: row.camera_port,
                         cameraPath: row.camera_path,
-                        rtspUsername: row.rtsp_username,
-                        rtspPasswordEncrypted: row.rtsp_password_encrypted,
+                        streamKey: row.stream_key,
                     });
                 }
             }
@@ -83,6 +92,22 @@ export class ClubRepository extends BaseRepository<IClub> {
             return Array.from(clubsMap.values());
         } catch (error: any) {
             throw new Error(`Error al buscar clubs con courts: ${error.message}`);
+        }
+    }
+
+    async updateTheme(id: number, theme: Theme): Promise<Theme | null> {
+        try {
+            const [rows]: any = await pool.query(
+                `UPDATE clubs SET theme = ? WHERE id = ?`,
+                [JSON.stringify(theme), id]
+            );
+
+            if (rows.affectedRows === 0) {
+                return null;
+            }
+            return theme
+        } catch (error: any) {
+            throw new Error(`Error al actualizar colores del club: ${error.message}`);
         }
     }
 }

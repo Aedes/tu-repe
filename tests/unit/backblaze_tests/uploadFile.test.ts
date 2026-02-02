@@ -3,11 +3,12 @@ import request from "supertest"
 import path from "path"
 import { VideoService } from "../../../src/services/VideoService"
 import { generateAdminToken } from "../../helpers/generateToken"
+import { PORT } from "../../../src/config/config"
 
 test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo localmente", async () => {
     const token = generateAdminToken()
 
-    const clubRes = await request("http://localhost:5000")
+    const clubRes = await request(`http://localhost:${PORT}`)
         .post("/clubs")
         .set("Authorization", `Bearer ${token}`)
         .send({
@@ -24,17 +25,13 @@ test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo loc
     expect(clubRes.status).toBe(201)
     const clubId = clubRes.body.id
 
-    const courtRes = await request("http://localhost:5000")
+    const courtRes = await request(`http://localhost:${PORT}`)
         .post("/courts")
         .set("Authorization", `Bearer ${token}`)
         .send({
             clubId: clubId,
             name: "Court for Upload Test",
             cameraHost: "192.168.0.1",
-            cameraPort: 554,
-            cameraPath: "/stream1",
-            rtspUsername: "user1",
-            rtspPassword: "cameraPassword123"
         })
 
     expect(courtRes.status).toBe(201)

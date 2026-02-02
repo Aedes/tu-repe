@@ -1,11 +1,12 @@
 import request from "supertest"
 import { generateAdminToken } from "../../helpers/generateToken"
+import { PORT } from "../../../src/config/config"
 
 describe("POST Video routes", () => {
     test("POST /videos - debería crear un nuevo video", async () => {
         const token = generateAdminToken()
 
-        const clubRes = await request("http://localhost:5000")
+        const clubRes = await request(`http://localhost:${PORT}`)
             .post("/clubs")
             .set("Authorization", `Bearer ${token}`)
             .send({
@@ -22,23 +23,19 @@ describe("POST Video routes", () => {
         expect(clubRes.status).toBe(201)
         const clubId = clubRes.body.id
 
-        const courtRes = await request("http://localhost:5000")
+        const courtRes = await request(`http://localhost:${PORT}`)
             .post("/courts")
             .set("Authorization", `Bearer ${token}`)
             .send({
                 clubId: clubId,
                 name: "New Court",
                 cameraHost: "192.168.0.1",
-                cameraPort: 554,
-                cameraPath: "/stream1",
-                rtspUsername: "user1",
-                rtspPassword: "cameraPassword123"
             })
 
         expect(courtRes.status).toBe(201)
         const courtId = courtRes.body.id
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .post("/videos")
             .set("Authorization", `Bearer ${token}`)
             .send({

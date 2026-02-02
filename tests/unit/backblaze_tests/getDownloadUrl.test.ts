@@ -4,11 +4,12 @@ import path from "path"
 import fs from "fs"
 import { VideoService } from "../../../src/services/VideoService"
 import { generateAdminToken } from "../../helpers/generateToken"
+import { PORT } from "../../../src/config/config"
 
 test("debería obtener la URL de descarga de un archivo de Backblaze B2 correctamente", async () => {
     const token = generateAdminToken()
 
-    const clubRes = await request("http://localhost:5000")
+    const clubRes = await request(`http://localhost:${PORT}`)
         .post("/clubs")
         .set("Authorization", `Bearer ${token}`)
         .send({
@@ -25,17 +26,13 @@ test("debería obtener la URL de descarga de un archivo de Backblaze B2 correcta
     expect(clubRes.status).toBe(201)
     const clubId = clubRes.body.id
 
-    const courtRes = await request("http://localhost:5000")
+    const courtRes = await request(`http://localhost:${PORT}`)
         .post("/courts")
         .set("Authorization", `Bearer ${token}`)
         .send({
             clubId: clubId,
             name: "Court for Upload Test",
             cameraHost: "192.168.0.1",
-            cameraPort: 554,
-            cameraPath: "/stream1",
-            rtspUsername: "user1",
-            rtspPassword: "cameraPassword123"
         })
 
     expect(courtRes.status).toBe(201)

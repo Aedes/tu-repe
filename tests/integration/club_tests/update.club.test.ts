@@ -1,14 +1,18 @@
 import request from "supertest"
 import { Club } from "../../../src/models/Club"
 import { ClubService } from "../../../src/services/ClubService"
+import { PORT } from "../../../src/config/config"
+import { generateAdminToken } from "../../helpers/generateToken"
 
 describe("PUT Club routes", () => {
     test("PUT /clubs/c/:id - debería actualizar un club existente", async () => {
+        const token = generateAdminToken()
         const club = new Club("Club To Update", "10:00", "20:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
         const savedClub = await ClubService.createClub(club)
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .put(`/clubs/c/${savedClub.id}`)
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "Updated Club Name",
                 openTime: "11:00",

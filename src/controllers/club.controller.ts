@@ -146,6 +146,27 @@ export const deleteClubImage = async (req: Request, res: Response): Promise<void
     }
 }
 
+export const updateClubTheme = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const clubId = parseInt(req.params.id, 10)
+        const { theme } = req.body
+
+        if (!theme || !theme.primary || !theme.secondary || !theme.background) {
+            return res.status(400).json({ message: "Theme must include primary, secondary, and background colors" })
+        }
+
+        const updatedClub = await ClubService.updateClubTheme(clubId, theme)
+
+        if (!updatedClub) {
+            return res.status(404).json({ message: "Club not found" })
+        }
+
+        return res.status(200).json(updatedClub)
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 export const deleteClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const clubId = parseInt(req.params.id, 10)

@@ -2,7 +2,7 @@ import { CourtRepository } from "../repositories";
 import { ICourt } from "../types";
 import fs from "fs";
 import path from "path";
-import { EncryptionService } from "./EncryptionService";
+import crypto from "crypto"
 
 export class CourtService {
     private static readonly CourtRepository = new CourtRepository()
@@ -29,6 +29,10 @@ export class CourtService {
 
     static findCourtById(id: number): Promise<ICourt | null> {
         return this.CourtRepository.findById(id)
+    }
+
+    static findCourtByStreamkey(streamKey: string): Promise<ICourt | null> {
+        return this.CourtRepository.findByStreamKey(streamKey)
     }
 
     static findCourtByNameAndClubId(name: string, clubId: number): Promise<ICourt | null> {
@@ -70,8 +74,24 @@ export class CourtService {
         }
     }
 
-    static buildRtspUrl(court: ICourt): string {
-        const password = EncryptionService.decrypt(court.rtspPasswordEncrypted)
-        return `rtsp://${court.rtspUsername}:${encodeURIComponent(password)}@${court.cameraHost}:${court.cameraPort}${court.cameraPath}`
+    static generateStreamKey(numberCourt: string): string {
+        const randomPart = crypto.randomBytes(9).toString("base64url")
+        return `cancha${numberCourt}_${randomPart}`
+    }
+
+    static async verifyStream(path: string) {
+        const clubId = path.split("/")[0].split("_")[1]
+        const streamKey = path.split("/")[1]
+
+        const courtsOfClub = await this.getCourtsByClubId(parseInt(clubId!))
+        const court = await this.findCourtByStreamkey(streamKey!)
+
+        const isCourtOfClub = court && courtsOfClub.some(c => c.id === court.id);
+
+        if (!court || !isCourtOfClub) {
+            throw new Error(`Stream Key inválida: ${streamKey}`)
+        }
+
+        return true
     }
 }

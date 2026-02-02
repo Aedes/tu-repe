@@ -2,12 +2,13 @@ import request from "supertest"
 import fs from "fs"
 import path from "path"
 import { generateAdminToken } from "../../helpers/generateToken"
+import { PORT } from "../../../src/config/config"
 
 describe("POST Court routes", () => {
     test("POST /courts - debería crear una nueva cancha y el directorio correspondiente", async () => {
         const token = generateAdminToken()
 
-        const clubRes = await request("http://localhost:5000")
+        const clubRes = await request(`http://localhost:${PORT}`)
             .post("/clubs")
             .set("Authorization", `Bearer ${token}`)
             .send({
@@ -24,26 +25,19 @@ describe("POST Court routes", () => {
         expect(clubRes.status).toBe(201)
         const clubId = clubRes.body.id
 
-        const res = await request("http://localhost:5000")
+        const res = await request(`http://localhost:${PORT}`)
             .post("/courts")
             .set("Authorization", `Bearer ${token}`)
             .send({
                 clubId: clubId,
                 name: "New Court",
                 cameraHost: "192.168.0.1",
-                cameraPort: 554,
-                cameraPath: "/stream1",
-                rtspUsername: "user1",
-                rtspPassword: "cameraPassword123"
             })
 
         expect(res.status).toBe(201)
         expect(res.body).toHaveProperty("id")
         expect(res.body.name).toBe("New Court")
         expect(res.body.cameraHost).toBe("192.168.0.1")
-        expect(res.body.cameraPort).toBe(554)
-        expect(res.body.cameraPath).toBe("/stream1")
-        expect(res.body.rtspUsername).toBe("user1")
         expect(res.body.clubId).toBe(clubId)
 
         const courtId = res.body.id
