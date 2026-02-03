@@ -9,7 +9,7 @@ import { initRetryUploadWorker } from "./workers/retryUploadWorker"
 import { initCleanupWorker } from "./workers/cleanupWorker"
 import { clipRouter } from "./routes/clip.routes"
 import { ensureUploadsDir } from "./config/initUploads"
-//import { initRecordingScheduler } from "./workers/recordingScheduler"
+import { initRecordingScheduler } from "./workers/recordingScheduler"
 import { authRouter } from "./routes/auth.routes"
 import { userRouter } from "./routes/user.routes"
 
@@ -25,7 +25,7 @@ app.use(express.json())
 initVideoIngestor()
 initRetryUploadWorker()
 initCleanupWorker()
-//initRecordingScheduler()
+initRecordingScheduler()
 ensureUploadsDir()
 
 app.use("/clubs", clubRouter)
