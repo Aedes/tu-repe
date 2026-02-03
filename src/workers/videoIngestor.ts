@@ -33,7 +33,10 @@ export const initVideoIngestor = () => {
                 return
             }
 
-            const { courtId, startTime, endTime } = metadata;
+            const { courtId, startTime } = metadata;
+            const endTime = new Date(
+                Date.now() - STABILITY_THRESHOLD - 2_000 - (3 * 60 * 60 * 1000)
+            )
 
             const court = await CourtService.findCourtById(courtId);
             if (!court) {
