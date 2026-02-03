@@ -36,6 +36,9 @@ export class VideoRecordingService {
 
             const ffmpegArgs = [
                 "-rtsp_transport", "tcp",
+                "-fflags", "+genpts+discardcorrupt",
+                "-err_detect", "ignore_err",
+
                 "-i", rtspUrl,
 
                 "-c:v", "libx264",

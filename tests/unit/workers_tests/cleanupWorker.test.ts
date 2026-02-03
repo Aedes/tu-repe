@@ -14,7 +14,13 @@ test("debería obtener fallos permanentemente fallidos antiguos para limpieza", 
     const court = new Court(savedClub.id!, "Test Court", "192.168.0.1", "/stream1", "encryptedPass1")
     const savedCourt = await CourtService.createCourt(court)
 
-    const videoFileName = `cancha${savedCourt.id}_2024-01-01_10-00.mp4`
+    const now = new Date(Date.now() - 30 * 1000)
+    const yyyy = now.getFullYear()
+    const mm = String(now.getMonth() + 1).padStart(2, '0')
+    const dd = String(now.getDate()).padStart(2, '0')
+    const hh = String(now.getHours()).padStart(2, '0')
+    const min = String(now.getMinutes()).padStart(2, '0')
+    const videoFileName = `cancha${savedCourt.id}_${yyyy}-${mm}-${dd}_${hh}-${min}.mp4`
     const filePath = path.join("/var/videos", `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
     fs.writeFileSync(filePath, "test content")
 
@@ -63,7 +69,14 @@ test("debería limpiar múltiples archivos permanentemente fallidos", async () =
     const failedUploads = []
 
     for (let i = 0; i < 3; i++) {
-        const videoFileName = `cancha${savedCourt.id}_2024-01-01_1${i}-00.mp4`
+        const now = new Date(Date.now() - 30 * 1000)
+        now.setHours(now.getHours() + i)
+        const yyyy = now.getFullYear()
+        const mm = String(now.getMonth() + 1).padStart(2, '0')
+        const dd = String(now.getDate()).padStart(2, '0')
+        const hh = String(now.getHours()).padStart(2, '0')
+        const min = String(now.getMinutes()).padStart(2, '0')
+        const videoFileName = `cancha${savedCourt.id}_${yyyy}-${mm}-${dd}_${hh}-${min}.mp4`
         const filePath = path.join("/var/videos", `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
         fs.writeFileSync(filePath, "test content")
         await new Promise((resolve) => setTimeout(resolve, 5000))
