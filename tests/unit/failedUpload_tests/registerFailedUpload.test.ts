@@ -3,6 +3,7 @@ import { Court } from "../../../src/models/Court"
 import { ClubService } from "../../../src/services/ClubService"
 import { CourtService } from "../../../src/services/CourtService"
 import { FailedUploadService } from "../../../src/services/FailedUploadService"
+import { getDateInUTC } from "../../../src/utils/getDateInUTC"
 
 test("debería registrar un fallo de subida en la base de datos", async () => {
     const club = new Club("Test Club", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
@@ -15,11 +16,14 @@ test("debería registrar un fallo de subida en la base de datos", async () => {
     const fileName = "test_video.mp4"
     const errorMessage = "Error de conexión con B2"
 
+    const endTimeUTC = getDateInUTC(new Date(Date.now()))
+
     const failedUpload = await FailedUploadService.registerFailedUpload(
         filePath,
         fileName,
         savedClub.id!,
         savedCourt.id!,
+        endTimeUTC,
         errorMessage
     )
 

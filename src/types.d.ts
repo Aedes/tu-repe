@@ -66,6 +66,7 @@ export interface IFailedUpload {
     fileName: string;
     clubId: number;
     courtId: number;
+    endTime: Date;
     errorMessage?: string;
     attemptsCount: number;
     lastAttemptAt?: Date;

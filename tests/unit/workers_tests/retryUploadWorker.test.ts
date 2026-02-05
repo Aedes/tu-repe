@@ -4,6 +4,7 @@ import { ClubService } from "../../../src/services/ClubService"
 import { CourtService } from "../../../src/services/CourtService"
 import { FailedUploadService } from "../../../src/services/FailedUploadService"
 import path from "path"
+import { getDateInUTC } from "../../../src/utils/getDateInUTC"
 
 test("debería incrementar intentos cuando falla el reintento", async () => {
     const club = new Club("Test Club", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
@@ -15,11 +16,14 @@ test("debería incrementar intentos cuando falla el reintento", async () => {
     const videoFileName = `cancha${savedCourt.id}_2024-01-01_10-00.mp4`
     const filePath = path.join("/var/videos", `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
 
+    const endTimeUTC = getDateInUTC(new Date(Date.now()))
+
     const failedUpload = await FailedUploadService.registerFailedUpload(
         filePath,
         videoFileName,
         savedClub.id!,
         savedCourt.id!,
+        endTimeUTC,
         "Error inicial"
     )
 
@@ -47,11 +51,14 @@ test("debería marcar como permanentemente fallido cuando alcanza el máximo de 
     const videoFileName = `cancha${savedCourt.id}_2024-01-01_10-00.mp4`
     const filePath = path.join("/var/videos", `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
 
+    const endTimeUTC = getDateInUTC(new Date(Date.now()))
+
     const failedUpload = await FailedUploadService.registerFailedUpload(
         filePath,
         videoFileName,
         savedClub.id!,
         savedCourt.id!,
+        endTimeUTC,
         "Error inicial"
     )
 
@@ -79,11 +86,14 @@ test("debería eliminar registro cuando el archivo no existe", async () => {
     const videoFileName = `cancha${savedCourt.id}_2024-01-01_10-00.mp4`
     const filePath = path.join("/var/videos", `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
 
+    const endTimeUTC = getDateInUTC(new Date(Date.now()))
+
     const failedUpload = await FailedUploadService.registerFailedUpload(
         filePath,
         videoFileName,
         savedClub.id!,
         savedCourt.id!,
+        endTimeUTC,
         "Error inicial"
     )
 

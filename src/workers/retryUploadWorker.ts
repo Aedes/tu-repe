@@ -85,7 +85,7 @@ export const initRetryUploadWorker = () => {
                         fileName: failedUpload.fileName,
                         b2FilePath,
                         startTime: metadata.startTime,
-                        endTime: metadata.endTime
+                        endTime: failedUpload.endTime
                     });
 
                     await FailedUploadService.deleteFailedUpload(failedUpload.id!);

@@ -9,6 +9,7 @@ export class FailedUploadService {
         fileName: string,
         clubId: number,
         courtId: number,
+        endTime: Date,
         errorMessage: string
     ): Promise<IFailedUpload> {
         return await this.FailedUploadRepository.create({
@@ -16,6 +17,7 @@ export class FailedUploadService {
             fileName,
             clubId,
             courtId,
+            endTime,
             errorMessage,
             attemptsCount: 0,
             status: 'pending'

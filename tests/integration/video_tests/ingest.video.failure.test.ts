@@ -29,6 +29,8 @@ describe("debería registrar un fallo cuando no puede subir el video a B2", () =
 
         if (!foundCourt) return
 
+        const endTime = new Date(Date.now())
+
         const errorMessage = "Error de conexión con B2"
 
         await FailedUploadService.registerFailedUpload(
@@ -36,6 +38,7 @@ describe("debería registrar un fallo cuando no puede subir el video a B2", () =
             videoFileName,
             foundCourt.clubId,
             courtId,
+            endTime,
             errorMessage
         )
 

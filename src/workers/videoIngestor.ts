@@ -6,6 +6,7 @@ import { FailedUploadService } from "../services/FailedUploadService"
 import { CourtService } from "../services/CourtService"
 import { extractMetadataFromFileName } from "../utils/extractMetadataFromFileName"
 import { STABILITY_THRESHOLD } from "../config/config"
+import { getDateInUTC } from "../utils/getDateInUTC"
 
 export const initVideoIngestor = () => {
     console.log("👀 Ingestor de video iniciado, monitoreando directorio de videos...")
@@ -35,8 +36,9 @@ export const initVideoIngestor = () => {
 
             const { courtId, startTime } = metadata;
             const endTime = new Date(
-                Date.now() - STABILITY_THRESHOLD - 2_000 - (3 * 60 * 60 * 1000)
+                Date.now() - STABILITY_THRESHOLD - 2_000
             )
+            const endTimeUTC = getDateInUTC(endTime)
 
             const court = await CourtService.findCourtById(courtId);
             if (!court) {
@@ -59,6 +61,7 @@ export const initVideoIngestor = () => {
                     fileName,
                     court.clubId,
                     courtId,
+                    endTimeUTC,
                     uploadError.message
                 )
                 return
@@ -69,7 +72,7 @@ export const initVideoIngestor = () => {
                 fileName,
                 b2FilePath,
                 startTime,
-                endTime
+                endTime: endTimeUTC
             });
 
             console.log("Video guardado en la BD:", fileName);
