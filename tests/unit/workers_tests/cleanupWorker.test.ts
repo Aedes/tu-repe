@@ -6,6 +6,7 @@ import { FailedUploadService } from "../../../src/services/FailedUploadService"
 import { pool } from "../../../src/config/db"
 import fs from "fs"
 import path from "path"
+import { getDateInUTC } from "../../../src/utils/getDateInUTC"
 
 test("debería obtener fallos permanentemente fallidos antiguos para limpieza", async () => {
     const club = new Club("Test Club", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
@@ -26,11 +27,14 @@ test("debería obtener fallos permanentemente fallidos antiguos para limpieza", 
 
     await new Promise((resolve) => setTimeout(resolve, 5000))
 
+    const endTimeUTC = getDateInUTC(new Date(Date.now()))
+
     const failedUpload = await FailedUploadService.registerFailedUpload(
         filePath,
         videoFileName,
         savedClub.id!,
         savedCourt.id!,
+        endTimeUTC,
         "Error"
     )
 
@@ -83,11 +87,14 @@ test("debería limpiar múltiples archivos permanentemente fallidos", async () =
 
         filePaths.push(filePath)
 
+        const endTimeUTC = getDateInUTC(new Date(Date.now()))
+
         const failedUpload = await FailedUploadService.registerFailedUpload(
             filePath,
             videoFileName,
             savedClub.id!,
             savedCourt.id!,
+            endTimeUTC,
             "Error"
         )
 
