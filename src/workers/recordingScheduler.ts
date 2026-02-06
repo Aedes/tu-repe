@@ -18,7 +18,9 @@ export const initRecordingScheduler = () => {
 };
 
 export async function checkAndManageRecordings() {
-    const now = new Date();
+    const now = new Date(new Date().toLocaleString("en-US", {
+        timeZone: "America/Argentina/Buenos_Aires",
+    }));
     const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
     try {
