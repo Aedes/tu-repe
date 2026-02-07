@@ -1,4 +1,5 @@
 import { pool } from "../config/db";
+import { generatePublicId } from "../utils/publicId";
 
 export abstract class BaseRepository<T> {
     protected abstract tableName: string;
@@ -33,6 +34,9 @@ export abstract class BaseRepository<T> {
     async create(data: Partial<T>): Promise<T> {
         try {
             const fields = this.mapFieldsToColumns(data);
+            if (fields.public_id === undefined) {
+                fields.public_id = generatePublicId();
+            }
             const columns = Object.keys(fields).join(", ");
             const values = Object.values(fields);
             const placeholders = values.map(() => "?").join(", ");

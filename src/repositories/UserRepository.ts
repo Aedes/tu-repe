@@ -32,6 +32,7 @@ export class UserRepository extends BaseRepository<IUser> {
 
             return {
                 id: rows[0].id,
+                publicId: rows[0].public_id,
                 email: rows[0].email,
                 passwordHash: rows[0].password_hash,
                 name: rows[0].name,
@@ -104,6 +105,7 @@ export class UserRepository extends BaseRepository<IUser> {
 
             const usersWithClubs: UserWithClubs[] = users.map((user: any) => ({
                 id: user.id,
+                publicId: user.publicId,
                 email: user.email,
                 name: user.name,
                 passwordHash: user.password_hash,
@@ -112,6 +114,7 @@ export class UserRepository extends BaseRepository<IUser> {
 
             const camelCaseUsersWithClubs = usersWithClubs.map((user: any) => ({
                 id: user.id,
+                publicId: user.publicId,
                 email: user.email,
                 name: user.name,
                 passwordHash: user.passwordHash,
