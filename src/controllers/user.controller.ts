@@ -23,6 +23,7 @@ export const createUser = async (req: Request, res: Response): Promise<void | Re
 
         return res.status(201).json({
             id: newUser.id,
+            publicId: newUser.publicId,
             name: newUser.name,
             email: newUser.email
         })
@@ -92,6 +93,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void | Re
 
         return res.status(200).json({
             id: updatedUser.id,
+            publicId: updatedUser.publicId,
             name: updatedUser.name,
             email: updatedUser.email,
         })
