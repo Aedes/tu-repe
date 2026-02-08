@@ -34,7 +34,14 @@ export const createClub = async (req: Request, res: Response): Promise<void | Re
 export const getAllClubs = async (_req: Request, res: Response): Promise<void | Response> => {
     try {
         const clubs = await ClubService.getAllClubs()
-        return res.status(200).json(clubs)
+        const clubsWithPublicIdAsId = clubs.map((club: any) => {
+            const { publicId, ...rest } = club
+            return {
+                ...rest,
+                id: publicId
+            }
+        })
+        return res.status(200).json(clubsWithPublicIdAsId)
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }

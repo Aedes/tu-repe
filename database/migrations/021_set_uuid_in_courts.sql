@@ -1,0 +1,1 @@
+UPDATE courts SET public_id = UUID() WHERE public_id IS NULL;

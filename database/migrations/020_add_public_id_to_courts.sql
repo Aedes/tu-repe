@@ -1,0 +1,2 @@
+ALTER TABLE courts
+ADD COLUMN public_id CHAR(36);
