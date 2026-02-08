@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { Club } from "../models/Club"
 import { ClubService } from "../services/ClubService"
+import { mapPublicId, mapPublicIdArray } from "../utils/publicIdResponse"
 
 export const createClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
@@ -25,7 +26,7 @@ export const createClub = async (req: Request, res: Response): Promise<void | Re
             return res.status(400).json({ message: "Error creating club" })
         }
 
-        return res.status(201).json(newClub)
+        return res.status(201).json(mapPublicId(newClub))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -34,7 +35,7 @@ export const createClub = async (req: Request, res: Response): Promise<void | Re
 export const getAllClubs = async (_req: Request, res: Response): Promise<void | Response> => {
     try {
         const clubs = await ClubService.getAllClubs()
-        return res.status(200).json(clubs)
+        return res.status(200).json(mapPublicIdArray(clubs))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -43,7 +44,11 @@ export const getAllClubs = async (_req: Request, res: Response): Promise<void | 
 export const getAllClubsWithCourts = async (_req: Request, res: Response): Promise<void | Response> => {
     try {
         const clubs = await ClubService.getAllClubsWithCourts()
-        return res.status(200).json(clubs)
+        const mapped = clubs.map(club => ({
+            ...mapPublicId(club),
+            courts: club.courts ? mapPublicIdArray(club.courts) : []
+        }))
+        return res.status(200).json(mapped)
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -51,14 +56,14 @@ export const getAllClubsWithCourts = async (_req: Request, res: Response): Promi
 
 export const getClubById = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const clubId = parseInt(req.params.id, 10)
-        const club = await ClubService.findClubById(clubId)
+        const clubPublicId = req.params.id
+        const club = await ClubService.findClubByPublicId(clubPublicId)
 
         if (!club) {
             return res.status(404).json({ message: "Club not found" })
         }
 
-        return res.status(200).json(club)
+        return res.status(200).json(mapPublicId(club))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -66,7 +71,7 @@ export const getClubById = async (req: Request, res: Response): Promise<void | R
 
 export const updateClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const clubId = parseInt(req.params.id, 10)
+        const clubPublicId = req.params.id
         const updatableFields = [
             "name",
             "openTime",
@@ -87,13 +92,13 @@ export const updateClub = async (req: Request, res: Response): Promise<void | Re
             }
         }
 
-        const updatedClub = await ClubService.updateClub(clubId, updateData)
+        const updatedClub = await ClubService.updateClubByPublicId(clubPublicId, updateData)
 
         if (!updatedClub) {
             return res.status(404).json({ message: "Club not found" })
         }
 
-        return res.status(200).json(updatedClub)
+        return res.status(200).json(mapPublicId(updatedClub))
     } catch (error: any) {
         console.log(error)
         res.status(500).json({ message: error.message })
@@ -102,7 +107,7 @@ export const updateClub = async (req: Request, res: Response): Promise<void | Re
 
 export const updateClubImage = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const clubId = parseInt(req.params.id, 10)
+        const clubPublicId = req.params.id
         const imageContext = req.params.context
 
         if (imageContext === "logo" || imageContext === "cover") {
@@ -110,13 +115,13 @@ export const updateClubImage = async (req: Request, res: Response): Promise<void
                 return res.status(400).json({ message: "No file uploaded" })
             }
 
-            const updatedClub = await ClubService.updateClubImage(clubId, req.file, imageContext)
+            const updatedClub = await ClubService.updateClubImageByPublicId(clubPublicId, req.file, imageContext)
 
             if (!updatedClub) {
                 return res.status(404).json({ message: "Club not found" })
             }
 
-            return res.status(200).json(updatedClub)
+            return res.status(200).json(mapPublicId(updatedClub))
         }
 
         return res.status(400).json({ message: "Invalid image context" })
@@ -127,17 +132,17 @@ export const updateClubImage = async (req: Request, res: Response): Promise<void
 
 export const deleteClubImage = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const clubId = parseInt(req.params.id, 10)
+        const clubPublicId = req.params.id
         const imageContext = req.params.context
 
         if (imageContext === "logo" || imageContext === "cover") {
-            const updatedClub = await ClubService.deleteClubImage(clubId, imageContext)
+            const updatedClub = await ClubService.deleteClubImageByPublicId(clubPublicId, imageContext)
 
             if (!updatedClub) {
                 return res.status(404).json({ message: "Club not found" })
             }
 
-            return res.status(200).json(updatedClub)
+            return res.status(200).json(mapPublicId(updatedClub))
         }
 
         return res.status(400).json({ message: "Invalid image context" })
@@ -148,14 +153,14 @@ export const deleteClubImage = async (req: Request, res: Response): Promise<void
 
 export const updateClubTheme = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const clubId = parseInt(req.params.id, 10)
+        const clubPublicId = req.params.id
         const { theme } = req.body
 
         if (!theme || !theme.primary || !theme.secondary || !theme.background) {
             return res.status(400).json({ message: "Theme must include primary, secondary, and background colors" })
         }
 
-        const updatedClub = await ClubService.updateClubTheme(clubId, theme)
+        const updatedClub = await ClubService.updateClubThemeByPublicId(clubPublicId, theme)
 
         if (!updatedClub) {
             return res.status(404).json({ message: "Club not found" })
@@ -169,8 +174,8 @@ export const updateClubTheme = async (req: Request, res: Response): Promise<void
 
 export const deleteClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const clubId = parseInt(req.params.id, 10)
-        const deleted = await ClubService.deleteClub(clubId)
+        const clubPublicId = req.params.id
+        const deleted = await ClubService.deleteClubByPublicId(clubPublicId)
 
         if (!deleted) {
             return res.status(404).json({ message: "Club not found" })

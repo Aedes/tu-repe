@@ -3,6 +3,7 @@ import { ICourt } from "../types";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto"
+import { ClubService } from "./ClubService";
 
 export class CourtService {
     private static readonly CourtRepository = new CourtRepository()
@@ -31,6 +32,10 @@ export class CourtService {
         return this.CourtRepository.findById(id)
     }
 
+    static findCourtByPublicId(publicId: string): Promise<ICourt | null> {
+        return this.CourtRepository.findByPublicId(publicId)
+    }
+
     static findCourtByStreamkey(streamKey: string): Promise<ICourt | null> {
         return this.CourtRepository.findByStreamKey(streamKey)
     }
@@ -47,8 +52,19 @@ export class CourtService {
         return this.CourtRepository.findByClubId(clubId)
     }
 
+    static async getCourtsByClubPublicId(clubPublicId: string): Promise<ICourt[]> {
+        const clubId = await ClubService.resolveClubId(clubPublicId)
+        return this.CourtRepository.findByClubId(clubId)
+    }
+
     static updateCourt(id: number, newDataCourt: Partial<ICourt>): Promise<ICourt | null> {
         return this.CourtRepository.update(id, newDataCourt)
+    }
+
+    static async updateCourtByPublicId(publicId: string, newDataCourt: Partial<ICourt>): Promise<ICourt | null> {
+        const court = await this.CourtRepository.findByPublicId(publicId)
+        if (!court?.id) return null
+        return this.updateCourt(court.id, newDataCourt)
     }
 
     static async deleteCourt(id: number): Promise<boolean> {
@@ -60,6 +76,18 @@ export class CourtService {
         }
 
         return deleted
+    }
+
+    static async deleteCourtByPublicId(publicId: string): Promise<boolean> {
+        const court = await this.CourtRepository.findByPublicId(publicId)
+        if (!court?.id) return false
+        return this.deleteCourt(court.id)
+    }
+
+    static async resolveCourtId(publicId: string): Promise<number> {
+        const court = await this.CourtRepository.findByPublicId(publicId)
+        if (!court?.id) throw new Error("Court not found")
+        return court.id
     }
 
     private static deleteCourtDirectories(clubId: number, courtId: number): void {

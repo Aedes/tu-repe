@@ -73,6 +73,23 @@ export abstract class BaseRepository<T> {
         }
     }
 
+    async findByPublicId(publicId: string): Promise<T | null> {
+        try {
+            const [rows]: any = await pool.query(
+                `SELECT * FROM ${this.tableName} WHERE public_id = ?`,
+                [publicId]
+            );
+
+            if (rows.length === 0) {
+                return null;
+            }
+
+            return this.mapColumnsToFields(rows[0]);
+        } catch (error: any) {
+            throw new Error(`Error al buscar ${this.tableName} por public_id: ${error.message}`);
+        }
+    }
+
     async findAll(): Promise<T[]> {
         try {
             const [rows]: any = await pool.query(`SELECT * FROM ${this.tableName}`);

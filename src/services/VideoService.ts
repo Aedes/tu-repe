@@ -24,6 +24,10 @@ export class VideoService {
         return this.VideoRepository.findById(id)
     }
 
+    static findVideoByPublicId(publicId: string): Promise<IVideo | null> {
+        return this.VideoRepository.findByPublicId(publicId)
+    }
+
     static getAllVideos(): Promise<IVideo[]> {
         return this.VideoRepository.findAll()
     }
@@ -44,8 +48,20 @@ export class VideoService {
         return this.VideoRepository.update(id, newDataVideo)
     }
 
+    static async updateVideoByPublicId(publicId: string, newDataVideo: Partial<IVideo>): Promise<IVideo | null> {
+        const video = await this.VideoRepository.findByPublicId(publicId)
+        if (!video?.id) return null
+        return this.updateVideo(video.id, newDataVideo)
+    }
+
     static deleteVideo(id: number): Promise<boolean> {
         return this.VideoRepository.delete(id)
+    }
+
+    static async deleteVideoByPublicId(publicId: string): Promise<boolean> {
+        const video = await this.VideoRepository.findByPublicId(publicId)
+        if (!video?.id) return false
+        return this.deleteVideo(video.id)
     }
 
     static async getVideoDownloadUrlsForAppointment(startTime: Date, courtId: number): Promise<string[]> {
