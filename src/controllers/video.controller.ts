@@ -1,12 +1,14 @@
 import { Request, Response } from "express"
 import { VideoService } from "../services/VideoService"
 import { Video } from "../models/Video"
+import { CourtService } from "../services/CourtService"
+import { mapPublicId, mapPublicIdArray } from "../utils/publicIdResponse"
 
 export const createVideo = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const { courtId, fileName, b2FilePath, startTime, endTime } = req.body
+        const { courtId: courtPublicId, fileName, b2FilePath, startTime, endTime } = req.body
 
-        if (!courtId || !fileName || !b2FilePath || !startTime || !endTime) {
+        if (!courtPublicId || !fileName || !b2FilePath || !startTime || !endTime) {
             return res.status(400).json({ message: "Missing required fields." });
         }
 
@@ -21,10 +23,11 @@ export const createVideo = async (req: Request, res: Response): Promise<void | R
             return res.status(400).json({ message: "startTime must be before endTime." });
         }
 
+        const courtId = await CourtService.resolveCourtId(courtPublicId)
         const video = new Video(courtId, fileName, start, end, b2FilePath)
         const newVideo = await VideoService.createVideo(video)
 
-        return res.status(201).json(newVideo)
+        return res.status(201).json(mapPublicId(newVideo))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -33,7 +36,7 @@ export const createVideo = async (req: Request, res: Response): Promise<void | R
 export const getAllVideos = async (_req: Request, res: Response): Promise<void | Response> => {
     try {
         const videos = await VideoService.getAllVideos()
-        return res.status(200).json(videos)
+        return res.status(200).json(mapPublicIdArray(videos))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -41,12 +44,12 @@ export const getAllVideos = async (_req: Request, res: Response): Promise<void |
 
 export const getVideoById = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const videoId = parseInt(req.params.id, 10)
-        const video = await VideoService.findVideoById(videoId)
+        const videoPublicId = req.params.id
+        const video = await VideoService.findVideoByPublicId(videoPublicId)
 
         if (!video) return res.status(404).json({ message: "Video not found" })
 
-        return res.status(200).json(video)
+        return res.status(200).json(mapPublicId(video))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -54,10 +57,11 @@ export const getVideoById = async (req: Request, res: Response): Promise<void | 
 
 export const getVideosByCourtId = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const courtId = parseInt(req.params.courtId, 10)
+        const courtPublicId = req.params.courtId
+        const courtId = await CourtService.resolveCourtId(courtPublicId)
         const videos = await VideoService.getVideosByCourtId(courtId)
 
-        return res.status(200).json(videos)
+        return res.status(200).json(mapPublicIdArray(videos))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -65,17 +69,18 @@ export const getVideosByCourtId = async (req: Request, res: Response): Promise<v
 
 export const getVideosByDateRange = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const { startTime, endTime, courtId } = req.query
+        const { startTime, endTime, courtId: courtPublicId } = req.query
 
-        if (!startTime || !endTime || !courtId) {
+        if (!startTime || !endTime || !courtPublicId) {
             return res.status(400).json({ message: "startTime, endTime and courtId are required" })
         }
 
         const start = new Date(startTime as string)
         const end = new Date(endTime as string)
-        const videos = await VideoService.getVideosBetweenDatesAndCourtId(start, end, parseInt(courtId as string, 10))
+        const courtId = await CourtService.resolveCourtId(courtPublicId as string)
+        const videos = await VideoService.getVideosBetweenDatesAndCourtId(start, end, courtId)
 
-        return res.status(200).json(videos)
+        return res.status(200).json(mapPublicIdArray(videos))
 
     } catch (error: any) {
         res.status(500).json({ message: error.message })
@@ -84,14 +89,15 @@ export const getVideosByDateRange = async (req: Request, res: Response): Promise
 
 export const getVideoDownloadUrlsForAppointment = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const { startTime, courtId } = req.query
+        const { startTime, courtId: courtPublicId } = req.query
 
-        if (!startTime || !courtId) {
+        if (!startTime || !courtPublicId) {
             return res.status(400).json({ message: "startTime and courtId are required" })
         }
 
         const start = new Date(startTime as string)
-        const urls = await VideoService.getVideoDownloadUrlsForAppointment(start, parseInt(courtId as string, 10))
+        const courtId = await CourtService.resolveCourtId(courtPublicId as string)
+        const urls = await VideoService.getVideoDownloadUrlsForAppointment(start, courtId)
 
         return res.status(200).json(urls)
     } catch (error: any) {
@@ -101,9 +107,9 @@ export const getVideoDownloadUrlsForAppointment = async (req: Request, res: Resp
 
 export const updateVideo = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const videoId = parseInt(req.params.id, 10)
+        const videoPublicId = req.params.id
         const { fileName, b2FilePath, startTime, endTime } = req.body
-        const updatedVideo = await VideoService.updateVideo(videoId, {
+        const updatedVideo = await VideoService.updateVideoByPublicId(videoPublicId, {
             fileName,
             b2FilePath,
             startTime: startTime ? new Date(startTime) : undefined,
@@ -114,7 +120,7 @@ export const updateVideo = async (req: Request, res: Response): Promise<void | R
             return res.status(404).json({ message: "Video not found" })
         }
 
-        return res.status(200).json(updatedVideo)
+        return res.status(200).json(mapPublicId(updatedVideo))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -122,8 +128,8 @@ export const updateVideo = async (req: Request, res: Response): Promise<void | R
 
 export const deleteVideo = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const videoId = parseInt(req.params.id, 10)
-        const deleted = await VideoService.deleteVideo(videoId)
+        const videoPublicId = req.params.id
+        const deleted = await VideoService.deleteVideoByPublicId(videoPublicId)
 
         if (!deleted) {
             return res.status(404).json({ message: "Video not found" })

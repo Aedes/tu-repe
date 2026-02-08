@@ -1,4 +1,5 @@
 import { pool } from "../config/db";
+import { generatePublicId } from "../utils/publicId";
 
 export abstract class BaseRepository<T> {
     protected abstract tableName: string;
@@ -33,6 +34,9 @@ export abstract class BaseRepository<T> {
     async create(data: Partial<T>): Promise<T> {
         try {
             const fields = this.mapFieldsToColumns(data);
+            if (fields.public_id === undefined) {
+                fields.public_id = generatePublicId();
+            }
             const columns = Object.keys(fields).join(", ");
             const values = Object.values(fields);
             const placeholders = values.map(() => "?").join(", ");
@@ -66,6 +70,23 @@ export abstract class BaseRepository<T> {
             return this.mapColumnsToFields(rows[0]);
         } catch (error: any) {
             throw new Error(`Error al buscar ${this.tableName} por ID: ${error.message}`);
+        }
+    }
+
+    async findByPublicId(publicId: string): Promise<T | null> {
+        try {
+            const [rows]: any = await pool.query(
+                `SELECT * FROM ${this.tableName} WHERE public_id = ?`,
+                [publicId]
+            );
+
+            if (rows.length === 0) {
+                return null;
+            }
+
+            return this.mapColumnsToFields(rows[0]);
+        } catch (error: any) {
+            throw new Error(`Error al buscar ${this.tableName} por public_id: ${error.message}`);
         }
     }
 
