@@ -81,6 +81,7 @@ export class UserService {
                         courts: Array.isArray(club.courts)
                             ? club.courts.map((court: any) => ({
                                 id: court.id,
+                                publicId: court.publicId,
                                 name: court.name,
                                 cameraHost: court.cameraHost,
                             }))
