@@ -12,7 +12,7 @@ describe("DELETE Video routes", () => {
     test("DELETE /videos/v/:id - debería eliminar un video existente", async () => {
         const token = generateAdminToken()
 
-        const club = new Club("Club for Video Deletion", "10:00", "20:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Club for Video Deletion", "10:00", "20:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court for Video Deletion", "192.168.0.1", "/stream1", "encryptedPass1")

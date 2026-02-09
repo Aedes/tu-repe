@@ -7,7 +7,7 @@ import { VideoService } from "../../../src/services/VideoService"
 
 describe("obtener downloadUrl de videos para un partido", () => {
     test("debería obtener los downloadUrl de todos los videos que cubren un partido", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
@@ -73,7 +73,7 @@ describe("obtener downloadUrl de videos para un partido", () => {
     })
 
     test("debería retornar un array vacío si no hay videos para el rango del partido", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
@@ -100,7 +100,7 @@ describe("obtener downloadUrl de videos para un partido", () => {
     })
 
     test("debería calcular correctamente el endTime usando appointmentDuration del club", async () => {
-        const club = new Club("Aedes Padel", "08:00", "22:00", 90, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Aedes Padel", "08:00", "22:00", 90, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")

@@ -7,7 +7,7 @@ import { generateAdminToken } from "../../helpers/generateToken"
 describe("PUT Club routes", () => {
     test("PUT /clubs/c/:id - debería actualizar un club existente", async () => {
         const token = generateAdminToken()
-        const club = new Club("Club To Update", "10:00", "20:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Club To Update", "10:00", "20:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const res = await request(`http://localhost:${PORT}`)

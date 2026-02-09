@@ -13,7 +13,7 @@ describe("DELETE Court routes", () => {
     test("DELETE /courts/c/:id - debería eliminar una cancha existente, sus videos asociados y los directorios de la misma", async () => {
         const token = generateAdminToken()
 
-        const club = new Club("Club for Court Deletion", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Club for Court Deletion", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court to Delete", "192.168.0.1", "/stream1", "encryptedPass1")

@@ -7,8 +7,8 @@ import { PORT } from "../../../src/config/config"
 
 describe("GET Court routes", () => {
     test("GET /courts - debería obtener todas las canchas", async () => {
-        const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
-        const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId1")
+        const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId2")
         const savedClub1 = await ClubService.createClub(club1)
         const savedClub2 = await ClubService.createClub(club2)
 
@@ -26,7 +26,7 @@ describe("GET Court routes", () => {
     })
 
     test("GET /courts/c/:id - debería obtener una cancha por id", async () => {
-        const club = new Club("Club By ID", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Club By ID", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const court = new Court(savedClub.id!, "Court By ID", "192.168.0.1", "/path1", "streamKey1")
@@ -44,7 +44,7 @@ describe("GET Court routes", () => {
     })
 
     test("GET /courts/cl/:id - debería obtener todas las canchas de un club", async () => {
-        const club = new Club("Club With Courts", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Club With Courts", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const court1 = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "streamKey1")
