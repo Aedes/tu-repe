@@ -19,7 +19,9 @@ export const createClub = async (req: Request, res: Response): Promise<void | Re
             description
         } = req.body
 
-        const club = new Club(name, openTime, closeTime, appointmentDuration, country, province, city, address, phone, instagramHandle, description)
+        const urlId = [...Array(12)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+
+        const club = new Club(name, openTime, closeTime, appointmentDuration, country, province, city, address, urlId, phone, instagramHandle, description)
         const newClub = await ClubService.createClub(club)
 
         if (!newClub) {
@@ -69,6 +71,21 @@ export const getClubById = async (req: Request, res: Response): Promise<void | R
     }
 }
 
+export const getClubByUrlId = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const clubUrlId = req.params.urlId
+        const club = await ClubService.findClubByUrlId(clubUrlId)
+
+        if (!club) {
+            return res.status(404).json({ message: "Club not found" })
+        }
+
+        return res.status(200).json(mapPublicId(club))
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 export const updateClub = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const clubPublicId = req.params.id
@@ -81,6 +98,7 @@ export const updateClub = async (req: Request, res: Response): Promise<void | Re
             "province",
             "city",
             "address",
+            "urlId",
             "phone",
             "instagramHandle",
             "description"

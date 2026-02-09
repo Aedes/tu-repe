@@ -1,0 +1,3 @@
+ALTER TABLE clubs
+MODIFY url_id VARCHAR(32) NOT NULL,
+ADD CONSTRAINT uq_clubs_url_id UNIQUE (url_id);

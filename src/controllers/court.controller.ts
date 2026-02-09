@@ -63,6 +63,20 @@ export const getCourtsByClubId = async (req: Request, res: Response): Promise<vo
     }
 }
 
+export const getCourtsByClubUrlId = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const clubUrlId = req.params.urlId
+        const club = await ClubService.findClubByUrlId(clubUrlId)
+        if (!club) {
+            return res.status(404).json({ message: "Club not found" })
+        }
+        const courts = await CourtService.getCourtsByClubPublicId(club.publicId!)
+        return res.status(200).json(mapPublicIdArray(courts))
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 export const updateCourt = async (req: Request, res: Response): Promise<void | Response> => {
     try {
         const courtPublicId = req.params.id

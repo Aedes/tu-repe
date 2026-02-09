@@ -17,6 +17,10 @@ export class ClubService {
         return this.ClubRepository.findByPublicId(publicId)
     }
 
+    static findClubByUrlId(urlId: string): Promise<IClub | null> {
+        return this.ClubRepository.findOneBy({ urlId })
+    }
+
     static findClubByName(name: string): Promise<IClub | null> {
         return this.ClubRepository.findByName(name)
     }

@@ -25,6 +25,7 @@ export interface IClub {
     province: string;
     city: string;
     address: string;
+    urlId: string;
     phone?: string;
     instagramHandle?: string;
     description?: string;

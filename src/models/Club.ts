@@ -11,6 +11,7 @@ export class Club implements IClub {
         readonly province: string,
         readonly city: string,
         readonly address: string,
+        readonly urlId: string,
         readonly phone?: string,
         readonly instagramHandle?: string,
         readonly description?: string,
@@ -20,6 +21,6 @@ export class Club implements IClub {
         readonly coverImagePublicId?: string,
         readonly id?: number
     ) {
-        ClubValidator.validate({ name, openTime, closeTime, appointmentDuration, country, province, city, address })
+        ClubValidator.validate({ name, openTime, closeTime, appointmentDuration, country, province, city, address, urlId })
     }
 }
