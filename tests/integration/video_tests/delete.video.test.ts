@@ -22,14 +22,14 @@ describe("DELETE Video routes", () => {
         const savedVideo = await VideoService.createVideo(video)
 
         const deleteRes = await request(`http://localhost:${PORT}`)
-            .delete(`/videos/v/${savedVideo.id}`)
+            .delete(`/videos/v/${savedVideo.publicId}`)
             .set("Authorization", `Bearer ${token}`)
 
         expect(deleteRes.status).toBe(200)
         expect(deleteRes.body).toHaveProperty("message", "Video deleted successfully")
 
         const getRes = await request(`http://localhost:${PORT}`)
-            .get(`/videos/v/${savedVideo.id}`)
+            .get(`/videos/v/${savedVideo.publicId}`)
         expect(getRes.status).toBe(404)
     })
 })

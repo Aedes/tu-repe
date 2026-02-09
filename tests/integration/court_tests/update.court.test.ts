@@ -15,13 +15,13 @@ describe("PUT Court routes", () => {
         const savedCourt = await CourtService.createCourt(court)
 
         const res = await request(`http://localhost:${PORT}`)
-            .put(`/courts/c/${savedCourt.id}`)
+            .put(`/courts/c/${savedCourt.publicId}`)
             .send({
                 name: "Updated Court Name",
             })
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedCourt.id)
+        expect(res.body).toHaveProperty("id", savedCourt.publicId)
         expect(res.body.name).toBe("Updated Court Name")
     })
 
@@ -33,14 +33,14 @@ describe("PUT Court routes", () => {
         const savedCourt = await CourtService.createCourt(court)
 
         const res = await request(`http://localhost:${PORT}`)
-            .put(`/courts/c/${savedCourt.id}`)
+            .put(`/courts/c/${savedCourt.publicId}`)
             .send({
                 name: "Updated Court Name",
                 cameraHost: "192.168.0.2",
             })
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedCourt.id)
+        expect(res.body).toHaveProperty("id", savedCourt.publicId)
         expect(res.body.name).toBe("Updated Court Name")
         expect(res.body.cameraHost).toBe("192.168.0.1")
     })
@@ -54,7 +54,7 @@ describe("PUT Court routes", () => {
         const savedCourt = await CourtService.createCourt(court)
 
         const res = await request(`http://localhost:${PORT}`)
-            .put(`/courts/c/${savedCourt.id}/admin`)
+            .put(`/courts/c/${savedCourt.publicId}/admin`)
             .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "Updated Court Name",
@@ -62,7 +62,7 @@ describe("PUT Court routes", () => {
             })
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedCourt.id)
+        expect(res.body).toHaveProperty("id", savedCourt.publicId)
         expect(res.body.name).toBe("Updated Court Name")
         expect(res.body.cameraHost).toBe("192.168.0.2")
     })

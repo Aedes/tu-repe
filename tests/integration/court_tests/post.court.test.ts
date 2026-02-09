@@ -3,6 +3,8 @@ import fs from "fs"
 import path from "path"
 import { generateAdminToken } from "../../helpers/generateToken"
 import { PORT } from "../../../src/config/config"
+import { ClubService } from "../../../src/services/ClubService"
+import { CourtService } from "../../../src/services/CourtService"
 
 describe("POST Court routes", () => {
     test("POST /courts - debería crear una nueva cancha y el directorio correspondiente", async () => {
@@ -23,13 +25,16 @@ describe("POST Court routes", () => {
             })
 
         expect(clubRes.status).toBe(201)
-        const clubId = clubRes.body.id
+        const clubPublicId = clubRes.body.id
+
+        const club = await ClubService.findClubByPublicId(clubPublicId)
+        const clubId = club?.id
 
         const res = await request(`http://localhost:${PORT}`)
             .post("/courts")
             .set("Authorization", `Bearer ${token}`)
             .send({
-                clubId: clubId,
+                clubId: clubPublicId,
                 name: "New Court",
                 cameraHost: "192.168.0.1",
             })
@@ -40,9 +45,11 @@ describe("POST Court routes", () => {
         expect(res.body.cameraHost).toBe("192.168.0.1")
         expect(res.body.clubId).toBe(clubId)
 
-        const courtId = res.body.id
+        const courtPublictId = res.body.id
+        const court = await CourtService.findCourtByPublicId(courtPublictId)
+
         const clubPath = path.join("/var/videos", `club_${clubId}`)
-        const courtPath = path.join(clubPath, `court_${courtId}`)
+        const courtPath = path.join(clubPath, `court_${court?.id}`)
 
         expect(fs.existsSync(clubPath)).toBe(true)
         expect(fs.existsSync(courtPath)).toBe(true)

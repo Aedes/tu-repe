@@ -33,10 +33,10 @@ describe("GET Court routes", () => {
         const savedCourt = await CourtService.createCourt(court)
 
         const res = await request(`http://localhost:${PORT}`)
-            .get(`/courts/c/${savedCourt.id}`)
+            .get(`/courts/c/${savedCourt.publicId}`)
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedCourt.id)
+        expect(res.body).toHaveProperty("id", savedCourt.publicId)
         expect(res.body.name).toBe("Court By ID")
         expect(res.body.cameraHost).toBe("192.168.0.1")
         expect(res.body.cameraPath).toBe("/path1")
@@ -53,7 +53,7 @@ describe("GET Court routes", () => {
         await CourtService.createCourt(court2)
 
         const res = await request(`http://localhost:${PORT}`)
-            .get(`/courts/cl/${savedClub.id}`)
+            .get(`/courts/cl/${savedClub.publicId}`)
 
         expect(res.status).toBe(200)
         expect(Array.isArray(res.body)).toBe(true)

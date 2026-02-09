@@ -22,22 +22,22 @@ describe("DELETE Club routes", () => {
         const savedVideo = await VideoService.createVideo(video)
 
         const deleteRes = await request(`http://localhost:${PORT}`)
-            .delete(`/clubs/c/${savedClub.id!}`)
+            .delete(`/clubs/c/${savedClub.publicId!}`)
             .set("Authorization", `Bearer ${token}`)
 
         expect(deleteRes.status).toBe(200)
         expect(deleteRes.body).toHaveProperty("message", "Club deleted successfully")
 
         const getClubRes = await request(`http://localhost:${PORT}`)
-            .get(`/clubs/c/${savedCourt.id}`)
+            .get(`/clubs/c/${savedCourt.publicId}`)
         expect(getClubRes.status).toBe(404)
 
         const getCourtRes = await request(`http://localhost:${PORT}`)
-            .get(`/courts/c/${savedCourt.id}`)
+            .get(`/courts/c/${savedCourt.publicId}`)
         expect(getCourtRes.status).toBe(404)
 
         const getVideoRes = await request(`http://localhost:${PORT}`)
-            .get(`/videos/v/${savedVideo.id}`)
+            .get(`/videos/v/${savedVideo.publicId}`)
         expect(getVideoRes.status).toBe(404)
     })
 })

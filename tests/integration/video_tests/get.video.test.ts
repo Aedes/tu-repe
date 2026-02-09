@@ -48,10 +48,10 @@ describe("GET Videos routes", () => {
         const savedVideo = await VideoService.createVideo(video)
 
         const res = await request(`http://localhost:${PORT}`)
-            .get(`/videos/v/${savedVideo.id}`)
+            .get(`/videos/v/${savedVideo.publicId}`)
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedVideo.id)
+        expect(res.body).toHaveProperty("id", savedVideo.publicId)
         expect(res.body.fileName).toBe("video_by_id.mp4")
         expect(res.body.b2FilePath).toBe("/example/path/video_by_id.mp4")
     })
@@ -75,7 +75,7 @@ describe("GET Videos routes", () => {
         await VideoService.createVideo(video2)
 
         const res = await request(`http://localhost:${PORT}`)
-            .get(`/videos/c/${savedCourt3.id}`)
+            .get(`/videos/c/${savedCourt3.publicId}`)
 
         expect(res.status).toBe(200)
         expect(Array.isArray(res.body)).toBe(true)
@@ -103,7 +103,7 @@ describe("GET Videos routes", () => {
 
         const res = await request(`http://localhost:${PORT}`)
             .get(`/videos/range`)
-            .query({ startTime: "2024-02-01", endTime: "2024-02-03", courtId: savedCourt4.id })
+            .query({ startTime: "2024-02-01", endTime: "2024-02-03", courtId: savedCourt4.publicId })
 
         expect(res.status).toBe(200)
         expect(Array.isArray(res.body)).toBe(true)

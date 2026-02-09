@@ -26,10 +26,10 @@ describe("GET Club routes", () => {
         const savedClub = await ClubService.createClub(club)
 
         const res = await request(`http://localhost:${PORT}`)
-            .get(`/clubs/c/${savedClub.id}`)
+            .get(`/clubs/c/${savedClub.publicId}`)
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedClub.id)
+        expect(res.body).toHaveProperty("id", savedClub.publicId)
         expect(res.body.name).toBe("Club By ID")
         expect(res.body.openTime).toBe("09:00:00")
         expect(res.body.closeTime).toBe("21:00:00")

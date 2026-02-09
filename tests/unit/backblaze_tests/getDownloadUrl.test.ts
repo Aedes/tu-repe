@@ -5,6 +5,8 @@ import fs from "fs"
 import { VideoService } from "../../../src/services/VideoService"
 import { generateAdminToken } from "../../helpers/generateToken"
 import { PORT } from "../../../src/config/config"
+import { ClubService } from "../../../src/services/ClubService"
+import { CourtService } from "../../../src/services/CourtService"
 
 test("debería obtener la URL de descarga de un archivo de Backblaze B2 correctamente", async () => {
     const token = generateAdminToken()
@@ -24,19 +26,25 @@ test("debería obtener la URL de descarga de un archivo de Backblaze B2 correcta
         })
 
     expect(clubRes.status).toBe(201)
-    const clubId = clubRes.body.id
+    const clubPublicId = clubRes.body.id
+
+    const club = await ClubService.findClubByPublicId(clubPublicId)
+    const clubId = club?.id
 
     const courtRes = await request(`http://localhost:${PORT}`)
         .post("/courts")
         .set("Authorization", `Bearer ${token}`)
         .send({
-            clubId: clubId,
+            clubId: clubPublicId,
             name: "Court for Upload Test",
             cameraHost: "192.168.0.1",
         })
 
     expect(courtRes.status).toBe(201)
-    const courtId = courtRes.body.id
+    const courtPublicId = courtRes.body.id
+
+    const court = await CourtService.findCourtByPublicId(courtPublicId)
+    const courtId = court?.id
 
     const videoFileName = `cancha${courtId}_2024-01-01_10-00.mp4`
     const videoFilePath = path.join("/var/videos", `club_${clubId}`, `court_${courtId}`, videoFileName)
@@ -45,7 +53,7 @@ test("debería obtener la URL de descarga de un archivo de Backblaze B2 correcta
 
     await new Promise((resolve) => setTimeout(resolve, 10000))
 
-    const videos = await VideoService.getVideosByCourtId(courtId)
+    const videos = await VideoService.getVideosByCourtId(courtId!)
     const video = videos.find(v => v.fileName === videoFileName)
 
     expect(video).toBeDefined()

@@ -22,7 +22,7 @@ describe("PUT Video routes", () => {
         const savedVideo = await VideoService.createVideo(video)
 
         const res = await request(`http://localhost:${PORT}`)
-            .put(`/videos/v/${savedVideo.id}`)
+            .put(`/videos/v/${savedVideo.publicId}`)
             .send({
                 fileName: "updated_video.mp4",
                 startTime: "2024-01-01T14:00:00Z",
@@ -31,7 +31,7 @@ describe("PUT Video routes", () => {
             })
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedVideo.id)
+        expect(res.body).toHaveProperty("id", savedVideo.publicId)
         expect(res.body.fileName).toBe("updated_video.mp4")
         expect(new Date(res.body.startTime).toISOString()).toBe("2024-01-01T14:00:00.000Z")
         expect(new Date(res.body.endTime).toISOString()).toBe("2024-01-01T14:10:00.000Z")
