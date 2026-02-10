@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createClub, deleteClub, deleteClubImage, getAllClubs, getAllClubsWithCourts, getClubById, updateClub, updateClubImage, updateClubTheme } from "../controllers/club.controller";
+import { createClub, deleteClub, deleteClubImage, getAllClubs, getAllClubsWithCourts, getClubById, getClubByUrlId, updateClub, updateClubImage, updateClubTheme } from "../controllers/club.controller";
 import { authAdmin } from "../middlewares/auth.middleware";
 import { uploadImages } from "../middlewares/upload.middleware";
 
@@ -8,6 +8,7 @@ export const clubRouter = Router();
 clubRouter.post("/", authAdmin, createClub)
 clubRouter.get("/", getAllClubs)
 clubRouter.get("/c/:id", getClubById)
+clubRouter.get("/c-url/:urlId", getClubByUrlId)
 clubRouter.get("/with-courts", getAllClubsWithCourts)
 clubRouter.put("/c/:id", authAdmin, updateClub)
 clubRouter.put("/c/:id/theme", authAdmin, updateClubTheme)

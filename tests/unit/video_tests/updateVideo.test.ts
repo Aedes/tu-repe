@@ -6,7 +6,7 @@ import { CourtService } from "../../../src/services/CourtService"
 import { VideoService } from "../../../src/services/VideoService"
 
 test("debería actualizar un video correctamente", async () => {
-    const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+    const club = new Club("Aedes Padel", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
     const savedClub = await ClubService.createClub(club)
 
     const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")

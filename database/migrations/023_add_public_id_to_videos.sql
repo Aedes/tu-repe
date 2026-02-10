@@ -1,0 +1,2 @@
+ALTER TABLE videos
+ADD COLUMN public_id CHAR(36);

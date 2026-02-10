@@ -3,6 +3,8 @@ import fs from "fs"
 import path from "path"
 import { generateAdminToken } from "../../helpers/generateToken"
 import { PORT } from "../../../src/config/config"
+import { ClubService } from "../../../src/services/ClubService"
+import { CourtService } from "../../../src/services/CourtService"
 
 describe("debería detectar un video nuevo en el directorio de ingestión y procesarlo correctamente", () => {
     test("Ingestor de video procesa nuevo archivo", async () => {
@@ -23,19 +25,25 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
             })
 
         expect(clubRes.status).toBe(201)
-        const clubId = clubRes.body.id
+        const clubPublicId = clubRes.body.id
 
         const courtRes = await request(`http://localhost:${PORT}`)
             .post("/courts")
             .set("Authorization", `Bearer ${token}`)
             .send({
-                clubId: clubId,
+                clubId: clubPublicId,
                 name: "Court for Video Ingestor",
                 cameraHost: "192.168.0.1",
             })
 
         expect(courtRes.status).toBe(201)
-        const courtId = courtRes.body.id
+        const courtPublicId = courtRes.body.id
+
+        const club = await ClubService.findClubByPublicId(clubPublicId)
+        const court = await CourtService.findCourtByPublicId(courtPublicId)
+
+        const clubId = club?.id
+        const courtId = court?.id
 
         const videoFileName = `cancha${courtId}_2024-01-01_10-00.mp4`
         const videoFilePath = path.join("/var/videos", `club_${clubId}`, `court_${courtId}`, videoFileName)
@@ -45,7 +53,7 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
         await new Promise((resolve) => setTimeout(resolve, 10000))
 
         const videoRes = await request(`http://localhost:${PORT}`)
-            .get(`/videos/c/${courtId}`)
+            .get(`/videos/c/${courtPublicId}`)
 
         expect(videoRes.status).toBe(200)
         const videos = videoRes.body

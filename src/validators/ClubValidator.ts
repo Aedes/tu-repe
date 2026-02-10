@@ -25,5 +25,8 @@ export class ClubValidator extends BaseValidator {
 
         this.validateRequired(data.address, 'address');
         this.validateNonEmptyString(data.address, 'address');
+
+        this.validateRequired(data.urlId, 'urlId');
+        this.validateNonEmptyString(data.urlId, 'urlId');
     }
 }

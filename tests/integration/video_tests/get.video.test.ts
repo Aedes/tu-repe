@@ -14,7 +14,7 @@ describe("GET Videos routes", () => {
         const startTime2 = new Date("2024-01-01T11:00:00Z")
         const endTime2 = new Date("2024-01-01T11:10:00Z")
 
-        const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub1 = await ClubService.createClub(club1)
 
         const court1 = new Court(savedClub1.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
@@ -38,7 +38,7 @@ describe("GET Videos routes", () => {
         const startTime = new Date("2024-01-01T11:00:00Z")
         const endTime = new Date("2024-01-01T11:10:00Z")
 
-        const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub2 = await ClubService.createClub(club2)
 
         const court2 = new Court(savedClub2.id!, "Court 2", "192.168.0.1", "/stream1", "encryptedPass1")
@@ -48,10 +48,10 @@ describe("GET Videos routes", () => {
         const savedVideo = await VideoService.createVideo(video)
 
         const res = await request(`http://localhost:${PORT}`)
-            .get(`/videos/v/${savedVideo.id}`)
+            .get(`/videos/v/${savedVideo.publicId}`)
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedVideo.id)
+        expect(res.body).toHaveProperty("id", savedVideo.publicId)
         expect(res.body.fileName).toBe("video_by_id.mp4")
         expect(res.body.b2FilePath).toBe("/example/path/video_by_id.mp4")
     })
@@ -62,7 +62,7 @@ describe("GET Videos routes", () => {
         const startTime2 = new Date("2024-01-01T11:00:00Z")
         const endTime2 = new Date("2024-01-01T11:10:00Z")
 
-        const club3 = new Club("Club Three", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club3 = new Club("Club Three", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub3 = await ClubService.createClub(club3)
 
         const court3 = new Court(savedClub3.id!, "Court 3", "192.168.0.1", "/stream1", "encryptedPass1")
@@ -75,7 +75,7 @@ describe("GET Videos routes", () => {
         await VideoService.createVideo(video2)
 
         const res = await request(`http://localhost:${PORT}`)
-            .get(`/videos/c/${savedCourt3.id}`)
+            .get(`/videos/c/${savedCourt3.publicId}`)
 
         expect(res.status).toBe(200)
         expect(Array.isArray(res.body)).toBe(true)
@@ -89,7 +89,7 @@ describe("GET Videos routes", () => {
         const startTime2 = new Date("2024-02-05T10:00:00Z")
         const endTime2 = new Date("2024-02-05T10:10:00Z")
 
-        const club4 = new Club("Club Four", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club4 = new Club("Club Four", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub4 = await ClubService.createClub(club4)
 
         const court4 = new Court(savedClub4.id!, "Court 4", "192.168.0.1", "/stream1", "encryptedPass1")
@@ -103,7 +103,7 @@ describe("GET Videos routes", () => {
 
         const res = await request(`http://localhost:${PORT}`)
             .get(`/videos/range`)
-            .query({ startTime: "2024-02-01", endTime: "2024-02-03", courtId: savedCourt4.id })
+            .query({ startTime: "2024-02-01", endTime: "2024-02-03", courtId: savedCourt4.publicId })
 
         expect(res.status).toBe(200)
         expect(Array.isArray(res.body)).toBe(true)

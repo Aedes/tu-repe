@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
 import { CourtService } from "../services/CourtService";
 import { Court } from "../models/Court";
+import { ClubService } from "../services/ClubService";
+import { mapPublicId, mapPublicIdArray } from "../utils/publicIdResponse";
 
 export const createCourt = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const { name, clubId, cameraHost } = req.body
+        const { name, clubId: clubPublicId, cameraHost } = req.body
+        const clubId = await ClubService.resolveClubId(clubPublicId)
 
         const existingCourts = await CourtService.getCourtsByClubId(clubId)
         const nextCourtNumber = existingCourts.length + 1
@@ -19,7 +22,7 @@ export const createCourt = async (req: Request, res: Response): Promise<void | R
             return res.status(400).json({ message: "Error creating court" })
         }
 
-        return res.status(201).json(newCourt)
+        return res.status(201).json(mapPublicId(newCourt))
     } catch (error: any) {
         console.error(error)
         res.status(500).json({ message: error.message })
@@ -29,7 +32,7 @@ export const createCourt = async (req: Request, res: Response): Promise<void | R
 export const getAllCourts = async (_req: Request, res: Response): Promise<void | Response> => {
     try {
         const courts = await CourtService.getAllCourts()
-        return res.status(200).json(courts)
+        return res.status(200).json(mapPublicIdArray(courts))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -37,14 +40,14 @@ export const getAllCourts = async (_req: Request, res: Response): Promise<void |
 
 export const getCourtById = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const courtId = parseInt(req.params.id, 10)
-        const court = await CourtService.findCourtById(courtId)
+        const courtPublicId = req.params.id
+        const court = await CourtService.findCourtByPublicId(courtPublicId)
 
         if (!court) {
             return res.status(404).json({ message: "Court not found" })
         }
 
-        return res.status(200).json(court)
+        return res.status(200).json(mapPublicId(court))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -52,9 +55,23 @@ export const getCourtById = async (req: Request, res: Response): Promise<void | 
 
 export const getCourtsByClubId = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const clubId = parseInt(req.params.id, 10)
-        const courts = await CourtService.getCourtsByClubId(clubId)
-        return res.status(200).json(courts)
+        const clubPublicId = req.params.id
+        const courts = await CourtService.getCourtsByClubPublicId(clubPublicId)
+        return res.status(200).json(mapPublicIdArray(courts))
+    } catch (error: any) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+export const getCourtsByClubUrlId = async (req: Request, res: Response): Promise<void | Response> => {
+    try {
+        const clubUrlId = req.params.urlId
+        const club = await ClubService.findClubByUrlId(clubUrlId)
+        if (!club) {
+            return res.status(404).json({ message: "Club not found" })
+        }
+        const courts = await CourtService.getCourtsByClubPublicId(club.publicId!)
+        return res.status(200).json(mapPublicIdArray(courts))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -62,15 +79,15 @@ export const getCourtsByClubId = async (req: Request, res: Response): Promise<vo
 
 export const updateCourt = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const courtId = parseInt(req.params.id, 10)
+        const courtPublicId = req.params.id
         const { name } = req.body
-        const updatedCourt = await CourtService.updateCourt(courtId, { name })
+        const updatedCourt = await CourtService.updateCourtByPublicId(courtPublicId, { name })
 
         if (!updatedCourt) {
             return res.status(404).json({ message: "Court not found" })
         }
 
-        return res.status(200).json(updatedCourt)
+        return res.status(200).json(mapPublicId(updatedCourt))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -78,7 +95,7 @@ export const updateCourt = async (req: Request, res: Response): Promise<void | R
 
 export const updateCourtAdmin = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const courtId = parseInt(req.params.id, 10)
+        const courtPublicId = req.params.id
 
         const updatableFields = [
             "name",
@@ -91,13 +108,13 @@ export const updateCourtAdmin = async (req: Request, res: Response): Promise<voi
             }
         }
 
-        const updatedCourt = await CourtService.updateCourt(courtId, updateData)
+        const updatedCourt = await CourtService.updateCourtByPublicId(courtPublicId, updateData)
 
         if (!updatedCourt) {
             return res.status(404).json({ message: "Court not found" })
         }
 
-        return res.status(200).json(updatedCourt)
+        return res.status(200).json(mapPublicId(updatedCourt))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -105,7 +122,7 @@ export const updateCourtAdmin = async (req: Request, res: Response): Promise<voi
 
 export const updateCourtUser = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const courtId = parseInt(req.params.id, 10)
+        const courtPublicId = req.params.id
 
         const updatableFields = [
             "name",
@@ -117,13 +134,13 @@ export const updateCourtUser = async (req: Request, res: Response): Promise<void
             }
         }
 
-        const updatedCourt = await CourtService.updateCourt(courtId, updateData)
+        const updatedCourt = await CourtService.updateCourtByPublicId(courtPublicId, updateData)
 
         if (!updatedCourt) {
             return res.status(404).json({ message: "Court not found" })
         }
 
-        return res.status(200).json(updatedCourt)
+        return res.status(200).json(mapPublicId(updatedCourt))
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
@@ -131,8 +148,8 @@ export const updateCourtUser = async (req: Request, res: Response): Promise<void
 
 export const deleteCourt = async (req: Request, res: Response): Promise<void | Response> => {
     try {
-        const courtId = parseInt(req.params.id, 10)
-        const deleted = await CourtService.deleteCourt(courtId)
+        const courtPublicId = req.params.id
+        const deleted = await CourtService.deleteCourtByPublicId(courtPublicId)
 
         if (!deleted) {
             return res.status(404).json({ message: "Court not found" })

@@ -7,11 +7,11 @@ import { generateAdminToken } from "../../helpers/generateToken"
 describe("PUT Club routes", () => {
     test("PUT /clubs/c/:id - debería actualizar un club existente", async () => {
         const token = generateAdminToken()
-        const club = new Club("Club To Update", "10:00", "20:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Club To Update", "10:00", "20:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const res = await request(`http://localhost:${PORT}`)
-            .put(`/clubs/c/${savedClub.id}`)
+            .put(`/clubs/c/${savedClub.publicId}`)
             .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "Updated Club Name",
@@ -25,7 +25,7 @@ describe("PUT Club routes", () => {
             })
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedClub.id)
+        expect(res.body).toHaveProperty("id", savedClub.publicId)
         expect(res.body.name).toBe("Updated Club Name")
         expect(res.body.openTime).toBe("11:00:00")
         expect(res.body.closeTime).toBe("21:00:00")

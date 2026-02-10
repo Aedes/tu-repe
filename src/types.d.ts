@@ -16,6 +16,7 @@ export interface Theme {
 
 export interface IClub {
     id?: number;
+    publicId?: string;
     name: string;
     openTime: string;
     closeTime: string;
@@ -24,6 +25,7 @@ export interface IClub {
     province: string;
     city: string;
     address: string;
+    urlId: string;
     phone?: string;
     instagramHandle?: string;
     description?: string;
@@ -36,6 +38,7 @@ export interface IClub {
 
 export interface ICourt {
     id?: number;
+    publicId?: string;
     clubId: number;
     name: string;
     cameraHost: string;
@@ -45,6 +48,7 @@ export interface ICourt {
 
 export interface IVideo {
     id?: number;
+    publicId?: string;
     courtId: number;
     fileName: string;
     startTime: Date;
@@ -62,6 +66,7 @@ export interface ClubWithCourts extends IClub {
 
 export interface IFailedUpload {
     id?: number;
+    publicId?: string;
     filePath: string;
     fileName: string;
     clubId: number;
@@ -84,6 +89,7 @@ export interface ActiveRecording {
 
 export interface IUser {
     id?: number;
+    publicId?: string;
     email: string;
     passwordHash: string;
     name: string;

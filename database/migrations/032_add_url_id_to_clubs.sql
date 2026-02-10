@@ -1,0 +1,2 @@
+ALTER TABLE clubs
+ADD COLUMN url_id VARCHAR(32);

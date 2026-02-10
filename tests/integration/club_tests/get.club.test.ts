@@ -7,8 +7,8 @@ import { PORT } from "../../../src/config/config"
 
 describe("GET Club routes", () => {
     test("GET /clubs - debería obtener todos los clubs", async () => {
-        const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
-        const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId1")
+        const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId2")
 
         await ClubService.createClub(club1)
         await ClubService.createClub(club2)
@@ -22,14 +22,14 @@ describe("GET Club routes", () => {
     })
 
     test("GET /clubs/c/:id - debería obtener un club por ID", async () => {
-        const club = new Club("Club By ID", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club = new Club("Club By ID", "09:00", "21:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
         const savedClub = await ClubService.createClub(club)
 
         const res = await request(`http://localhost:${PORT}`)
-            .get(`/clubs/c/${savedClub.id}`)
+            .get(`/clubs/c/${savedClub.publicId}`)
 
         expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("id", savedClub.id)
+        expect(res.body).toHaveProperty("id", savedClub.publicId)
         expect(res.body.name).toBe("Club By ID")
         expect(res.body.openTime).toBe("09:00:00")
         expect(res.body.closeTime).toBe("21:00:00")
@@ -41,8 +41,8 @@ describe("GET Club routes", () => {
     })
 
     test("GET /clubs/with-courts - debería obtener todos los clubs con sus canchas", async () => {
-        const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
-        const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123")
+        const club1 = new Club("Club One", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId1")
+        const club2 = new Club("Club Two", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId2")
         const savedClub1 = await ClubService.createClub(club1)
         const savedClub2 = await ClubService.createClub(club2)
 

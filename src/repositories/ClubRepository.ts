@@ -26,6 +26,7 @@ export class ClubRepository extends BaseRepository<IClub> {
             const [rows]: any = await pool.query(
                 `SELECT 
                     c.id as club_id, 
+                    c.public_id as club_public_id,
                     c.name as club_name, 
                     c.open_time, 
                     c.close_time,
@@ -34,6 +35,7 @@ export class ClubRepository extends BaseRepository<IClub> {
                     c.province,
                     c.city,
                     c.address,
+                    c.url_id,
                     c.phone,
                     c.instagram_handle,
                     c.description,
@@ -43,6 +45,7 @@ export class ClubRepository extends BaseRepository<IClub> {
                     c.cover_image_public_id,
                     c.theme,
                     ct.id as court_id,
+                    ct.public_id as court_public_id,
                     ct.name as court_name,
                     ct.camera_host,
                     ct.camera_path,
@@ -58,6 +61,7 @@ export class ClubRepository extends BaseRepository<IClub> {
                 if (!clubsMap.has(row.club_id)) {
                     clubsMap.set(row.club_id, {
                         id: row.club_id,
+                        publicId: row.club_public_id,
                         name: row.club_name,
                         openTime: row.open_time,
                         closeTime: row.close_time,
@@ -66,6 +70,7 @@ export class ClubRepository extends BaseRepository<IClub> {
                         province: row.province,
                         city: row.city,
                         address: row.address,
+                        urlId: row.url_id,
                         phone: row.phone,
                         instagramHandle: row.instagram_handle,
                         description: row.description,
@@ -81,6 +86,7 @@ export class ClubRepository extends BaseRepository<IClub> {
                 if (row.court_id) {
                     clubsMap.get(row.club_id).courts.push({
                         id: row.court_id,
+                        publicId: row.court_public_id,
                         name: row.court_name,
                         cameraHost: row.camera_host,
                         cameraPath: row.camera_path,
