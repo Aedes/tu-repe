@@ -1,10 +1,11 @@
 import { v2 as cloudinary } from "cloudinary"
-import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME } from "../config/config"
+import { config } from "../config/config"
+import { logger } from "../logger"
 
 cloudinary.config({
-    cloud_name: CLOUDINARY_CLOUD_NAME,
-    api_key: CLOUDINARY_API_KEY,
-    api_secret: CLOUDINARY_API_SECRET
+    cloud_name: config.CLOUDINARY_CLOUD_NAME,
+    api_key: config.CLOUDINARY_API_KEY,
+    api_secret: config.CLOUDINARY_API_SECRET,
 })
 
 export class CloudinaryService {
@@ -17,21 +18,21 @@ export class CloudinaryService {
                 overwrite: true,
             }, (error, result) => {
                 if (error) {
-                    return reject(new Error(`Error al subir archivo a Cloudinary: ${error.message}`));
+                    return reject(new Error("Error al subir archivo a Cloudinary"))
                 }
-                if (!result || !result.secure_url || !result.public_id) {
-                    return reject(new Error("Error al obtener la URL del archivo subido a Cloudinary"));
+                if (!result?.secure_url || !result.public_id) {
+                    return reject(new Error("Error al obtener la URL del archivo subido a Cloudinary"))
                 }
-                resolve({ url: result.secure_url, publicId: result.public_id });
+                resolve({ url: result.secure_url, publicId: result.public_id })
             }).end(buffer)
         })
     }
 
     static async deleteImage(publicId: string): Promise<void> {
         try {
-            await cloudinary.uploader.destroy(publicId);
-        } catch (error: any) {
-            throw new Error(`Error al eliminar archivo de Cloudinary: ${error.message}`);
+            await cloudinary.uploader.destroy(publicId)
+        } catch (error) {
+            logger.error({ err: error, publicId }, "cloudinary_delete_failed")
         }
     }
 }

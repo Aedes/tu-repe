@@ -1,186 +1,117 @@
-import { Request, Response } from "express";
-import { CourtService } from "../services/CourtService";
-import { Court } from "../models/Court";
-import { ClubService } from "../services/ClubService";
-import { mapPublicId, mapPublicIdArray } from "../utils/publicIdResponse";
+import { Request, Response } from "express"
+import { CourtService } from "../services/CourtService"
+import { ClubService } from "../services/ClubService"
+import { toAdminCourt, toPublicCourt } from "../dto/responseDtos"
+import { AppError } from "../errors/AppError"
+import { config } from "../config/config"
+import { timingSafeEqual } from "crypto"
+import { logger } from "../logger"
 
-export const createCourt = async (req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const { name, clubId: clubPublicId, cameraHost } = req.body
-        const clubId = await ClubService.resolveClubId(clubPublicId)
-
-        const existingCourts = await CourtService.getCourtsByClubId(clubId)
-        const nextCourtNumber = existingCourts.length + 1
-
-        const streamKey = CourtService.generateStreamKey(nextCourtNumber.toString())
-        const cameraPath = `club_${clubId}/${streamKey}`
-
-        const court = new Court(clubId, name, cameraHost, cameraPath, streamKey)
-        const newCourt = await CourtService.createCourt(court)
-
-        if (!newCourt) {
-            return res.status(400).json({ message: "Error creating court" })
-        }
-
-        return res.status(201).json(mapPublicId(newCourt))
-    } catch (error: any) {
-        console.error(error)
-        res.status(500).json({ message: error.message })
-    }
+const safeEqual = (a: string, b: string) => {
+    const left = Buffer.from(a)
+    const right = Buffer.from(b)
+    if (left.length !== right.length) return false
+    return timingSafeEqual(left, right)
 }
 
-export const getAllCourts = async (_req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const courts = await CourtService.getAllCourts()
-        return res.status(200).json(mapPublicIdArray(courts))
-    } catch (error: any) {
-        res.status(500).json({ message: error.message })
-    }
+export const createCourt = async (req: Request, res: Response) => {
+    const clubId = await ClubService.resolveClubId(req.body.clubId)
+    const existingCourts = await CourtService.getCourtsByClubId(clubId)
+    const streamKey = CourtService.generateStreamKey(String(existingCourts.length + 1))
+    const cameraPath = `club_${clubId}/${streamKey}`
+    const newCourt = await CourtService.createCourt({
+        clubId,
+        name: req.body.name,
+        cameraHost: req.body.cameraHost,
+        cameraPath,
+        streamKey,
+    })
+    res.status(201).json(toAdminCourt(newCourt, true))
 }
 
-export const getCourtById = async (req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const courtPublicId = req.params.id
-        const court = await CourtService.findCourtByPublicId(courtPublicId)
-
-        if (!court) {
-            return res.status(404).json({ message: "Court not found" })
-        }
-
-        return res.status(200).json(mapPublicId(court))
-    } catch (error: any) {
-        res.status(500).json({ message: error.message })
-    }
+export const getAllCourts = async (_req: Request, res: Response) => {
+    const courts = await CourtService.getAllCourts()
+    res.status(200).json(courts.map((court) => toAdminCourt(court)))
 }
 
-export const getCourtsByClubId = async (req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const clubPublicId = req.params.id
-        const courts = await CourtService.getCourtsByClubPublicId(clubPublicId)
-        return res.status(200).json(mapPublicIdArray(courts))
-    } catch (error: any) {
-        res.status(500).json({ message: error.message })
-    }
+export const getCourtById = async (req: Request, res: Response) => {
+    const court = await CourtService.findCourtByPublicId(req.params.id)
+    if (!court) throw AppError.notFound("Court not found")
+    res.status(200).json(toAdminCourt(court))
 }
 
-export const getCourtsByClubUrlId = async (req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const clubUrlId = req.params.urlId
-        const club = await ClubService.findClubByUrlId(clubUrlId)
-        if (!club) {
-            return res.status(404).json({ message: "Club not found" })
-        }
-        const courts = await CourtService.getCourtsByClubPublicId(club.publicId!)
-        return res.status(200).json(mapPublicIdArray(courts))
-    } catch (error: any) {
-        res.status(500).json({ message: error.message })
-    }
+export const getCourtsByClubId = async (req: Request, res: Response) => {
+    const courts = await CourtService.getCourtsByClubPublicId(req.params.id)
+    res.status(200).json(courts.map((court) => toAdminCourt(court)))
 }
 
-export const updateCourt = async (req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const courtPublicId = req.params.id
-        const { name } = req.body
-        const updatedCourt = await CourtService.updateCourtByPublicId(courtPublicId, { name })
-
-        if (!updatedCourt) {
-            return res.status(404).json({ message: "Court not found" })
-        }
-
-        return res.status(200).json(mapPublicId(updatedCourt))
-    } catch (error: any) {
-        res.status(500).json({ message: error.message })
-    }
+export const getCourtsByClubUrlId = async (req: Request, res: Response) => {
+    const club = await ClubService.findClubByUrlId(req.params.urlId)
+    if (!club) throw AppError.notFound("Club not found")
+    const courts = await CourtService.getCourtsByClubPublicId(club.publicId!)
+    res.status(200).json(courts.map(toPublicCourt))
 }
 
-export const updateCourtAdmin = async (req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const courtPublicId = req.params.id
-
-        const updatableFields = [
-            "name",
-            "cameraHost",
-        ];
-        const updateData: any = {};
-        for (const field of updatableFields) {
-            if (req.body[field] !== undefined) {
-                updateData[field] = req.body[field];
-            }
-        }
-
-        const updatedCourt = await CourtService.updateCourtByPublicId(courtPublicId, updateData)
-
-        if (!updatedCourt) {
-            return res.status(404).json({ message: "Court not found" })
-        }
-
-        return res.status(200).json(mapPublicId(updatedCourt))
-    } catch (error: any) {
-        res.status(500).json({ message: error.message })
-    }
+export const updateCourtAdmin = async (req: Request, res: Response) => {
+    const updated = await CourtService.updateCourtByPublicId(req.params.id, req.body)
+    if (!updated) throw AppError.notFound("Court not found")
+    res.status(200).json(toAdminCourt(updated))
 }
 
-export const updateCourtUser = async (req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const courtPublicId = req.params.id
-
-        const updatableFields = [
-            "name",
-        ];
-        const updateData: any = {};
-        for (const field of updatableFields) {
-            if (req.body[field] !== undefined) {
-                updateData[field] = req.body[field];
-            }
-        }
-
-        const updatedCourt = await CourtService.updateCourtByPublicId(courtPublicId, updateData)
-
-        if (!updatedCourt) {
-            return res.status(404).json({ message: "Court not found" })
-        }
-
-        return res.status(200).json(mapPublicId(updatedCourt))
-    } catch (error: any) {
-        res.status(500).json({ message: error.message })
-    }
+export const updateCourtUser = async (req: Request, res: Response) => {
+    const updated = await CourtService.updateCourtByPublicId(req.params.id, { name: req.body.name })
+    if (!updated) throw AppError.notFound("Court not found")
+    res.status(200).json({ id: updated.publicId, name: updated.name })
 }
 
-export const deleteCourt = async (req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const courtPublicId = req.params.id
-        const deleted = await CourtService.deleteCourtByPublicId(courtPublicId)
-
-        if (!deleted) {
-            return res.status(404).json({ message: "Court not found" })
-        }
-
-        return res.status(200).json({ message: "Court deleted successfully" })
-    } catch (error: any) {
-        res.status(500).json({ message: error.message })
-    }
+export const deleteCourt = async (req: Request, res: Response) => {
+    const deleted = await CourtService.deleteCourtByPublicId(req.params.id)
+    if (!deleted) throw AppError.notFound("Court not found")
+    res.status(200).json({ message: "Court deleted successfully" })
 }
 
-export const verifyStream = async (req: Request, res: Response): Promise<void | Response> => {
-    try {
-        const { action, path } = req.body
+export const rotateStreamKey = async (req: Request, res: Response) => {
+    const court = await CourtService.rotateStreamKey(req.params.id)
+    logger.info({ courtId: court.publicId }, "stream_key_rotated")
+    res.status(200).json(toAdminCourt(court, true))
+}
 
-        if (action === "publish") {
-            console.log("Solicitud de streaming recibica. Verificando...")
-            if (!path) {
-                return res.status(400).send('Missing path');
-            }
+export const getCourtPublishTarget = async (req: Request, res: Response) => {
+    const court = await CourtService.findCourtByPublicId(req.params.id)
+    if (!court?.cameraPath || !court.streamKey) throw AppError.notFound("Court not found")
+    logger.info({ courtId: court.publicId }, "stream_target_revealed")
+    res.status(200).json({
+        cameraPath: court.cameraPath,
+        streamKey: court.streamKey,
+    })
+}
 
-            const isValidStreaming = await CourtService.verifyStream(path)
+const mediaAuthSecret = (req: Request): string => {
+    const header = req.get("x-internal-token") || ""
+    if (header) return header
+    const authorization = req.get("authorization") || ""
+    const match = authorization.match(/^Basic\s+(.+)$/i)
+    if (!match) return ""
+    const decoded = Buffer.from(match[1], "base64").toString("utf8")
+    const separator = decoded.indexOf(":")
+    if (separator < 0) return ""
+    return decoded.slice(separator + 1)
+}
 
-            if (!isValidStreaming) {
-                return res.status(400).send('Invalid Stream Key');
-            }
-            console.log("Streaming válido.")
-        }
-
-        return res.status(200).send('OK');
-    } catch (error: any) {
-        res.status(500).json({ message: error.message })
+export const verifyStream = async (req: Request, res: Response) => {
+    const header = mediaAuthSecret(req)
+    if (!header || !safeEqual(header, config.MEDIA_AUTH_SECRET)) {
+        throw AppError.unauthorized()
     }
+    const action = String(req.body.action || "")
+    if (action === "read" || action === "playback") {
+        res.status(200).send("OK")
+        return
+    }
+    if (action !== "publish") {
+        throw AppError.forbidden("Acción no soportada")
+    }
+    const streamPath = String(req.body.path || "")
+    await CourtService.verifyStream(streamPath, config.MEDIA_AUTH_SECRET)
+    res.status(200).send("OK")
 }

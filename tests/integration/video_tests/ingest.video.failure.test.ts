@@ -6,6 +6,7 @@ import { FailedUploadService } from "../../../src/services/FailedUploadService"
 import { VideoService } from "../../../src/services/VideoService"
 import { extractMetadataFromFileName } from "../../../src/utils/extractMetadataFromFileName"
 import path from "path"
+import { config } from "../../../src/config/config"
 
 describe("debería registrar un fallo cuando no puede subir el video a B2", () => {
     test("debería registrar fallo y no crear video cuando B2Service falla", async () => {
@@ -15,8 +16,8 @@ describe("debería registrar un fallo cuando no puede subir el video a B2", () =
         const court = new Court(savedClub.id!, "Test Court", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
-        const videoFileName = `cancha${savedCourt.id}_2024-01-01_10-00.mp4`
-        const videoFilePath = path.join("/var/videos", `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
+        const videoFileName = `cancha${savedCourt.id}_2024-01-01_10-00-00.mp4`
+        const videoFilePath = path.join(config.VIDEO_DIR, `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
 
         const metadata = extractMetadataFromFileName(videoFileName)
         expect(metadata).not.toBeNull()

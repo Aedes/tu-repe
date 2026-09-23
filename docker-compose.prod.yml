@@ -1,0 +1,154 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command:
+      - --default-time-zone=+00:00
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 1536M
+          pids: 256
+
+  migrate:
+    image: ${API_IMAGE:-tu-repe-api:latest}
+    command: ["node", "build/database/migrate.js"]
+    env_file: .env
+    environment:
+      TZ: UTC
+      NODE_ENV: production
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - internal
+    restart: "no"
+
+  api:
+    image: ${API_IMAGE:-tu-repe-api:latest}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TZ: UTC
+      NODE_ENV: production
+      MYSQL_HOST: mysql
+      MEDIA_SERVER_RTSP_BASE_URL: rtsp://mediamtx:8554
+    depends_on:
+      mysql:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - clip_uploads:/app/uploads
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/health/live"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 768M
+          pids: 256
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  worker:
+    image: ${API_IMAGE:-tu-repe-api:latest}
+    command: ["node", "build/src/worker.js"]
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TZ: UTC
+      NODE_ENV: production
+      MYSQL_HOST: mysql
+      MEDIA_SERVER_RTSP_BASE_URL: rtsp://mediamtx:8554
+    depends_on:
+      mysql:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      mediamtx:
+        condition: service_started
+    volumes:
+      - videos:/var/videos
+      - clip_uploads:/app/uploads
+    networks:
+      - internal
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+          pids: 128
+
+  mediamtx:
+    image: bluenviron/mediamtx:1.11.3
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      MTX_RTSPTRANSPORTS: tcp
+    volumes:
+      - ./deploy/mediamtx.yml:/mediamtx.yml:ro
+    ports:
+      - "1935:1935"
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+          pids: 64
+
+  caddy-frontend:
+    image: ${FRONTEND_IMAGE:-tu-repe-frontend:latest}
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - internal
+      - edge
+
+volumes:
+  mysql_data:
+  videos:
+  clip_uploads:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    driver: bridge
+  edge:
+    driver: bridge

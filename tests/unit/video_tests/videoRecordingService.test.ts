@@ -22,8 +22,16 @@ describe("VideoRecordingService", () => {
         mockProcess = {
             stderr: { on: jest.fn() },
             on: jest.fn(),
-            kill: jest.fn(),
-            killed: false
+            once: jest.fn((_event, callback) => {
+                mockProcess.exitCallback = callback;
+            }),
+            kill: jest.fn(() => {
+                mockProcess.exitCode = 0;
+                mockProcess.exitCallback?.(0, "SIGTERM");
+                return true;
+            }),
+            killed: false,
+            exitCode: null,
         };
 
         mockSpawn.mockReturnValue(mockProcess as any);
@@ -35,7 +43,6 @@ describe("VideoRecordingService", () => {
         const activeRecordings = VideoRecordingService.getActiveRecordings();
         for (const courtId of activeRecordings) {
             await VideoRecordingService.stopRecording(courtId);
-            await new Promise((resolve) => setTimeout(resolve, 5000));
         }
     });
 
@@ -43,7 +50,9 @@ describe("VideoRecordingService", () => {
         await VideoRecordingService.startRecording(1, 1, "rtsp://example.com/stream");
 
         expect(fs.mkdirSync).toHaveBeenCalled();
-        expect(mockSpawn).toHaveBeenCalledWith("ffmpeg", expect.any(Array));
+        expect(mockSpawn).toHaveBeenCalledWith("ffmpeg", expect.any(Array), expect.objectContaining({
+            env: expect.any(Object),
+        }));
         expect(VideoRecordingService.isRecording(1)).toBe(true);
     });
 

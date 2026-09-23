@@ -1,15 +1,38 @@
 import { ClipConverterService } from "../../../src/services/ClipConverterService";
+import { config } from "../../../src/config/config";
 import fs from "fs";
+import path from "path";
 
-jest.mock("fluent-ffmpeg")
+jest.mock("../../../src/utils/ffprobe", () => ({
+    probeMedia: jest.fn().mockResolvedValue({
+        format: { format_name: "matroska,webm", duration: 10 },
+        streams: [{ codec_type: "video", width: 1280, height: 720, avg_frame_rate: "30/1" }],
+    }),
+    parseDurationSeconds: jest.fn().mockReturnValue(10),
+    parseFps: jest.fn().mockReturnValue(30),
+}))
+
+jest.mock("child_process", () => ({
+    spawn: jest.fn(() => ({
+        on: jest.fn((event, callback) => {
+            if (event === "exit") queueMicrotask(() => callback(0))
+        }),
+        kill: jest.fn(),
+        killed: false,
+    })),
+}))
 
 describe("ClipConverterService", () => {
+    afterEach(() => {
+        jest.restoreAllMocks()
+    })
+
     test("convierte un webm a mp4", async () => {
         const webmPath = "uploads/test.webm";
 
         const result = await ClipConverterService.convertWebmToMp4(webmPath);
 
-        expect(result).toBe("uploads/test.mp4");
+        expect(result).toBe(path.join(config.UPLOAD_DIR, "test.mp4"));
     });
 
     test("limpia archivos temporales", () => {

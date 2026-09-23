@@ -1,12 +1,14 @@
 import { pool } from "../../src/config/db"
+import { config } from "../../src/config/config"
 
 export const clearDatabase = async () => {
-    await pool.query('SET FOREIGN_KEY_CHECKS = 0')
-    await pool.query('DELETE FROM clubs');
-    await pool.query('DELETE FROM courts');
-    await pool.query('DELETE FROM videos');
-    await pool.query('DELETE FROM users')
-    await pool.query('DELETE FROM club_users')
-    await pool.query('DELETE FROM failed_uploads');
-    await pool.query('SET FOREIGN_KEY_CHECKS = 1')
+    if (config.NODE_ENV !== "test" || !config.MYSQL_DATABASE.endsWith("_test")) {
+        throw new Error("clearDatabase solo puede ejecutarse contra una base *_test")
+    }
+    await pool.query("SET FOREIGN_KEY_CHECKS = 0")
+    const tables = ["club_users", "videos", "video_ingestion_jobs", "video_deletion_jobs", "failed_uploads", "courts", "clubs", "users", "worker_heartbeats"]
+    for (const table of tables) {
+        await pool.query(`DELETE FROM ${table}`)
+    }
+    await pool.query("SET FOREIGN_KEY_CHECKS = 1")
 }

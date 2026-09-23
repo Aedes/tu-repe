@@ -1,93 +1,80 @@
-import cron from "node-cron";
-import { ClubService } from "../services/ClubService";
-import { VideoRecordingService } from "../services/VideoRecordingService";
-import { VIDEO_CHUNK_DURATION_MS } from "../config/config";
+import cron from "node-cron"
+import { ClubService } from "../services/ClubService"
+import { VideoRecordingService } from "../services/VideoRecordingService"
+import { VIDEO_CHUNK_DURATION_MS, config } from "../config/config"
+import { logger } from "../logger"
+
+let task: { stop: () => void } | undefined
+const courtLocks = new Set<number>()
+let cycleRunning = false
 
 export const initRecordingScheduler = () => {
-    console.log("⏰ Scheduler de grabación iniciado");
-
-    cron.schedule("* * * * *", async () => {
+    task = cron.schedule("* * * * *", async () => {
         try {
-            await checkAndManageRecordings();
-        } catch (error: any) {
-            console.error("❌ Error en el scheduler de grabación:", error.message);
+            await checkAndManageRecordings()
+        } catch (error) {
+            logger.error({ err: error }, "recording_scheduler_error")
         }
-    });
+    })
+    void checkAndManageRecordings()
+    logger.info("recording_scheduler_started")
+}
 
-    checkAndManageRecordings();
-};
+export const stopRecordingScheduler = () => {
+    task?.stop()
+}
 
 export async function checkAndManageRecordings() {
-    const now = new Date(new Date().toLocaleString("en-US", {
-        timeZone: "America/Argentina/Buenos_Aires",
-    }));
-    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-
+    if (cycleRunning) return
+    cycleRunning = true
     try {
-        const clubsWithCourts = await ClubService.getAllClubsWithCourts();
+        const now = new Date()
+        const currentTime = `${String(now.getUTCHours()).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")}`
+        const clubsWithCourts = await ClubService.getAllClubsWithCourts()
 
         for (const club of clubsWithCourts) {
-            if (!club.id || !club.openTime || !club.closeTime) {
-                continue;
-            }
-
-            const openTime = parseTime(club.openTime);
-            const closeTime = parseTime(club.closeTime);
-            const currentTimeDate = parseTime(currentTime);
-
-            const shouldBeRecording = isTimeInRange(currentTimeDate, openTime, closeTime);
-
-            const courts = club.courts || [];
+            if (!club.id || !club.openTime || !club.closeTime) continue
+            const shouldBeRecording = isTimeInRange(parseTime(currentTime), parseTime(club.openTime), parseTime(club.closeTime))
+            const courts = club.courts || []
             for (const court of courts) {
-                if (!court.id || !court.cameraHost || !court.cameraPath || !court.streamKey) {
-                    continue;
-                }
-
-                const isCurrentlyRecording = VideoRecordingService.isRecording(court.id);
-
-                if (shouldBeRecording && !isCurrentlyRecording) {
-                    try {
-                        await VideoRecordingService.startRecording(
-                            court.id,
-                            club.id,
-                            `rtsp://localhost:8554/${court.cameraPath}`,
-                            VIDEO_CHUNK_DURATION_MS
-                        );
-                    } catch (error: any) {
-                        console.error(`❌ Error al iniciar grabación para cancha ${court.id}:`, error.message);
+                if (!court.id || !court.streamKey) continue
+                if (courtLocks.has(court.id)) continue
+                courtLocks.add(court.id)
+                try {
+                    const isCurrentlyRecording = VideoRecordingService.isRecording(court.id)
+                    const rtspUrl = `${config.MEDIA_SERVER_RTSP_BASE_URL.replace(/\/$/, "")}/${court.cameraPath}`
+                    if (shouldBeRecording && !isCurrentlyRecording) {
+                        await VideoRecordingService.startRecording(court.id, club.id, rtspUrl, VIDEO_CHUNK_DURATION_MS)
+                    } else if (!shouldBeRecording && isCurrentlyRecording) {
+                        await VideoRecordingService.stopRecording(court.id)
                     }
-                } else if (!shouldBeRecording && isCurrentlyRecording) {
-                    try {
-                        await VideoRecordingService.stopRecording(court.id);
-                    } catch (error: any) {
-                        console.error(`❌ Error al detener grabación para cancha ${court.id}:`, error.message);
-                    }
+                } catch (error) {
+                    logger.error({ err: error, courtId: court.id }, "recording_manage_failed")
+                } finally {
+                    courtLocks.delete(court.id)
                 }
             }
         }
-    } catch (error: any) {
-        console.error("❌ Error al verificar horarios de clubes:", error.message);
+    } finally {
+        cycleRunning = false
     }
 }
 
 export function parseTime(timeString: string): Date {
-    const parts = timeString.split(":");
-    const hours = Number(parts[0]) || 0;
-    const minutes = Number(parts[1]) || 0;
-    const date = new Date();
-    date.setHours(hours, minutes, 0, 0);
-    return date;
+    const parts = timeString.split(":")
+    const hours = Number(parts[0]) || 0
+    const minutes = Number(parts[1]) || 0
+    const date = new Date()
+    date.setUTCHours(hours, minutes, 0, 0)
+    return date
 }
 
 export function isTimeInRange(currentTime: Date, openTime: Date, closeTime: Date): boolean {
-    const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-    const openMinutes = openTime.getHours() * 60 + openTime.getMinutes();
-    const closeMinutes = closeTime.getHours() * 60 + closeTime.getMinutes();
-
+    const currentMinutes = currentTime.getUTCHours() * 60 + currentTime.getUTCMinutes()
+    const openMinutes = openTime.getUTCHours() * 60 + openTime.getUTCMinutes()
+    const closeMinutes = closeTime.getUTCHours() * 60 + closeTime.getUTCMinutes()
     if (closeMinutes < openMinutes) {
-        return currentMinutes >= openMinutes || currentMinutes < closeMinutes;
-    } else {
-        return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+        return currentMinutes >= openMinutes || currentMinutes < closeMinutes
     }
+    return currentMinutes >= openMinutes && currentMinutes < closeMinutes
 }
-

@@ -1,45 +1,44 @@
-import { FailedUploadService } from "../services/FailedUploadService";
-import fs from "fs";
+import { RetentionService } from "../services/RetentionService"
+import { ClipConverterService } from "../services/ClipConverterService"
+import { IngestionService } from "../services/IngestionService"
+import { logger } from "../logger"
 
-const DAYS_TO_KEEP_FAILED = 3;
+let retentionTimer: NodeJS.Timeout | undefined
+let deletionTimer: NodeJS.Timeout | undefined
+let cleanupTimer: NodeJS.Timeout | undefined
 
 export const initCleanupWorker = () => {
-    const CLEANUP_INTERVAL = 24 * 60 * 60 * 1000;
-
-    const processCleanup = async () => {
+    const retain = async () => {
         try {
-            console.log("Iniciando limpieza de archivos fallidos...");
-
-            const oldFailedUploads = await FailedUploadService.getOldPermanentlyFailed(DAYS_TO_KEEP_FAILED);
-
-            let deletedCount = 0;
-            let errorCount = 0;
-
-            for (const failedUpload of oldFailedUploads) {
-                try {
-                    if (fs.existsSync(failedUpload.filePath)) {
-                        fs.unlinkSync(failedUpload.filePath);
-                        console.log(`Archivo eliminado: ${failedUpload.filePath}`);
-                    }
-
-                    await FailedUploadService.deleteFailedUpload(failedUpload.id!);
-                    deletedCount++;
-                } catch (error: any) {
-                    console.error(`Error al limpiar archivo ${failedUpload.filePath}:`, error);
-                    errorCount++;
-                }
-            }
-
-            console.log(`Limpieza completada: ${deletedCount} archivos eliminados, ${errorCount} errores`);
-        } catch (error: any) {
-            console.error("Error en el worker de limpieza:", error);
+            const count = await RetentionService.enqueueExpired()
+            if (count) logger.info({ count }, "retention_enqueued")
+        } catch (error) {
+            logger.error({ err: error }, "retention_worker_error")
         }
-    };
+    }
+    const deleteNext = async () => {
+        try {
+            await RetentionService.processNext()
+        } catch (error) {
+            logger.error({ err: error }, "deletion_worker_error")
+        }
+    }
+    const cleanup = () => {
+        ClipConverterService.cleanupOldUploads()
+        void IngestionService.reconcile()
+    }
 
-    processCleanup();
+    void retain()
+    void deleteNext()
+    cleanup()
+    retentionTimer = setInterval(() => void retain(), 60 * 60 * 1000)
+    deletionTimer = setInterval(() => void deleteNext(), 10_000)
+    cleanupTimer = setInterval(cleanup, 60 * 60 * 1000)
+    logger.info("cleanup_worker_started")
+}
 
-    setInterval(processCleanup, CLEANUP_INTERVAL);
-
-    console.log("🧹 Worker de limpieza iniciado");
-};
-
+export const stopCleanupWorker = () => {
+    if (retentionTimer) clearInterval(retentionTimer)
+    if (deletionTimer) clearInterval(deletionTimer)
+    if (cleanupTimer) clearInterval(cleanupTimer)
+}

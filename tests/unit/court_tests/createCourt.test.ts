@@ -2,6 +2,7 @@ import { Club } from "../../../src/models/Club"
 import { Court } from "../../../src/models/Court"
 import { ClubService } from "../../../src/services/ClubService"
 import { CourtService } from "../../../src/services/CourtService"
+import { config } from "../../../src/config/config"
 import fs from "fs"
 import path from "path"
 
@@ -12,7 +13,7 @@ test("debería persistir una nueva cancha en la base de datos y crear los direct
     const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
     const savedCourt = await CourtService.createCourt(court)
 
-    const clubPath = path.join("/var/videos", `club_${savedClub.id}`)
+    const clubPath = path.join(config.VIDEO_DIR, `club_${savedClub.id}`)
     const courtPath = path.join(clubPath, `court_${savedCourt.id}`)
 
     expect(fs.existsSync(clubPath)).toBe(true)

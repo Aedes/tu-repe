@@ -1,14 +1,16 @@
 import request from "supertest"
+import { app } from "../../../src/app"
 import { generateAdminToken } from "../../helpers/generateToken"
-import { PORT } from "../../../src/config/config"
 
 describe("POST Club routes", () => {
     test("POST /clubs - debería crear un club nuevo", async () => {
-        const token = generateAdminToken()
+        const token = await generateAdminToken()
 
-        const res = await request(`http://localhost:${PORT}`)
+        const res = await request(app)
             .post("/clubs")
             .set("Authorization", `Bearer ${token}`)
+            .set("Cookie", "tu_repe_csrf=test-csrf-token")
+            .set("X-CSRF-Token", "test-csrf-token")
             .send({
                 name: "Club Integration Test",
                 openTime: "07:00",

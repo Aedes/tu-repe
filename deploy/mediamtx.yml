@@ -1,0 +1,22 @@
+logLevel: warn
+authMethod: http
+# MediaMTX 1.11 no puede enviar headers propios. El secreto viaja como
+# password HTTP Basic y la API lo compara con MEDIA_AUTH_SECRET.
+# Si el secreto tiene @ : / # ? hay que percent-encodearlo.
+authHTTPAddress: http://mtx:MEDIAMTX_SECRET_PLACEHOLDER@api:3000/internal/mediamtx/auth
+
+rtmp: yes
+rtmpAddress: :1935
+rtsp: yes
+rtspAddress: :8554
+hls: no
+webrtc: no
+srt: no
+api: no
+metrics: no
+pprof: no
+playback: no
+
+paths:
+  all:
+    source: publisher

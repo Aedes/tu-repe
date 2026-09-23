@@ -1,12 +1,23 @@
 import mysql from "mysql2/promise"
-import { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE } from "./config"
+import { config } from "./config"
 
 export const pool = mysql.createPool({
-    host: MYSQL_HOST,
-    user: MYSQL_USER,
-    password: MYSQL_PASSWORD,
-    database: MYSQL_DATABASE,
+    host: config.MYSQL_HOST,
+    port: config.MYSQL_PORT,
+    user: config.MYSQL_USER,
+    password: config.MYSQL_PASSWORD,
+    database: config.MYSQL_DATABASE,
     waitForConnections: true,
     connectionLimit: 10,
-    timezone: 'Z'
+    timezone: "Z",
+    dateStrings: false,
 })
+
+export async function pingDatabase(): Promise<void> {
+    const connection = await pool.getConnection()
+    try {
+        await connection.query("SELECT 1")
+    } finally {
+        connection.release()
+    }
+}

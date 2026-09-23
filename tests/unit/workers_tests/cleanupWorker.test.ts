@@ -7,6 +7,7 @@ import { pool } from "../../../src/config/db"
 import fs from "fs"
 import path from "path"
 import { getDateInUTC } from "../../../src/utils/getDateInUTC"
+import { config } from "../../../src/config/config"
 
 test("debería obtener fallos permanentemente fallidos antiguos para limpieza", async () => {
     const club = new Club("Test Club", "08:00", "22:00", 60, "Argentina", "Mendoza", "San Rafael", "Calle Falsa 123", "urlId")
@@ -22,10 +23,8 @@ test("debería obtener fallos permanentemente fallidos antiguos para limpieza", 
     const hh = String(now.getHours()).padStart(2, '0')
     const min = String(now.getMinutes()).padStart(2, '0')
     const videoFileName = `cancha${savedCourt.id}_${yyyy}-${mm}-${dd}_${hh}-${min}.mp4`
-    const filePath = path.join("/var/videos", `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
+    const filePath = path.join(config.VIDEO_DIR, `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
     fs.writeFileSync(filePath, "test content")
-
-    await new Promise((resolve) => setTimeout(resolve, 5000))
 
     const endTimeUTC = getDateInUTC(new Date(Date.now()))
 
@@ -55,7 +54,8 @@ test("debería obtener fallos permanentemente fallidos antiguos para limpieza", 
 
     await FailedUploadService.deleteFailedUpload(found!.id!)
 
-    expect(fs.existsSync(filePath)).toBe(false)
+    expect(fs.existsSync(filePath)).toBe(true)
+    fs.unlinkSync(filePath)
 
     const stillExists = await FailedUploadService.getOldPermanentlyFailed(3)
     const stillFound = stillExists.find(u => u.id === failedUpload.id)
@@ -81,9 +81,8 @@ test("debería limpiar múltiples archivos permanentemente fallidos", async () =
         const hh = String(now.getHours()).padStart(2, '0')
         const min = String(now.getMinutes()).padStart(2, '0')
         const videoFileName = `cancha${savedCourt.id}_${yyyy}-${mm}-${dd}_${hh}-${min}.mp4`
-        const filePath = path.join("/var/videos", `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
+        const filePath = path.join(config.VIDEO_DIR, `club_${savedClub.id}`, `court_${savedCourt.id}`, videoFileName)
         fs.writeFileSync(filePath, "test content")
-        await new Promise((resolve) => setTimeout(resolve, 5000))
 
         filePaths.push(filePath)
 
