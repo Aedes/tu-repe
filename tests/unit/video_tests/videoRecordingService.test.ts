@@ -53,6 +53,12 @@ describe("VideoRecordingService", () => {
         expect(mockSpawn).toHaveBeenCalledWith("ffmpeg", expect.any(Array), expect.objectContaining({
             env: expect.any(Object),
         }));
+        const args = mockSpawn.mock.calls[0][1] as string[];
+        expect(args).toEqual(expect.arrayContaining([
+            "-segment_format", "mp4",
+            "-segment_format_options", "movflags=+frag_keyframe+empty_moov+default_base_moof",
+        ]));
+        expect(args).not.toEqual(expect.arrayContaining(["-movflags", "+faststart"]));
         expect(VideoRecordingService.isRecording(1)).toBe(true);
     });
 

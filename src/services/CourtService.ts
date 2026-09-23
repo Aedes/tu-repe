@@ -8,12 +8,14 @@ import { config } from "../config/config"
 import { AppError } from "../errors/AppError"
 import { VideoRepository } from "../repositories/VideoRepository"
 import { DeletionJobRepository } from "../repositories/DeletionJobRepository"
+import { AppointmentVideoJobRepository } from "../repositories/AppointmentVideoJobRepository"
 import { pool } from "../config/db"
 
 export class CourtService {
     private static readonly CourtRepository = new CourtRepository()
     private static readonly videos = new VideoRepository()
     private static readonly deletionJobs = new DeletionJobRepository()
+    private static readonly appointmentVideos = new AppointmentVideoJobRepository()
 
     static async createCourt(court: ICourt): Promise<ICourt> {
         const newCourt = await this.CourtRepository.create(court)
@@ -74,6 +76,17 @@ export class CourtService {
         for (const row of rows as { id: number; b2_file_path: string }[]) {
             await this.videos.markDeleting(row.id)
             await this.deletionJobs.enqueue({ videoId: row.id, courtId: id, clubId: court?.clubId, b2FilePath: row.b2_file_path })
+        }
+        const merged = await this.appointmentVideos.findStoredByCourt(id)
+        for (const job of merged) {
+            if (!job.id || !job.b2FilePath) continue
+            await this.appointmentVideos.markDeleting(job.id)
+            await this.deletionJobs.enqueue({
+                appointmentVideoJobId: job.id,
+                courtId: id,
+                clubId: court?.clubId,
+                b2FilePath: job.b2FilePath,
+            })
         }
         const deleted = await this.CourtRepository.delete(id)
         if (deleted && court) {

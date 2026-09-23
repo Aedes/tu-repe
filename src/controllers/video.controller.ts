@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { VideoService } from "../services/VideoService"
 import { CourtService } from "../services/CourtService"
 import { TurnstileService } from "../services/TurnstileService"
+import { AppointmentVideoService } from "../services/AppointmentVideoService"
 import { AppError } from "../errors/AppError"
 
 const toAdminVideo = (video: NonNullable<Awaited<ReturnType<typeof VideoService.findVideoByPublicId>>>) => ({
@@ -58,6 +59,29 @@ export const getVideoDownloadUrlsForAppointment = async (req: Request, res: Resp
     res.setHeader("Cache-Control", "no-store")
     res.setHeader("Referrer-Policy", "no-referrer")
     res.status(200).json(urls)
+}
+
+const sendRender = (res: Response, result: Awaited<ReturnType<typeof AppointmentVideoService.requestRender>>) => {
+    res.setHeader("Cache-Control", "no-store")
+    res.setHeader("Referrer-Policy", "no-referrer")
+    const status = result.status === "queued" || result.status === "processing" ? 202 : 200
+    res.status(status).json(result)
+}
+
+export const createAppointmentRender = async (req: Request, res: Response) => {
+    await TurnstileService.verify(String(req.body.turnstileToken || ""), req.ip)
+    const result = await AppointmentVideoService.requestRender({
+        startTime: new Date(req.body.startTime),
+        courtPublicId: String(req.body.courtId),
+        clubUrlId: String(req.body.clubUrlId),
+        mode: req.body.mode,
+    })
+    sendRender(res, result)
+}
+
+export const getAppointmentRender = async (req: Request, res: Response) => {
+    const result = await AppointmentVideoService.getRenderStatus(req.params.jobId)
+    sendRender(res, result)
 }
 
 export const updateVideo = async (req: Request, res: Response) => {

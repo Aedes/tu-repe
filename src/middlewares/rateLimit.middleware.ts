@@ -35,6 +35,22 @@ export const searchLimiter = rateLimit({
     keyGenerator: ipKey,
 })
 
+export const renderLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: ipKey,
+})
+
+export const renderStatusLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    limit: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: ipKey,
+})
+
 export const clipLimiter = rateLimit({
     windowMs: 10 * 60 * 1000,
     limit: 3,

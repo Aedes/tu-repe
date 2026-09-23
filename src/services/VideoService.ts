@@ -121,7 +121,7 @@ export class VideoService {
         return this.deleteVideo(video.id)
     }
 
-    static async getVideoDownloadUrlsForAppointment(startTime: Date, courtId: number, clubUrlId: string) {
+    static async resolveAppointmentContext(startTime: Date, courtId: number, clubUrlId: string) {
         const court = await this.CourtRepository.findById(courtId)
         if (!court) throw AppError.notFound("Court not found")
         const club = await ClubService.findClubById(court.clubId)
@@ -135,6 +135,11 @@ export class VideoService {
         }
 
         const endTime = new Date(startTime.getTime() + club.appointmentDuration * 60 * 1000)
+        return { court, club, endTime }
+    }
+
+    static async getVideoDownloadUrlsForAppointment(startTime: Date, courtId: number, clubUrlId: string) {
+        const { endTime } = await this.resolveAppointmentContext(startTime, courtId, clubUrlId)
         const videos = await this.VideoRepository.findAvailableOverlapping(courtId, startTime, endTime)
         const urls = await Promise.all(videos.map(async (video) => ({
             startTime: video.startTime,

@@ -6,7 +6,7 @@ export const clearDatabase = async () => {
         throw new Error("clearDatabase solo puede ejecutarse contra una base *_test")
     }
     await pool.query("SET FOREIGN_KEY_CHECKS = 0")
-    const tables = ["club_users", "videos", "video_ingestion_jobs", "video_deletion_jobs", "failed_uploads", "courts", "clubs", "users", "worker_heartbeats"]
+    const tables = ["club_users", "videos", "video_ingestion_jobs", "video_deletion_jobs", "appointment_video_jobs", "failed_uploads", "courts", "clubs", "users", "worker_heartbeats"]
     for (const table of tables) {
         await pool.query(`DELETE FROM ${table}`)
     }

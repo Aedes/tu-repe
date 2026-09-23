@@ -18,6 +18,7 @@ const clearDatabase = async () => {
         await pool.query('DELETE FROM failed_uploads');
         await pool.query('DELETE FROM video_ingestion_jobs');
         await pool.query('DELETE FROM video_deletion_jobs');
+        await pool.query('DELETE FROM appointment_video_jobs');
         await pool.query('DELETE FROM worker_heartbeats');
         await pool.query('SET FOREIGN_KEY_CHECKS = 1')
 

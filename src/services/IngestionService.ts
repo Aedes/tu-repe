@@ -1,5 +1,8 @@
 import fs from "fs"
+import os from "os"
 import path from "path"
+import { execFile } from "child_process"
+import { promisify } from "util"
 import { IngestionJobRepository } from "../repositories/IngestionJobRepository"
 import { CourtService } from "./CourtService"
 import { B2Service } from "./B2Service"
@@ -13,6 +16,18 @@ import { FailedUploadService } from "./FailedUploadService"
 import { IIngestionJob } from "../types"
 
 const MAX_ATTEMPTS = 10
+const MIN_FALLBACK_DURATION_SECONDS = 1
+const FFMPEG_REMUX_TIMEOUT_MS = 300_000
+const execFileAsync = promisify(execFile)
+
+const estimateDurationFromFileMtime = (filePath: string, startTime: Date): number | null => {
+    const stat = fs.statSync(filePath)
+    const elapsedSeconds = Math.ceil((stat.mtime.getTime() - startTime.getTime()) / 1000)
+    if (!Number.isFinite(elapsedSeconds) || elapsedSeconds < MIN_FALLBACK_DURATION_SECONDS) {
+        return null
+    }
+    return Math.min(elapsedSeconds, config.VIDEO_CHUNK_DURATION_SECONDS)
+}
 
 export class IngestionService {
     private static readonly jobs = new IngestionJobRepository()
@@ -31,11 +46,17 @@ export class IngestionService {
             logger.warn({ courtId: metadata.courtId }, "ingestion_court_missing")
             return
         }
-        let duration = config.VIDEO_CHUNK_DURATION_SECONDS
+        let duration: number
         try {
             duration = parseDurationSeconds(await probeMedia(filePath))
         } catch (error) {
-            logger.warn({ err: error, fileName }, "ingestion_probe_failed_using_chunk")
+            const estimatedDuration = estimateDurationFromFileMtime(filePath, metadata.startTime)
+            if (!estimatedDuration) {
+                logger.warn({ err: error, fileName }, "ingestion_probe_failed_skipping")
+                return
+            }
+            duration = estimatedDuration
+            logger.warn({ err: error, fileName, duration }, "ingestion_probe_failed_using_file_mtime")
         }
         const endTime = new Date(metadata.startTime.getTime() + duration * 1000)
         logger.info({ fileName }, "ingestion_queued")
@@ -64,6 +85,7 @@ export class IngestionService {
 
     private static async processJob(id: number, job: IIngestionJob) {
         if (!job) return
+        let preparedUploadDir: string | undefined
         try {
             if (!fs.existsSync(job.filePath) && job.status !== "uploaded") {
                 await this.jobs.markRetry(id, "Archivo local ausente", job.attemptsCount + 1, job.attemptsCount + 1 >= MAX_ATTEMPTS)
@@ -73,8 +95,10 @@ export class IngestionService {
 
             let b2FilePath = job.b2FilePath
             if (job.status !== "uploaded" || !b2FilePath) {
+                const uploadFilePath = await this.prepareUploadFile(job.filePath)
+                if (uploadFilePath !== job.filePath) preparedUploadDir = path.dirname(uploadFilePath)
                 b2FilePath = await B2Service.uploadFileAndGetFilePath(
-                    job.filePath,
+                    uploadFilePath,
                     job.clubId,
                     job.courtId,
                     job.fileName
@@ -112,6 +136,30 @@ export class IngestionService {
             const attempts = job.attemptsCount + 1
             await this.jobs.markRetry(id, message, attempts, attempts >= MAX_ATTEMPTS)
             logger.error({ err: error, jobId: id, attempts }, "ingestion_job_failed")
+        } finally {
+            if (preparedUploadDir) {
+                await fs.promises.rm(preparedUploadDir, { recursive: true, force: true })
+            }
+        }
+    }
+
+    private static async prepareUploadFile(filePath: string): Promise<string> {
+        if (config.isTest) return filePath
+        const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "tu-repe-ingest-"))
+        const outputPath = path.join(tempDir, path.basename(filePath))
+        try {
+            await execFileAsync("ffmpeg", [
+                "-y",
+                "-i", filePath,
+                "-c", "copy",
+                "-movflags", "+faststart",
+                outputPath,
+            ], { timeout: FFMPEG_REMUX_TIMEOUT_MS, env: { ...process.env, TZ: "UTC" } })
+            parseDurationSeconds(await probeMedia(outputPath))
+            return outputPath
+        } catch (error) {
+            await fs.promises.rm(tempDir, { recursive: true, force: true })
+            throw error
         }
     }
 

@@ -40,6 +40,14 @@ const envSchema = z.object({
     VIDEO_DIR: z.string().min(1).default("/var/videos"),
     UPLOAD_DIR: z.string().min(1).default("./uploads"),
     STABILITY_THRESHOLD_MS: z.coerce.number().int().positive().default(10_000),
+    APPOINTMENT_MERGE_ENABLED: z.enum(["true", "false"]).default("true"),
+    APPOINTMENT_MERGE_MAX_ATTEMPTS: z.coerce.number().int().positive().default(3),
+    APPOINTMENT_MERGE_FFMPEG_TIMEOUT_MS: z.coerce.number().int().positive().default(300_000),
+    APPOINTMENT_MERGE_WORKER_INTERVAL_MS: z.coerce.number().int().positive().default(5_000),
+    APPOINTMENT_MERGE_COVERAGE_TOLERANCE_MS: z.coerce.number().int().nonnegative().default(10_000),
+    APPOINTMENT_MERGE_DISK_MARGIN_BYTES: z.coerce.number().int().positive().default(512 * 1024 * 1024),
+    APPOINTMENT_MERGE_URL_EXTRA_SECONDS: z.coerce.number().int().positive().default(1_800),
+    APPOINTMENT_MERGE_LOCK_TIMEOUT_MINUTES: z.coerce.number().int().positive().default(20),
     COOKIE_SECURE: z.enum(["true", "false"]).default("false"),
     TRUST_PROXY: z.coerce.number().int().min(0).default(1),
 })
@@ -69,6 +77,7 @@ export const config = {
     cookieSecure: env.COOKIE_SECURE === "true" || env.NODE_ENV === "production",
     isProduction: env.NODE_ENV === "production",
     isTest: env.NODE_ENV === "test",
+    appointmentMergeEnabled: env.APPOINTMENT_MERGE_ENABLED === "true",
 }
 
 export const PORT = config.PORT

@@ -7,6 +7,8 @@ import {
 import { Upload } from "@aws-sdk/lib-storage"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import fs from "fs"
+import { Readable } from "stream"
+import { pipeline } from "stream/promises"
 import { config } from "../config/config"
 
 const client = new S3Client({
@@ -25,13 +27,20 @@ export class B2Service {
             throw new Error(`El archivo no existe: ${localFilePath}`)
         }
         const b2FilePath = `club_${clubId}/court_${courtId}/${fileName}`
+        return this.uploadFile(localFilePath, b2FilePath)
+    }
+
+    static async uploadFile(localFilePath: string, b2FilePath: string, contentType = "video/mp4"): Promise<string> {
+        if (!fs.existsSync(localFilePath)) {
+            throw new Error(`El archivo no existe: ${localFilePath}`)
+        }
         const upload = new Upload({
             client,
             params: {
                 Bucket: config.B2_BUCKET_NAME,
                 Key: b2FilePath,
                 Body: fs.createReadStream(localFilePath),
-                ContentType: "video/mp4",
+                ContentType: contentType,
             },
             queueSize: 2,
             partSize: 8 * 1024 * 1024,
@@ -41,12 +50,30 @@ export class B2Service {
         return b2FilePath
     }
 
-    static async getDownloadUrl(b2FilePath: string): Promise<string> {
+    static async downloadToFile(b2FilePath: string, destination: string): Promise<void> {
+        const response = await client.send(new GetObjectCommand({
+            Bucket: config.B2_BUCKET_NAME,
+            Key: b2FilePath,
+        }))
+        if (!response.Body) throw new Error(`Objeto vacío: ${b2FilePath}`)
+        await pipeline(response.Body as Readable, fs.createWriteStream(destination))
+    }
+
+    static async getObjectSize(b2FilePath: string): Promise<number> {
+        const head = await client.send(new HeadObjectCommand({
+            Bucket: config.B2_BUCKET_NAME,
+            Key: b2FilePath,
+        }))
+        return head.ContentLength || 0
+    }
+
+    static async getDownloadUrl(b2FilePath: string, expiresIn = 5 * 60, downloadName?: string): Promise<string> {
         const command = new GetObjectCommand({
             Bucket: config.B2_BUCKET_NAME,
             Key: b2FilePath,
+            ...(downloadName ? { ResponseContentDisposition: `attachment; filename="${downloadName}"` } : {}),
         })
-        return getSignedUrl(client, command, { expiresIn: 5 * 60 })
+        return getSignedUrl(client, command, { expiresIn })
     }
 
     static async deleteObject(b2FilePath: string): Promise<void> {

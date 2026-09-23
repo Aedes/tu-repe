@@ -4,12 +4,14 @@ import { CloudinaryService } from "./CloudinaryService"
 import { assertImageMagic } from "../middlewares/upload.middleware"
 import { AppError } from "../errors/AppError"
 import { DeletionJobRepository } from "../repositories/DeletionJobRepository"
+import { AppointmentVideoJobRepository } from "../repositories/AppointmentVideoJobRepository"
 import { VideoRepository } from "../repositories/VideoRepository"
 import { pool } from "../config/db"
 
 export class ClubService {
     private static readonly ClubRepository = new ClubRepository()
     private static readonly deletionJobs = new DeletionJobRepository()
+    private static readonly appointmentVideos = new AppointmentVideoJobRepository()
     private static readonly videos = new VideoRepository()
 
     static createClub(club: IClub): Promise<IClub> {
@@ -116,6 +118,17 @@ export class ClubService {
         for (const row of rows as { id: number; b2_file_path: string; court_id: number }[]) {
             await this.videos.markDeleting(row.id)
             await this.deletionJobs.enqueue({ videoId: row.id, courtId: row.court_id, clubId: id, b2FilePath: row.b2_file_path })
+        }
+        const merged = await this.appointmentVideos.findStoredByClub(id)
+        for (const job of merged) {
+            if (!job.id || !job.b2FilePath) continue
+            await this.appointmentVideos.markDeleting(job.id)
+            await this.deletionJobs.enqueue({
+                appointmentVideoJobId: job.id,
+                courtId: job.courtId,
+                clubId: id,
+                b2FilePath: job.b2FilePath,
+            })
         }
         return this.ClubRepository.delete(id)
     }

@@ -56,6 +56,17 @@ Admin crea/rota stream key. Nunca listar keys. Si una cámara no publica: verifi
 - ffmpeg inactivo en horario de club
 - Errores B2
 - Videos expirados no eliminados (`npm run retention:dry-run` en worker)
+- Trabajos `appointment_video_jobs` en `failed_permanently` o `processing` con `locked_at` vencido
+
+## Video unificado
+
+La búsqueda pública encola un MP4 por turno. El worker lo arma con `ffmpeg -c copy` dentro de `/var/videos/appointment-merges` y lo sube a B2. La segunda búsqueda del mismo turno reutiliza ese archivo.
+
+Si faltan fragmentos o la unión falla, la API responde `fallback` y el frontend reproduce las partes. `APPOINTMENT_MERGE_ENABLED=false` detiene trabajos nuevos y el worker, sin borrar los objetos ya generados.
+
+Síntomas de disco lleno: logs `DISK_FULL` o `appointment_merge_retry`, y `/health/ready` puede fallar por espacio. No borrar `/var/videos` completo: ahí también están los fragmentos que todavía no se ingirieron. Solo se pueden eliminar directorios `appointment-merges/job-*` más viejos que el lock (20 minutos por defecto).
+
+Rollback: volver el frontend al flujo `GET /videos/urls` y poner `APPOINTMENT_MERGE_ENABLED=false`. La migración 044 es aditiva.
 
 ## Incidentes
 

@@ -6,6 +6,7 @@ const mapJob = (row: Record<string, any>): IDeletionJob => ({
     id: row.id,
     publicId: row.public_id,
     videoId: row.video_id,
+    appointmentVideoJobId: row.appointment_video_job_id,
     courtId: row.court_id,
     clubId: row.club_id,
     b2FilePath: row.b2_file_path,
@@ -16,12 +17,13 @@ const mapJob = (row: Record<string, any>): IDeletionJob => ({
 })
 
 export class DeletionJobRepository {
-    async enqueue(job: { videoId?: number | null; courtId?: number | null; clubId?: number | null; b2FilePath: string }) {
+    async enqueue(job: { videoId?: number | null; appointmentVideoJobId?: number | null; courtId?: number | null; clubId?: number | null; b2FilePath: string }) {
         await pool.query(
-            `INSERT INTO video_deletion_jobs (public_id, video_id, court_id, club_id, b2_file_path, status, attempts_count)
-             VALUES (?, ?, ?, ?, ?, 'pending', 0)
+            `INSERT INTO video_deletion_jobs
+             (public_id, video_id, appointment_video_job_id, court_id, club_id, b2_file_path, status, attempts_count)
+             VALUES (?, ?, ?, ?, ?, ?, 'pending', 0)
              ON DUPLICATE KEY UPDATE status = IF(status = 'completed', 'completed', status)`,
-            [generatePublicId(), job.videoId || null, job.courtId || null, job.clubId || null, job.b2FilePath]
+            [generatePublicId(), job.videoId || null, job.appointmentVideoJobId || null, job.courtId || null, job.clubId || null, job.b2FilePath]
         )
     }
 

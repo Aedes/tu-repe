@@ -7,6 +7,15 @@ export class VideoRepository extends BaseRepository<IVideo> {
     protected tableName = "videos"
     protected primaryKey = "id"
 
+    async findByIds(ids: number[]): Promise<IVideo[]> {
+        if (!ids.length) return []
+        const [rows] = await pool.query(
+            `SELECT * FROM ${this.tableName} WHERE id IN (${ids.map(() => "?").join(",")})`,
+            ids
+        )
+        return (rows as Record<string, unknown>[]).map((row) => this.mapColumnsToFields(row))
+    }
+
     async findByCourtId(courtId: number): Promise<IVideo[]> {
         return this.findBy({ courtId } as Partial<IVideo>)
     }

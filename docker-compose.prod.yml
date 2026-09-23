@@ -91,7 +91,7 @@ services:
       mediamtx:
         condition: service_started
     volumes:
-      - videos:/var/videos
+      - videos:/var/videos # también guarda temporales de unión en appointment-merges
       - clip_uploads:/app/uploads
     networks:
       - internal

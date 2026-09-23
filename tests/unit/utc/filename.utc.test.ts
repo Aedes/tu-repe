@@ -1,4 +1,5 @@
 import { extractMetadataFromFileName } from "../../../src/utils/extractMetadataFromFileName"
+import { argentinaWallClock } from "../../../src/utils/argentinaTime"
 import { isTimeInRange, parseTime } from "../../../src/workers/recordingScheduler"
 
 describe("UTC filename and schedule", () => {
@@ -15,5 +16,16 @@ describe("UTC filename and schedule", () => {
     test("horario overnight", () => {
         expect(isTimeInRange(parseTime("23:00"), parseTime("22:00"), parseTime("02:00"))).toBe(true)
         expect(isTimeInRange(parseTime("10:00"), parseTime("22:00"), parseTime("02:00"))).toBe(false)
+    })
+
+    test("compara apertura y cierre contra la hora de Argentina", () => {
+        const elevenArgentina = new Date("2026-09-23T14:00:00.000Z")
+        const nineArgentina = new Date("2026-09-23T12:00:00.000Z")
+        expect(argentinaWallClock(elevenArgentina)).toBe("11:00")
+        expect(argentinaWallClock(nineArgentina)).toBe("09:00")
+        expect(isTimeInRange(parseTime(argentinaWallClock(nineArgentina)), parseTime("08:00"), parseTime("09:00"))).toBe(false)
+        expect(isTimeInRange(parseTime(argentinaWallClock(new Date("2026-09-23T11:59:00.000Z"))), parseTime("08:00"), parseTime("09:00"))).toBe(true)
+        expect(argentinaWallClock(new Date("2026-09-24T02:30:00.000Z"))).toBe("23:30")
+        expect(argentinaWallClock(new Date("2026-09-24T03:00:00.000Z"))).toBe("00:00")
     })
 })

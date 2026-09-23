@@ -23,6 +23,10 @@ export type SystemRole = "ADMIN" | "USER"
 export type VideoStatus = "available" | "deleting" | "deleted"
 export type IngestionStatus = "pending" | "uploading" | "uploaded" | "completed" | "retrying" | "failed_permanently"
 export type DeletionStatus = "pending" | "in_progress" | "completed" | "failed"
+export type AppointmentVideoStatus = "pending" | "processing" | "completed" | "retrying" | "failed_permanently" | "deleting" | "deleted"
+export type AppointmentProcessingStep = "downloading" | "validating" | "concatenating" | "uploading"
+export type AppointmentFallbackReason = "incomplete_sources" | "merge_failed" | "merge_disabled"
+export type AppointmentRenderMode = "parts" | "unified"
 
 export interface IClub {
     id?: number
@@ -113,6 +117,7 @@ export interface IDeletionJob {
     id?: number
     publicId?: string
     videoId?: number | null
+    appointmentVideoJobId?: number | null
     courtId?: number | null
     clubId?: number | null
     b2FilePath: string
@@ -121,6 +126,37 @@ export interface IDeletionJob {
     errorMessage?: string | null
     lockedAt?: Date | null
 }
+
+export interface IAppointmentVideoJob {
+    id?: number
+    publicId?: string
+    courtId: number
+    clubId: number
+    appointmentStart: Date
+    appointmentEnd: Date
+    cacheKey: string
+    sourceVideoIds: number[]
+    sourceCount: number
+    b2FilePath?: string | null
+    status: AppointmentVideoStatus
+    processingStep?: AppointmentProcessingStep | null
+    attemptsCount: number
+    errorCode?: string | null
+    errorMessage?: string | null
+    lockedAt?: Date | null
+    expiresAt?: Date | null
+    createdAt?: Date
+    updatedAt?: Date
+}
+
+export type VideoPartUrl = { url: string; startTime: string; endTime: string }
+
+export type AppointmentRenderResponse =
+    | { status: "ready"; jobId?: string; videoUrl: string; urlExpiresAt: string; startTime: string; endTime: string }
+    | { status: "queued" | "processing"; jobId: string; pollAfterMs: number }
+    | { status: "parts"; parts: VideoPartUrl[] }
+    | { status: "fallback"; reason: AppointmentFallbackReason; jobId?: string; parts: VideoPartUrl[] }
+    | { status: "not_found" }
 
 export type RecordingState = "starting" | "running" | "stopping"
 

@@ -41,4 +41,36 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
 
         jest.restoreAllMocks()
     })
+
+    test("usa la hora de modificación cuando ffprobe no puede obtener duración", async () => {
+        const club = await ClubService.createClub(new Club(
+            "Club for Video Ingestor Fallback", "08:00", "22:00", 60,
+            "Argentina", "Mendoza", "San Rafael", "Comandante Salas 660", "urlIdFallback"
+        ))
+        const court = await CourtService.createCourt(
+            new Court(club.id!, "Court for Video Ingestor Fallback", "192.168.0.2", "/stream", "stream-key")
+        )
+        const videoFileName = `cancha${court.id}_2024-01-01_10-00-00.mp4`
+        const videoFilePath = path.join(config.VIDEO_DIR, `club_${club.id}`, `court_${court.id}`, videoFileName)
+        const endTime = new Date("2024-01-01T10:00:37.000Z")
+
+        fs.mkdirSync(path.dirname(videoFilePath), { recursive: true })
+        fs.writeFileSync(videoFilePath, "video")
+        fs.utimesSync(videoFilePath, endTime, endTime)
+        jest.spyOn(ffprobe, "probeMedia").mockRejectedValue(new Error("No se pudo obtener la duración"))
+        jest.spyOn(B2Service, "uploadFileAndGetFilePath")
+            .mockResolvedValue(`club_${club.id}/court_${court.id}/${videoFileName}`)
+
+        await IngestionService.registerFile(videoFilePath)
+        expect(await IngestionService.processNext()).toBe(true)
+
+        const videos = await VideoService.getVideosByCourtId(court.id!)
+        const ingestedVideo = videos.find((video) => video.fileName === videoFileName)
+
+        expect(ingestedVideo).toBeDefined()
+        expect(ingestedVideo?.startTime.toISOString()).toBe("2024-01-01T10:00:00.000Z")
+        expect(ingestedVideo?.endTime.toISOString()).toBe("2024-01-01T10:00:37.000Z")
+
+        jest.restoreAllMocks()
+    })
 })

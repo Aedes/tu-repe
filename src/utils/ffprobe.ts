@@ -5,14 +5,17 @@ const execFileAsync = promisify(execFile)
 
 interface ProbeStream {
     codec_type?: string
+    codec_name?: string
     width?: number
     height?: number
+    pix_fmt?: string
     avg_frame_rate?: string
     duration?: string
+    channels?: number
 }
 
-interface ProbeResult {
-    format?: { duration?: string; format_name?: string }
+export interface ProbeResult {
+    format?: { duration?: string; format_name?: string; size?: string }
     streams?: ProbeStream[]
 }
 

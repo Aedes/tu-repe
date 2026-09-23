@@ -3,6 +3,7 @@ import { ClubService } from "../services/ClubService"
 import { VideoRecordingService } from "../services/VideoRecordingService"
 import { VIDEO_CHUNK_DURATION_MS, config } from "../config/config"
 import { logger } from "../logger"
+import { argentinaWallClock } from "../utils/argentinaTime"
 
 let task: { stop: () => void } | undefined
 const courtLocks = new Set<number>()
@@ -28,8 +29,7 @@ export async function checkAndManageRecordings() {
     if (cycleRunning) return
     cycleRunning = true
     try {
-        const now = new Date()
-        const currentTime = `${String(now.getUTCHours()).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")}`
+        const currentTime = argentinaWallClock(new Date())
         const clubsWithCourts = await ClubService.getAllClubsWithCourts()
 
         for (const club of clubsWithCourts) {
