@@ -1,30 +1,4 @@
-DROP TABLE IF EXISTS videos;
-DROP TABLE IF EXISTS courts;
-DROP TABLE IF EXISTS clubs;
-
-CREATE TABLE clubs (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  open_time TIME NOT NULL,
-  close_time TIME NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE courts (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  club_id INT NOT NULL,
-  name VARCHAR(50),
-  rtsp_url VARCHAR(255),
-  FOREIGN KEY (club_id) REFERENCES clubs(id) ON DELETE CASCADE
-);
-
-CREATE TABLE videos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  court_id INT NOT NULL,
-  file_name VARCHAR(255),
-  start_time DATETIME,
-  end_time DATETIME,
-  b2_url VARCHAR(255),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE CASCADE
-);
+-- Deprecated. La única fuente de verdad del esquema son
+-- database/migrations/*.sql aplicadas con `npm run migrate`.
+-- Este archivo se conserva vacío a propósito para que nadie lo use en tests.
+SELECT 1;

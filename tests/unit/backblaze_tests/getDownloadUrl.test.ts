@@ -1,64 +1,9 @@
 import { B2Service } from "../../../src/services/B2Service"
-import request from "supertest"
-import path from "path"
-import fs from "fs"
-import { VideoService } from "../../../src/services/VideoService"
-import { generateAdminToken } from "../../helpers/generateToken"
-import { PORT } from "../../../src/config/config"
-import { ClubService } from "../../../src/services/ClubService"
-import { CourtService } from "../../../src/services/CourtService"
 
 test("debería obtener la URL de descarga de un archivo de Backblaze B2 correctamente", async () => {
-    const token = generateAdminToken()
+    const b2FileUrl = await B2Service.getDownloadUrl("club_1/court_2/video.mp4")
 
-    const clubRes = await request(`http://localhost:${PORT}`)
-        .post("/clubs")
-        .set("Authorization", `Bearer ${token}`)
-        .send({
-            name: "Club for Upload Test",
-            openTime: "08:00",
-            closeTime: "22:00",
-            appointmentDuration: 60,
-            country: "Argentina",
-            province: "Mendoza",
-            city: "San Rafael",
-            address: "Comandante Salas 660"
-        })
-
-    expect(clubRes.status).toBe(201)
-    const clubPublicId = clubRes.body.id
-
-    const club = await ClubService.findClubByPublicId(clubPublicId)
-    const clubId = club?.id
-
-    const courtRes = await request(`http://localhost:${PORT}`)
-        .post("/courts")
-        .set("Authorization", `Bearer ${token}`)
-        .send({
-            clubId: clubPublicId,
-            name: "Court for Upload Test",
-            cameraHost: "192.168.0.1",
-        })
-
-    expect(courtRes.status).toBe(201)
-    const courtPublicId = courtRes.body.id
-
-    const court = await CourtService.findCourtByPublicId(courtPublicId)
-    const courtId = court?.id
-
-    const videoFileName = `cancha${courtId}_2024-01-01_10-00.mp4`
-    const videoFilePath = path.join("/var/videos", `club_${clubId}`, `court_${courtId}`, videoFileName)
-
-    fs.writeFileSync(videoFilePath, "Contenido de prueba para el video.")
-
-    await new Promise((resolve) => setTimeout(resolve, 10000))
-
-    const videos = await VideoService.getVideosByCourtId(courtId!)
-    const video = videos.find(v => v.fileName === videoFileName)
-
-    expect(video).toBeDefined()
-
-    const b2FileUrl = await B2Service.getDownloadUrl(video!.b2FilePath)
-
-    expect(b2FileUrl).toMatch(/^https:\/\/f[0-9]+\.backblazeb2\.com\/file\/.+\/club_[0-9]+\/court_[0-9]+\/cancha[0-9]+_2024-01-01_10-00\.mp4/)
+    expect(b2FileUrl).toContain("s3.example.test")
+    expect(b2FileUrl).toContain("club_1/court_2/video.mp4")
+    expect(b2FileUrl).toContain("X-Amz-Signature")
 })

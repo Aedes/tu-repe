@@ -23,5 +23,5 @@ test("debería eliminar un video correctamente", async () => {
     expect(deletionResult).toBe(true);
 
     const fetchedVideo = await VideoService.findVideoById(savedVideo.id!);
-    expect(fetchedVideo).toBeNull();
+    expect(fetchedVideo?.status).toBe("deleting");
 })

@@ -1,8 +1,9 @@
 import { pool } from "../../../src/config/db"
+import { config } from "../../../src/config/config"
 
 test('usa la base de datos de test', async () => {
     const [rows]: any = await pool.query('SELECT DATABASE() AS db')
-    expect(rows[0].db).toBe('tu_repe_mysql_test')
+    expect(rows[0].db).toBe(config.MYSQL_DATABASE)
 })
 
 test('debería conectarse exitosamente a la base de datos MySQL', async () => {

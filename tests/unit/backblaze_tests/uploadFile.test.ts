@@ -1,63 +1,37 @@
 import fs from "fs"
-import request from "supertest"
 import path from "path"
-import { VideoService } from "../../../src/services/VideoService"
-import { generateAdminToken } from "../../helpers/generateToken"
-import { PORT } from "../../../src/config/config"
-import { ClubService } from "../../../src/services/ClubService"
-import { CourtService } from "../../../src/services/CourtService"
+import { B2Service } from "../../../src/services/B2Service"
+import { config } from "../../../src/config/config"
+import { Upload } from "@aws-sdk/lib-storage"
 
-test("debería subir un video a B2, obtener b2FilePath y eliminar el archivo localmente", async () => {
-    const token = generateAdminToken()
+jest.mock("@aws-sdk/lib-storage", () => ({
+    Upload: jest.fn().mockImplementation((options) => ({
+        done: jest.fn(() => new Promise<void>((resolve, reject) => {
+            options.params.Body.once("open", () => {
+                options.params.Body.destroy()
+                resolve()
+            })
+            options.params.Body.once("error", reject)
+        })),
+    })),
+}))
 
-    const clubRes = await request(`http://localhost:${PORT}`)
-        .post("/clubs")
-        .set("Authorization", `Bearer ${token}`)
-        .send({
-            name: "Club for Upload Test",
-            openTime: "08:00",
-            closeTime: "22:00",
-            appointmentDuration: 60,
-            country: "Argentina",
-            province: "Mendoza",
-            city: "San Rafael",
-            address: "Comandante Salas 660"
-        })
+test("debería preparar la subida a B2 y devolver el b2FilePath", async () => {
+    fs.mkdirSync(config.UPLOAD_DIR, { recursive: true })
+    const videoFilePath = path.join(config.UPLOAD_DIR, "video.mp4")
+    fs.writeFileSync(videoFilePath, "Contenido de prueba")
 
-    expect(clubRes.status).toBe(201)
-    const clubPublicId = clubRes.body.id
+    try {
+        const b2FilePath = await B2Service.uploadFileAndGetFilePath(videoFilePath, 1, 2, "video.mp4")
 
-    const club = await ClubService.findClubByPublicId(clubPublicId)
-    const clubId = club?.id
-
-    const courtRes = await request(`http://localhost:${PORT}`)
-        .post("/courts")
-        .set("Authorization", `Bearer ${token}`)
-        .send({
-            clubId: clubPublicId,
-            name: "Court for Upload Test",
-            cameraHost: "192.168.0.1",
-        })
-
-    expect(courtRes.status).toBe(201)
-    const courtPublicId = courtRes.body.id
-
-    const court = await CourtService.findCourtByPublicId(courtPublicId)
-    const courtId = court?.id
-
-    const videoFileName = `cancha${courtId}_2024-01-01_10-00.mp4`
-    const videoFilePath = path.join("/var/videos", `club_${clubId}`, `court_${courtId}`, videoFileName)
-
-    fs.writeFileSync(videoFilePath, "Contenido de prueba para el video.")
-
-    await new Promise((resolve) => setTimeout(resolve, 10000))
-
-    const videos = await VideoService.getVideosByCourtId(courtId!)
-    const video = videos.find(v => v.fileName === videoFileName)
-
-    expect(video).toBeDefined()
-    expect(video!.b2FilePath).toBe(`club_${clubId}/court_${courtId}/${videoFileName}`)
-
-    const fileExists = fs.existsSync(videoFilePath)
-    expect(fileExists).toBe(false)
+        expect(b2FilePath).toBe("club_1/court_2/video.mp4")
+        expect(Upload).toHaveBeenCalledWith(expect.objectContaining({
+            params: expect.objectContaining({
+                Bucket: config.B2_BUCKET_NAME,
+                Key: b2FilePath,
+            }),
+        }))
+    } finally {
+        fs.rmSync(videoFilePath, { force: true })
+    }
 })

@@ -1,84 +1,35 @@
 import chokidar from "chokidar"
-import path from "path"
-import { VideoService } from "../services/VideoService"
-import { B2Service } from "../services/B2Service"
-import { FailedUploadService } from "../services/FailedUploadService"
-import { CourtService } from "../services/CourtService"
-import { extractMetadataFromFileName } from "../utils/extractMetadataFromFileName"
-import { STABILITY_THRESHOLD } from "../config/config"
-import { getDateInUTC } from "../utils/getDateInUTC"
+import fs from "fs"
+import { IngestionService } from "../services/IngestionService"
+import { config } from "../config/config"
+import { logger } from "../logger"
+
+let watcher: ReturnType<typeof chokidar.watch> | undefined
+
+const queueMp4 = (filePath: string) => {
+    if (!filePath.endsWith(".mp4")) return
+    void IngestionService.registerFile(filePath)
+}
 
 export const initVideoIngestor = () => {
-    console.log("👀 Ingestor de video iniciado, monitoreando directorio de videos...")
-
-    const WATCH_DIR = "/var/videos/**/**/*.mp4"
-
-    const watcher = chokidar.watch(WATCH_DIR, {
+    fs.mkdirSync(config.VIDEO_DIR, { recursive: true })
+    watcher = chokidar.watch(config.VIDEO_DIR, {
         persistent: true,
         ignoreInitial: true,
         awaitWriteFinish: {
-            stabilityThreshold: STABILITY_THRESHOLD,
-            pollInterval: 1_000
-        }
+            stabilityThreshold: config.STABILITY_THRESHOLD_MS,
+            pollInterval: 1_000,
+        },
+        ignored: (filePath, stats) => Boolean(stats?.isFile() && !String(filePath).endsWith(".mp4")),
     })
 
-    watcher.on("add", async (filePath) => {
-        try {
-            console.log("Nuevo video detectado:", filePath)
+    watcher.on("add", queueMp4)
+    watcher.on("change", queueMp4)
+    watcher.on("error", (error) => logger.error({ err: error }, "video_ingestor_error"))
 
-            const fileName = path.basename(filePath);
-
-            const metadata = extractMetadataFromFileName(fileName);
-            if (!metadata) {
-                console.error("No se pudo extraer metadata del archivo", fileName);
-                return
-            }
-
-            const { courtId, startTime } = metadata;
-            const endTime = new Date(
-                Date.now() - STABILITY_THRESHOLD - 2_000
-            )
-            const endTimeUTC = getDateInUTC(endTime)
-
-            const court = await CourtService.findCourtById(courtId);
-            if (!court) {
-                console.error("Court no encontrado:", courtId);
-                return
-            }
-
-            let b2FilePath: string;
-            try {
-                b2FilePath = await B2Service.uploadFileAndGetFilePath(
-                    filePath,
-                    court.clubId,
-                    courtId,
-                    fileName
-                )
-            } catch (uploadError: any) {
-                console.error("Error al subir archivo a B2, registrando para reintento:", uploadError.message);
-                await FailedUploadService.registerFailedUpload(
-                    filePath,
-                    fileName,
-                    court.clubId,
-                    courtId,
-                    endTimeUTC,
-                    uploadError.message
-                )
-                return
-            }
-
-            await VideoService.createVideo({
-                courtId,
-                fileName,
-                b2FilePath,
-                startTime,
-                endTime: endTimeUTC
-            });
-
-            console.log("Video guardado en la BD:", fileName);
-        } catch (err: any) {
-            console.error("Error al procesar el video:", err);
-        }
-    })
+    logger.info({ watchPath: config.VIDEO_DIR }, "video_ingestor_started")
 }
 
+export const stopVideoIngestor = () => {
+    void watcher?.close()
+}

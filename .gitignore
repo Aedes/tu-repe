@@ -2,7 +2,14 @@ node_modules
 # Keep environment variables out of version control
 .env
 .env.*
+!.env.example
+!.env.test.example
 
 /src/generated/prisma
 mysql_data/
 build
+uploads
+coverage
+*.log
+.DS_Store
+mediamtx.local.yml

@@ -2,9 +2,9 @@
 module.exports = {
     preset: 'ts-jest', // 👈 Esta línea es clave
     testEnvironment: "node",
-    setupFiles: ['dotenv/config'],
     transform: {
         "^.+\\.tsx?$": ["ts-jest", {}],
     },
     setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
+    testPathIgnorePatterns: ["/node_modules/", "/tests/external/"],
 };

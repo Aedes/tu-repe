@@ -36,10 +36,11 @@ describe("lectura de videos", () => {
         const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
-        const startTime1 = new Date("2024-01-01T10:00:00Z")
-        const endTime1 = new Date("2024-01-01T10:10:00Z")
-        const startTime2 = new Date("2024-02-01T10:00:00Z")
-        const endTime2 = new Date("2024-02-01T10:10:00Z")
+        const now = Date.now()
+        const startTime1 = new Date(now - 2 * 60 * 60 * 1000)
+        const endTime1 = new Date(now - 110 * 60 * 1000)
+        const startTime2 = new Date(now - 60 * 60 * 1000)
+        const endTime2 = new Date(now - 50 * 60 * 1000)
 
         const video1 = new Video(savedCourt.id!, "video1.mp4", startTime1, endTime1, "/example/path/video1.mp4")
         const video2 = new Video(savedCourt.id!, "video2.mp4", startTime2, endTime2, "/example/path/video2.mp4")
@@ -62,10 +63,11 @@ describe("lectura de videos", () => {
         const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
-        const startTime1 = new Date("2024-01-01T10:00:00Z")
-        const endTime1 = new Date("2024-01-01T10:10:00Z")
-        const startTime2 = new Date("2024-02-01T10:00:00Z")
-        const endTime2 = new Date("2024-02-01T10:10:00Z")
+        const now = Date.now()
+        const startTime1 = new Date(now - 2 * 60 * 60 * 1000)
+        const endTime1 = new Date(now - 110 * 60 * 1000)
+        const startTime2 = new Date(now - 60 * 60 * 1000)
+        const endTime2 = new Date(now - 50 * 60 * 1000)
 
         const video1 = new Video(savedCourt.id!, "video1.mp4", startTime1, endTime1, "/example/path/video1.mp4")
         const video2 = new Video(savedCourt.id!, "video2.mp4", startTime2, endTime2, "/example/path/video2.mp4")
@@ -73,8 +75,8 @@ describe("lectura de videos", () => {
         await VideoService.createVideo(video1)
         const savedVideo2 = await VideoService.createVideo(video2)
 
-        const fromDate = new Date("2024-01-15T00:00:00Z")
-        const toDate = new Date("2024-02-15T00:00:00Z")
+        const fromDate = new Date(now - 90 * 60 * 1000)
+        const toDate = new Date(now - 30 * 60 * 1000)
 
         const videos = await VideoService.getVideosBetweenDates(fromDate, toDate)
 
@@ -90,10 +92,11 @@ describe("lectura de videos", () => {
         const court = new Court(savedClub.id!, "Court 1", "192.168.0.1", "/stream1", "encryptedPass1")
         const savedCourt = await CourtService.createCourt(court)
 
-        const startTime1 = new Date("2024-01-01T10:00:00Z")
-        const endTime1 = new Date("2024-01-01T10:10:00Z")
-        const startTime2 = new Date("2024-02-01T10:00:00Z")
-        const endTime2 = new Date("2024-02-01T10:10:00Z")
+        const now = Date.now()
+        const startTime1 = new Date(now - 2 * 60 * 60 * 1000)
+        const endTime1 = new Date(now - 110 * 60 * 1000)
+        const startTime2 = new Date(now - 60 * 60 * 1000)
+        const endTime2 = new Date(now - 50 * 60 * 1000)
 
         const video1 = new Video(savedCourt.id!, "video1.mp4", startTime1, endTime1, "/example/path/video1.mp4")
         const video2 = new Video(savedCourt.id!, "video2.mp4", startTime2, endTime2, "/example/path/video2.mp4")
@@ -101,8 +104,8 @@ describe("lectura de videos", () => {
         await VideoService.createVideo(video1)
         const savedVideo2 = await VideoService.createVideo(video2)
 
-        const fromDate = new Date("2024-01-15T00:00:00Z")
-        const toDate = new Date("2024-02-15T00:00:00Z")
+        const fromDate = new Date(now - 90 * 60 * 1000)
+        const toDate = new Date(now - 30 * 60 * 1000)
 
         const videos = await VideoService.getVideosBetweenDatesAndCourtId(fromDate, toDate, savedCourt.id!)
 
