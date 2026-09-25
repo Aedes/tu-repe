@@ -11,7 +11,6 @@ import { VideoRepository } from "../repositories/VideoRepository"
 import { parseDurationSeconds, parseFps, probeMedia } from "../utils/ffprobe"
 import { ClipSegmentError, planClipSegments, PlannedClipSegment } from "./clipSegments"
 
-const RANGE_SLACK_MS = 5
 const MAX_OUTPUT_SECONDS = 30.5
 const KILL_GRACE_MS = 3_000
 const SILENT_AUDIO = "anullsrc=channel_layout=stereo:sample_rate=48000"
@@ -74,6 +73,9 @@ class SerialQueue {
 const queue = new SerialQueue()
 
 const seconds = (ms: number) => (ms / 1000).toFixed(3)
+
+// start_time/end_time son DATETIME (precisión de 1s). MySQL redondea .500 hacia arriba.
+const storedSecond = (ms: number) => Math.round(ms / 1000) * 1000
 
 const concatLine = (name: string) => `file '${name.replace(/'/g, "'\\''")}'`
 
@@ -159,7 +161,7 @@ export class ClipExtractService {
         const mediaEnd = Math.max(...sources.map((source) => source.endTime.getTime()))
         const clipStartMs = input.appointmentStart.getTime() + input.offsetMs
         const clipEndMs = clipStartMs + input.durationMs
-        if (clipStartMs < mediaStart - RANGE_SLACK_MS || clipEndMs > mediaEnd + RANGE_SLACK_MS) {
+        if (storedSecond(clipStartMs) < storedSecond(mediaStart) || storedSecond(clipEndMs) > storedSecond(mediaEnd)) {
             throw new ClipExtractError("INVALID_CLIP_RANGE")
         }
         const clipStart = new Date(clipStartMs)

@@ -34,6 +34,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: cp .env.test.example .env.test
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: npm run migrate:test
       - run: npm test
       - run: npm run security:audit

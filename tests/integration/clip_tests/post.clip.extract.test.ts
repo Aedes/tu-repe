@@ -82,6 +82,7 @@ describe("POST /clips/extract", () => {
         const club = await ClubService.createClub(new Club("Aedes", "08:00", "22:00", duration, "Argentina", "Mendoza", "San Rafael", "Calle 1", `h${suffix}`))
         const court = await CourtService.createCourt(new Court(club.id!, "Cancha", "10.0.0.2", "/stream", `key-${club.urlId}`))
         const start = new Date(Date.now() - 40 * 60 * 1000)
+        start.setUTCMilliseconds(600)
         await addPart(court.id!, club.id!, start, duration, "completo.mp4")
         return { club, court, start }
     }

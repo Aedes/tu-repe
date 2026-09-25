@@ -18,5 +18,5 @@ pprof: no
 playback: no
 
 paths:
-  all:
-    source: publisher
+    all:
+        source: publisher
