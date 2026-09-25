@@ -184,10 +184,21 @@ export const videoRenderBodySchema = z
 		clubUrlId: z.string().min(8).max(32),
 		courtId: uuidParam,
 		startTime: z.string().datetime(),
-		turnstileToken: z.string().min(1),
-		mode: z.enum(["parts", "unified"]).default("unified"),
+		turnstileToken: z.string().min(1).optional(),
+		continuationToken: z.string().min(20).max(2000).optional(),
+		mode: z.enum(["parts", "unified", "assess"]).default("assess"),
 	})
-	.strict();
+	.strict()
+	.superRefine((value, ctx) => {
+		if (value.mode === "unified" && value.continuationToken) return;
+		if (!value.turnstileToken) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "Completá el CAPTCHA para buscar el partido",
+				path: ["turnstileToken"],
+			});
+		}
+	});
 
 export const videoUrlsQuerySchema = z
 	.object({
@@ -221,3 +232,17 @@ export const rtmpWebhookSchema = z
 	.strict();
 
 export const imageContextSchema = z.enum(["logo", "cover"]);
+
+const CLIP_OFFSET_MIN_MS = -6 * 60 * 60 * 1000;
+const CLIP_OFFSET_MAX_MS = 24 * 60 * 60 * 1000;
+
+export const clipExtractSchema = z
+	.object({
+		clubUrlId: z.string().min(8).max(32),
+		courtId: uuidParam,
+		appointmentStartTime: z.string().datetime(),
+		offsetMs: z.number().int().min(CLIP_OFFSET_MIN_MS).max(CLIP_OFFSET_MAX_MS),
+		durationMs: z.number().int().min(1000).max(30000),
+		turnstileToken: z.string().min(1),
+	})
+	.strict();

@@ -1,5 +1,6 @@
 import rateLimit, { ipKeyGenerator } from "express-rate-limit"
 import { Request } from "express"
+import { config } from "../config/config"
 
 const ipKey = (req: Request) => req.ip ? ipKeyGenerator(req.ip) : "unknown"
 
@@ -53,7 +54,7 @@ export const renderStatusLimiter = rateLimit({
 
 export const clipLimiter = rateLimit({
     windowMs: 10 * 60 * 1000,
-    limit: 3,
+    limit: config.isTest ? 1_000 : 3,
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: ipKey,

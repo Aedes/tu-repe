@@ -8,18 +8,13 @@ import { B2Service } from "./B2Service"
 import { AppointmentVideoConcatService } from "./AppointmentVideoConcatService"
 import { AppointmentMergeError } from "../errors/AppointmentMergeError"
 import { appointmentCacheKey, assessAppointmentCoverage, earliestExpiry } from "./appointmentCoverage"
-import { AppointmentFallbackReason, IAppointmentVideoJob, IVideo, VideoPartUrl } from "../types"
+import { signaturesAreCompatible } from "./mergeSignature"
+import { signRenderContinuation } from "../utils/renderContinuation"
+import { AppointmentRenderResponse, IAppointmentVideoJob, IVideo, PartsNotice, VideoPartUrl } from "../types"
 
 const POLL_AFTER_MS = 5_000
 
-type AppointmentRenderMode = "parts" | "unified"
-
-type AppointmentRenderResponse =
-    | { status: "ready"; jobId?: string; videoUrl: string; urlExpiresAt: string; startTime: string; endTime: string }
-    | { status: "queued" | "processing"; jobId: string; pollAfterMs: number }
-    | { status: "parts"; parts: VideoPartUrl[] }
-    | { status: "fallback"; reason: AppointmentFallbackReason; jobId?: string; parts: VideoPartUrl[] }
-    | { status: "not_found" }
+type AppointmentRenderMode = "parts" | "unified" | "assess"
 
 export class AppointmentVideoService {
     private static readonly jobs = new AppointmentVideoJobRepository()
@@ -28,6 +23,7 @@ export class AppointmentVideoService {
     private static idle: Promise<void> = Promise.resolve()
 
     static async requestRender(input: { startTime: Date; courtPublicId: string; clubUrlId: string; mode?: AppointmentRenderMode }): Promise<AppointmentRenderResponse> {
+        const mode = input.mode || "assess"
         const courtId = await CourtService.resolveCourtId(input.courtPublicId)
         const context = await VideoService.resolveAppointmentContext(input.startTime, courtId, input.clubUrlId)
         const sources = await this.videos.findAvailableOverlapping(courtId, input.startTime, context.endTime)
@@ -39,16 +35,27 @@ export class AppointmentVideoService {
         )
         if (coverage.kind === "not_found") return { status: "not_found" }
         if (coverage.kind === "fallback") {
-            return { status: "fallback", reason: "incomplete_sources", parts: await this.signParts(coverage.videos) }
+            return this.partsResponse(coverage.videos, input.startTime, context.endTime, "gaps")
         }
-        if ((input.mode || "unified") === "parts") {
-            return { status: "parts", parts: await this.signParts(coverage.videos) }
+        if (mode === "parts") {
+            return this.partsResponse(coverage.videos, input.startTime, context.endTime)
         }
         if (coverage.videos.length === 1) {
             return this.readyFromSource(coverage.videos[0], input.startTime, context.endTime)
         }
+        if (!signaturesAreCompatible(coverage.videos.map((video) => video.mergeSignature))) {
+            return this.partsResponse(coverage.videos, input.startTime, context.endTime, "incompatible")
+        }
         if (!config.appointmentMergeEnabled) {
-            return { status: "fallback", reason: "merge_disabled", parts: await this.signParts(coverage.videos) }
+            if (mode === "unified") {
+                return {
+                    status: "fallback",
+                    reason: "merge_disabled",
+                    ...this.bounds(input.startTime, context.endTime),
+                    parts: await this.signParts(coverage.videos),
+                }
+            }
+            return this.partsResponse(coverage.videos, input.startTime, context.endTime, "incompatible")
         }
 
         const cacheKey = appointmentCacheKey(courtId, input.startTime, context.endTime)
@@ -58,6 +65,21 @@ export class AppointmentVideoService {
             return this.readyFromJob(existing, input.startTime, context.endTime)
         }
         if (existing?.status === "failed_permanently") return this.fallbackForJob(existing)
+        if (existing && existing.status !== "deleted" && existing.status !== "completed") {
+            return this.progressResponse(existing)
+        }
+        if (mode === "assess") {
+            return {
+                status: "choice",
+                continuationToken: signRenderContinuation({
+                    clubUrlId: input.clubUrlId,
+                    courtPublicId: input.courtPublicId,
+                    startTime: new Date(input.startTime).toISOString(),
+                }),
+                ...this.bounds(input.startTime, context.endTime),
+                parts: await this.signParts(coverage.videos),
+            }
+        }
         if (existing?.status === "completed" && existing.id) await this.jobs.markPending(existing.id)
 
         const job = await this.jobs.enqueueOrGet({
@@ -169,6 +191,15 @@ export class AppointmentVideoService {
         return ordered as IVideo[]
     }
 
+    private static async partsResponse(videos: IVideo[], start: Date, end: Date, notice?: PartsNotice): Promise<AppointmentRenderResponse> {
+        return {
+            status: "parts",
+            ...(notice ? { notice } : {}),
+            ...this.bounds(start, end),
+            parts: await this.signParts(videos),
+        }
+    }
+
     private static async signParts(videos: IVideo[]): Promise<VideoPartUrl[]> {
         return Promise.all(videos.map(async (video) => ({
             startTime: new Date(video.startTime).toISOString(),
@@ -185,14 +216,31 @@ export class AppointmentVideoService {
         return Math.max(60, Math.ceil((end.getTime() - start.getTime()) / 1000) + config.APPOINTMENT_MERGE_URL_EXTRA_SECONDS)
     }
 
+    private static bounds(start: Date, end: Date) {
+        return {
+            startTime: new Date(start).toISOString(),
+            endTime: new Date(end).toISOString(),
+        }
+    }
+
+    private static async playbackStartOf(sourceIds: number[], fallback: Date): Promise<string> {
+        const stored = await this.videos.findByIds(sourceIds)
+        const byId = new Map(stored.map((video) => [video.id, video]))
+        for (const id of sourceIds) {
+            const video = byId.get(id)
+            if (video) return new Date(video.startTime).toISOString()
+        }
+        return new Date(fallback).toISOString()
+    }
+
     private static async readyFromSource(video: IVideo, start: Date, end: Date): Promise<AppointmentRenderResponse> {
         const expiresIn = this.signedTtl(start, end)
         return {
             status: "ready",
             videoUrl: await B2Service.getDownloadUrl(video.b2FilePath, expiresIn),
             urlExpiresAt: new Date(Date.now() + expiresIn * 1000).toISOString(),
-            startTime: start.toISOString(),
-            endTime: end.toISOString(),
+            ...this.bounds(start, end),
+            playbackStartTime: new Date(video.startTime).toISOString(),
         }
     }
 
@@ -203,8 +251,8 @@ export class AppointmentVideoService {
             jobId: job.publicId,
             videoUrl: await B2Service.getDownloadUrl(job.b2FilePath!, expiresIn),
             urlExpiresAt: new Date(Date.now() + expiresIn * 1000).toISOString(),
-            startTime: new Date(start).toISOString(),
-            endTime: new Date(end).toISOString(),
+            ...this.bounds(start, end),
+            playbackStartTime: await this.playbackStartOf(job.sourceVideoIds, start),
         }
     }
 
@@ -222,6 +270,7 @@ export class AppointmentVideoService {
             status: "fallback",
             reason,
             jobId: job.publicId,
+            ...this.bounds(job.appointmentStart, job.appointmentEnd),
             parts: await this.signParts(available.sort((left, right) => new Date(left.startTime).getTime() - new Date(right.startTime).getTime())),
         }
     }

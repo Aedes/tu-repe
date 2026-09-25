@@ -5,44 +5,11 @@ import { config } from "../config/config"
 import { logger } from "../logger"
 import { B2Service } from "./B2Service"
 import { AppointmentMergeError } from "../errors/AppointmentMergeError"
-import { parseDurationSeconds, probeMedia, ProbeResult } from "../utils/ffprobe"
+import { parseDurationSeconds, probeMedia } from "../utils/ffprobe"
+import { encodeMergeSignature, mergeSignatureFromProbe } from "./mergeSignature"
 import { AppointmentProcessingStep } from "../types"
 
 type Source = { b2FilePath: string }
-
-type Signature = {
-    videoCodec: string
-    width: number
-    height: number
-    pixFmt: string
-    audioCodec: string
-    audioChannels: number
-}
-
-const signatureOf = (probe: ProbeResult): Signature => {
-    const video = probe.streams?.find((stream) => stream.codec_type === "video")
-    const audio = probe.streams?.find((stream) => stream.codec_type === "audio")
-    if (!video?.codec_name || !video.width || !video.height || !video.pix_fmt) {
-        throw new AppointmentMergeError("INCOMPATIBLE_SEGMENTS", "Fragmento sin video compatible", true)
-    }
-    return {
-        videoCodec: video.codec_name,
-        width: video.width,
-        height: video.height,
-        pixFmt: video.pix_fmt,
-        audioCodec: audio?.codec_name || "",
-        audioChannels: audio?.channels || 0,
-    }
-}
-
-const sameSignature = (left: Signature, right: Signature) => (
-    left.videoCodec === right.videoCodec
-    && left.width === right.width
-    && left.height === right.height
-    && left.pixFmt === right.pixFmt
-    && left.audioCodec === right.audioCodec
-    && left.audioChannels === right.audioChannels
-)
 
 export class AppointmentVideoConcatService {
     private static child: ChildProcess | null = null
@@ -145,20 +112,24 @@ export class AppointmentVideoConcatService {
     }
 
     private static async assertCompatible(tempDir: string, fileNames: string[]) {
-        let expected: Signature | null = null
+        let expected: string | null = null
         let duration = 0
         for (const fileName of fileNames) {
-            let probe: ProbeResult
+            let probe
             try {
                 probe = await probeMedia(path.join(tempDir, fileName))
             } catch (error) {
                 throw new AppointmentMergeError("FFPROBE_FAILED", error instanceof Error ? error.message : "ffprobe_failed", false)
             }
-            const signature = signatureOf(probe)
-            if (expected && !sameSignature(expected, signature)) {
+            const signature = mergeSignatureFromProbe(probe)
+            if (!signature) {
+                throw new AppointmentMergeError("INCOMPATIBLE_SEGMENTS", "Fragmento sin video compatible", true)
+            }
+            const encoded = encodeMergeSignature(signature)
+            if (expected && expected !== encoded) {
                 throw new AppointmentMergeError("INCOMPATIBLE_SEGMENTS", "Los fragmentos no se pueden unir sin recodificar", true)
             }
-            expected = signature
+            expected = encoded
             duration += parseDurationSeconds(probe)
         }
         return duration

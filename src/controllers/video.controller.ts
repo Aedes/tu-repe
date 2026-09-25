@@ -4,6 +4,7 @@ import { CourtService } from "../services/CourtService"
 import { TurnstileService } from "../services/TurnstileService"
 import { AppointmentVideoService } from "../services/AppointmentVideoService"
 import { AppError } from "../errors/AppError"
+import { verifyRenderContinuation } from "../utils/renderContinuation"
 
 const toAdminVideo = (video: NonNullable<Awaited<ReturnType<typeof VideoService.findVideoByPublicId>>>) => ({
     id: video.publicId,
@@ -69,9 +70,20 @@ const sendRender = (res: Response, result: Awaited<ReturnType<typeof Appointment
 }
 
 export const createAppointmentRender = async (req: Request, res: Response) => {
-    await TurnstileService.verify(String(req.body.turnstileToken || ""), req.ip)
+    const startTime = new Date(req.body.startTime)
+    const continuesPreparation = req.body.mode === "unified" && typeof req.body.continuationToken === "string"
+    if (continuesPreparation) {
+        const valid = verifyRenderContinuation(req.body.continuationToken, {
+            clubUrlId: String(req.body.clubUrlId),
+            courtPublicId: String(req.body.courtId),
+            startTime: startTime.toISOString(),
+        })
+        if (!valid) throw AppError.forbidden("La búsqueda expiró. Volvé a buscar el partido.")
+    } else {
+        await TurnstileService.verify(String(req.body.turnstileToken || ""), req.ip)
+    }
     const result = await AppointmentVideoService.requestRender({
-        startTime: new Date(req.body.startTime),
+        startTime,
         courtPublicId: String(req.body.courtId),
         clubUrlId: String(req.body.clubUrlId),
         mode: req.body.mode,

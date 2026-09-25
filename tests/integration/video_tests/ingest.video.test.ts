@@ -23,7 +23,13 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
         const videoFilePath = path.join(config.VIDEO_DIR, `club_${club.id}`, `court_${court.id}`, videoFileName)
 
         fs.writeFileSync(videoFilePath, "video")
-        jest.spyOn(ffprobe, "probeMedia").mockResolvedValue({ format: { duration: 900 }, streams: [] } as any)
+        jest.spyOn(ffprobe, "probeMedia").mockResolvedValue({
+            format: { duration: 900 },
+            streams: [
+                { codec_type: "video", codec_name: "h264", width: 1280, height: 720, pix_fmt: "yuv420p" },
+                { codec_type: "audio", codec_name: "aac", channels: 2 },
+            ],
+        } as any)
         jest.spyOn(B2Service, "uploadFileAndGetFilePath")
             .mockResolvedValue(`club_${club.id}/court_${court.id}/${videoFileName}`)
 
@@ -37,6 +43,7 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
         expect(ingestedVideo?.courtId).toBe(court.id)
         expect(ingestedVideo?.b2FilePath).toBe(`club_${club.id}/court_${court.id}/${videoFileName}`)
         expect(ingestedVideo?.startTime.toISOString()).toBe("2024-01-01T10:00:00.000Z")
+        expect(ingestedVideo?.mergeSignature).toBe("h264|1280|720|yuv420p|aac|2")
         expect(fs.existsSync(videoFilePath)).toBe(false)
 
         jest.restoreAllMocks()
@@ -70,6 +77,7 @@ describe("debería detectar un video nuevo en el directorio de ingestión y proc
         expect(ingestedVideo).toBeDefined()
         expect(ingestedVideo?.startTime.toISOString()).toBe("2024-01-01T10:00:00.000Z")
         expect(ingestedVideo?.endTime.toISOString()).toBe("2024-01-01T10:00:37.000Z")
+        expect(ingestedVideo?.mergeSignature).toBeNull()
 
         jest.restoreAllMocks()
     })

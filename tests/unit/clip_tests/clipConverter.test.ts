@@ -43,4 +43,19 @@ describe("ClipConverterService", () => {
 
         expect(unlinkSpy).toHaveBeenCalledTimes(2);
     });
+
+    test("no borra las carpetas de trabajo al limpiar uploads viejos", () => {
+        jest.spyOn(fs, "existsSync").mockReturnValue(true);
+        jest.spyOn(fs, "readdirSync").mockImplementation(() => ["clips", "viejo.mp4"] as unknown as ReturnType<typeof fs.readdirSync>);
+        jest.spyOn(fs, "statSync").mockImplementation((target) => ({
+            isDirectory: () => String(target).endsWith(`${path.sep}clips`),
+            mtimeMs: 0,
+        }) as fs.Stats);
+        const unlinkSpy = jest.spyOn(fs, "unlinkSync").mockImplementation();
+
+        ClipConverterService.cleanupOldUploads();
+
+        expect(unlinkSpy).toHaveBeenCalledTimes(1);
+        expect(unlinkSpy).toHaveBeenCalledWith(path.join(config.UPLOAD_DIR, "viejo.mp4"));
+    });
 });

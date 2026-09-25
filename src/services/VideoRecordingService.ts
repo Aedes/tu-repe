@@ -36,26 +36,8 @@ export class VideoRecordingService {
         const segmentDuration = Math.floor(chunkDurationMs / 1000)
         const segmentPattern = path.join(outputDir, `cancha${courtId}_%Y-%m-%d_%H-%M-%S.mp4`)
 
-        const ffmpegArgs = [
-            "-rtsp_transport", "tcp",
-            "-fflags", "+genpts+discardcorrupt",
-            "-err_detect", "ignore_err",
-            "-i", rtspUrl,
-            "-c:v", "libx264",
-            "-preset", "veryfast",
-            "-profile:v", "main",
-            "-level", "4.0",
-            "-pix_fmt", "yuv420p",
-            "-g", "60",
-            "-sc_threshold", "0",
-            "-f", "segment",
-            "-segment_time", String(segmentDuration),
-            "-segment_format", "mp4",
-            "-segment_format_options", "movflags=+frag_keyframe+empty_moov+default_base_moof",
-            "-reset_timestamps", "1",
-            "-strftime", "1",
-            segmentPattern,
-        ]
+        const ffmpegArgs = this.ffmpegArgs(rtspUrl, segmentDuration, segmentPattern)
+        logger.info({ courtId, mode: config.VIDEO_RECORDING_MODE }, "recording_started")
 
         const ffmpegProcess = spawn("ffmpeg", ffmpegArgs, {
             env: { ...process.env, TZ: "UTC" },
@@ -146,6 +128,37 @@ export class VideoRecordingService {
         return new Promise((resolve) => {
             recording.process.once("exit", () => resolve())
         })
+    }
+
+    private static ffmpegArgs(rtspUrl: string, segmentDuration: number, segmentPattern: string): string[] {
+        const input = [
+            "-rtsp_transport", "tcp",
+            "-fflags", "+genpts+discardcorrupt",
+            "-err_detect", "ignore_err",
+            "-i", rtspUrl,
+        ]
+        const video = config.VIDEO_RECORDING_MODE === "copy"
+            ? ["-c:v", "copy", "-c:a", "copy"]
+            : [
+                "-c:v", "libx264",
+                "-preset", "veryfast",
+                "-profile:v", "main",
+                "-level", "4.0",
+                "-pix_fmt", "yuv420p",
+                "-g", "60",
+                "-sc_threshold", "0",
+            ]
+        return [
+            ...input,
+            ...video,
+            "-f", "segment",
+            "-segment_time", String(segmentDuration),
+            "-segment_format", "mp4",
+            "-segment_format_options", "movflags=+frag_keyframe+empty_moov+default_base_moof",
+            "-reset_timestamps", "1",
+            "-strftime", "1",
+            segmentPattern,
+        ]
     }
 
     private static generateFileName(courtId: number, date: Date): string {

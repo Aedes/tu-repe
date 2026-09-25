@@ -26,7 +26,8 @@ export type DeletionStatus = "pending" | "in_progress" | "completed" | "failed"
 export type AppointmentVideoStatus = "pending" | "processing" | "completed" | "retrying" | "failed_permanently" | "deleting" | "deleted"
 export type AppointmentProcessingStep = "downloading" | "validating" | "concatenating" | "uploading"
 export type AppointmentFallbackReason = "incomplete_sources" | "merge_failed" | "merge_disabled"
-export type AppointmentRenderMode = "parts" | "unified"
+export type AppointmentRenderMode = "parts" | "unified" | "assess"
+export type PartsNotice = "gaps" | "incompatible"
 
 export interface IClub {
     id?: number
@@ -70,6 +71,7 @@ export interface IVideo {
     b2FilePath: string
     status?: VideoStatus
     expiresAt?: Date
+    mergeSignature?: string | null
 }
 
 export type ClubCreateDTO = Omit<IClub, "id">
@@ -152,10 +154,11 @@ export interface IAppointmentVideoJob {
 export type VideoPartUrl = { url: string; startTime: string; endTime: string }
 
 export type AppointmentRenderResponse =
-    | { status: "ready"; jobId?: string; videoUrl: string; urlExpiresAt: string; startTime: string; endTime: string }
+    | { status: "ready"; jobId?: string; videoUrl: string; urlExpiresAt: string; startTime: string; endTime: string; playbackStartTime: string }
     | { status: "queued" | "processing"; jobId: string; pollAfterMs: number }
-    | { status: "parts"; parts: VideoPartUrl[] }
-    | { status: "fallback"; reason: AppointmentFallbackReason; jobId?: string; parts: VideoPartUrl[] }
+    | { status: "parts"; notice?: PartsNotice; startTime: string; endTime: string; parts: VideoPartUrl[] }
+    | { status: "choice"; continuationToken: string; startTime: string; endTime: string; parts: VideoPartUrl[] }
+    | { status: "fallback"; reason: AppointmentFallbackReason; jobId?: string; startTime: string; endTime: string; parts: VideoPartUrl[] }
     | { status: "not_found" }
 
 export type RecordingState = "starting" | "running" | "stopping"

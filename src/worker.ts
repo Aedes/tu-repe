@@ -8,6 +8,7 @@ import { VideoRecordingService } from "./services/VideoRecordingService"
 import { IngestionService } from "./services/IngestionService"
 import { HeartbeatService } from "./services/HeartbeatService"
 import { ClipConverterService } from "./services/ClipConverterService"
+import { ClipExtractService } from "./services/ClipExtractService"
 import { pool } from "./config/db"
 import { config } from "./config/config"
 import { logger } from "./logger"
@@ -29,6 +30,7 @@ const scheduleStartupReconcile = () => {
 const start = async () => {
     await assertRuntimeReady()
     ClipConverterService.cleanupOldUploads()
+    ClipExtractService.cleanupStale()
     initVideoIngestor()
     await IngestionService.migrateFailedUploads()
     await IngestionService.reconcile()

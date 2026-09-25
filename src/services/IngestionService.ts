@@ -9,6 +9,7 @@ import { B2Service } from "./B2Service"
 import { VideoService } from "./VideoService"
 import { extractMetadataFromFileName } from "../utils/extractMetadataFromFileName"
 import { parseDurationSeconds, probeMedia } from "../utils/ffprobe"
+import { encodeMergeSignature, mergeSignatureFromProbe } from "./mergeSignature"
 import { pool } from "../config/db"
 import { logger } from "../logger"
 import { config } from "../config/config"
@@ -94,16 +95,20 @@ export class IngestionService {
             }
 
             let b2FilePath = job.b2FilePath
+            let mergeSignature: string | null = null
             if (job.status !== "uploaded" || !b2FilePath) {
-                const uploadFilePath = await this.prepareUploadFile(job.filePath)
-                if (uploadFilePath !== job.filePath) preparedUploadDir = path.dirname(uploadFilePath)
+                const prepared = await this.prepareUploadFile(job.filePath)
+                if (prepared.path !== job.filePath) preparedUploadDir = path.dirname(prepared.path)
+                mergeSignature = prepared.mergeSignature
                 b2FilePath = await B2Service.uploadFileAndGetFilePath(
-                    uploadFilePath,
+                    prepared.path,
                     job.clubId,
                     job.courtId,
                     job.fileName
                 )
                 await this.jobs.update(id, { b2FilePath, status: "uploaded" })
+            } else if (fs.existsSync(job.filePath)) {
+                mergeSignature = await this.readMergeSignature(job.filePath)
             }
 
             const connection = await pool.getConnection()
@@ -115,6 +120,7 @@ export class IngestionService {
                     b2FilePath: b2FilePath!,
                     startTime: new Date(job.startTime),
                     endTime: new Date(job.endTime),
+                    mergeSignature,
                 }, connection)
                 await this.jobs.update(id, { status: "completed", lockedAt: null }, connection)
                 await connection.commit()
@@ -143,8 +149,20 @@ export class IngestionService {
         }
     }
 
-    private static async prepareUploadFile(filePath: string): Promise<string> {
-        if (config.isTest) return filePath
+    private static async readMergeSignature(filePath: string): Promise<string | null> {
+        try {
+            const signature = mergeSignatureFromProbe(await probeMedia(filePath))
+            return signature ? encodeMergeSignature(signature) : null
+        } catch (error) {
+            logger.warn({ err: error, filePath }, "ingestion_signature_unavailable")
+            return null
+        }
+    }
+
+    private static async prepareUploadFile(filePath: string): Promise<{ path: string; mergeSignature: string | null }> {
+        if (config.isTest) {
+            return { path: filePath, mergeSignature: await this.readMergeSignature(filePath) }
+        }
         const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "tu-repe-ingest-"))
         const outputPath = path.join(tempDir, path.basename(filePath))
         try {
@@ -155,8 +173,10 @@ export class IngestionService {
                 "-movflags", "+faststart",
                 outputPath,
             ], { timeout: FFMPEG_REMUX_TIMEOUT_MS, env: { ...process.env, TZ: "UTC" } })
-            parseDurationSeconds(await probeMedia(outputPath))
-            return outputPath
+            const probe = await probeMedia(outputPath)
+            parseDurationSeconds(probe)
+            const signature = mergeSignatureFromProbe(probe)
+            return { path: outputPath, mergeSignature: signature ? encodeMergeSignature(signature) : null }
         } catch (error) {
             await fs.promises.rm(tempDir, { recursive: true, force: true })
             throw error

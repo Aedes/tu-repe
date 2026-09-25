@@ -1,5 +1,6 @@
 import { RetentionService } from "../services/RetentionService"
 import { ClipConverterService } from "../services/ClipConverterService"
+import { ClipExtractService } from "../services/ClipExtractService"
 import { IngestionService } from "../services/IngestionService"
 import { logger } from "../logger"
 
@@ -25,6 +26,7 @@ export const initCleanupWorker = () => {
     }
     const cleanup = () => {
         ClipConverterService.cleanupOldUploads()
+        ClipExtractService.cleanupStale()
         void IngestionService.reconcile()
     }
 

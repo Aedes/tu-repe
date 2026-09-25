@@ -111,6 +111,7 @@ export class ClipConverterService {
             const full = path.join(config.UPLOAD_DIR, name)
             try {
                 const stat = fs.statSync(full)
+                if (stat.isDirectory()) continue
                 if (now - stat.mtimeMs > maxAgeMs) fs.unlinkSync(full)
             } catch (error) {
                 logger.warn({ err: error, full }, "upload_cleanup_failed")
