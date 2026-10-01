@@ -4,11 +4,11 @@ Ejecutar en un compose idéntico a producción, sin `node_modules` locales.
 
 | # | Prueba | Resultado | Fecha | Notas |
 |---|---|---|---|---|
-| 1 | Build/install desde cero y `docker compose -f docker-compose.prod.yml up` | pendiente | | |
+| 1 | Build/install desde cero con `docker-compose.prod.yml` + `docker-compose.nginx.yml` | pendiente | | |
 | 2 | Migraciones en base vacía y en snapshot anonimizado; backup+restore+rollback | pendiente | | |
 | 3 | Mutaciones anónimas = 401; DTO públicos sin streamKey/cameraPath/b2FilePath | pendiente | | |
 | 4 | Owner A vs club/cancha B = 403 | pendiente | | |
-| 5 | Fuerza bruta login, CAPTCHA, rate limit y CSRF detrás de Caddy (IP real) | pendiente | | |
+| 5 | Fuerza bruta login, CAPTCHA, rate limit y CSRF detrás de Nginx (IP real) | pendiente | | |
 | 6 | Grabar stream y reiniciar worker en cada etapa de ingestión: un solo video | pendiente | | |
 | 7 | Búsqueda con horario no alineado; primer/último fragmento en UTC | pendiente | | |
 | 8 | Upload grande + clips inválidos/abortados; RAM/CPU/disco sin huérfanos | pendiente | | |

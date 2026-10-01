@@ -1,9 +1,7 @@
 logLevel: warn
 authMethod: http
-# MediaMTX 1.11 no puede enviar headers propios. El secreto viaja como
-# password HTTP Basic y la API lo compara con MEDIA_AUTH_SECRET.
-# Si el secreto tiene @ : / # ? hay que percent-encodearlo.
-authHTTPAddress: http://mtx:MEDIAMTX_SECRET_PLACEHOLDER@api:3000/internal/mediamtx/auth
+# docker-compose.prod.yml inyecta authHTTPAddress mediante
+# MTX_AUTHHTTPADDRESS. El secreto viaja como password HTTP Basic.
 
 rtmp: yes
 rtmpAddress: :1935

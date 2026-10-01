@@ -2,9 +2,9 @@
 
 ## Topología
 
-Una VPS. Caddy publica 80/443. MediaMTX publica 1935 (cámaras). API, worker, MySQL y RTSP 8554 quedan en la red Docker interna.
+Una VPS. En la instalación con Nginx, el Nginx del host publica 80/443, sirve el `dist` del frontend y envía `/api/*` a `127.0.0.1:5001`. MediaMTX publica 1935 para las cámaras. API, worker, MySQL y RTSP 8554 quedan en la red Docker interna.
 
-Réplicas: API N, worker **exactamente 1**.
+El frontend y la API deben verse desde el navegador bajo el mismo origen. Réplicas: API 1 en esta instalación y worker **exactamente 1**.
 
 ## Riesgo residual
 
@@ -18,21 +18,65 @@ La búsqueda pública de partidos no puede impedir por completo que un tercero v
 
 ## Variables
 
-Copiar `.env.example` a `.env` en el servidor. Rotar todos los secretos. `FRONTEND_ORIGIN=https://DOMAIN`. `MEDIA_SERVER_RTSP_BASE_URL=rtsp://mediamtx:8554`. Reemplazar `MEDIAMTX_SECRET_PLACEHOLDER` en la URL `authHTTPAddress` de `deploy/mediamtx.yml` por el mismo `MEDIA_AUTH_SECRET`. Si tiene caracteres reservados de URL (`@`, `:`, `/`, `#`, `?`), percent-encodearlos.
+Backend: copiar `.env.example` a `.env` en el servidor y rotar todos los secretos. Para evitar caracteres reservados en la URL interna de MediaMTX, generar `MEDIA_AUTH_SECRET` con `openssl rand -hex 32`. Valores importantes:
 
-## Primera instalación
+```env
+NODE_ENV=production
+PORT=3000
+FRONTEND_ORIGIN=https://turepe.aedestec.com
+MYSQL_HOST=mysql
+COOKIE_SECURE=true
+TRUST_PROXY=1
+MEDIA_SERVER_RTSP_BASE_URL=rtsp://mediamtx:8554
+```
 
-1. Instalar Docker. Clonar repos. Completar `.env`.
-2. `docker build -t tu-repe-api:latest .` en backend.
-3. `docker build -t tu-repe-frontend:latest .` en frontend (Vite mode production, sin localhost).
-4. `mysqldump` no aplica en vacío. `docker compose -f docker-compose.prod.yml up -d`
-5. `docker compose -f docker-compose.prod.yml run --rm api node build/scripts/create-admin.js` con `ADMIN_EMAIL` y `ADMIN_PASSWORD`. Guardar TOTP.
-6. Alta de clubes/canchas. Anotar stream keys **una sola vez**. Configurar cámaras RTMP a `rtmp://DOMAIN:1935/club_{id}/{streamKey}`.
+Compose inyecta `MEDIA_AUTH_SECRET` en MediaMTX mediante `MTX_AUTHHTTPADDRESS`; no se debe escribir el secreto en `deploy/mediamtx.yml`.
+
+Frontend: copiar `.env.production.example` a `.env.production`, completar las URLs de Cloudinary y crear claves Turnstile de producción autorizadas para `turepe.aedestec.com`. El frontend debe usar `VITE_BACKEND_API_URL=/api`.
+
+## Primera instalación con Nginx del host
+
+1. Instalar Docker Engine, el plugin Docker Compose, Nginx, Node.js 22 y Certbot. Clonar `tu-repe` y `tu-repe-frontend` bajo `/var/www/turepe/`.
+2. Completar el `.env` del backend y `.env.production` del frontend. No copiar secretos de desarrollo.
+3. En el frontend ejecutar `npm ci && npm run build`. Confirmar que existe `/var/www/turepe/tu-repe-frontend/dist/index.html`.
+4. En el backend ejecutar `docker build -t tu-repe-api:latest .`.
+5. Validar la combinación de Compose:
+
+   ```bash
+   docker compose -f docker-compose.prod.yml -f docker-compose.nginx.yml config --quiet
+   ```
+
+6. Levantar el stack sin Caddy:
+
+   ```bash
+   docker compose -f docker-compose.prod.yml -f docker-compose.nginx.yml up -d --remove-orphans
+   ```
+
+7. Copiar `deploy/nginx/turepe.conf.example` a `/etc/nginx/sites-available/tu-repe`, habilitarlo, deshabilitar las configuraciones antiguas que repitan esos `server_name`, ejecutar `sudo nginx -t` y luego `sudo systemctl reload nginx`.
+8. Crear el administrador:
+
+   ```bash
+   docker compose -f docker-compose.prod.yml -f docker-compose.nginx.yml run --rm \
+     -e ADMIN_EMAIL='...' -e ADMIN_PASSWORD='...' \
+     api node build/scripts/create-admin.js
+   ```
+
+   Guardar el TOTP fuera del servidor.
+9. Comprobar `https://turepe.aedestec.com/api/health/live` y `https://turepe.aedestec.com/api/health/ready`.
+10. Dar de alta clubes/canchas. Anotar stream keys **una sola vez**. El panel copia URLs con formato `rtmp://turepe.aedestec.com:1935/club_{id}/{streamKey}`.
+
+El despliegue alternativo con Caddy sigue disponible levantando únicamente `docker-compose.prod.yml`, pero no debe usarse mientras Nginx ocupe 80/443.
 
 ## Migraciones y rollback
 
 - Antes de migrar: `deploy/backup-mysql.sh`.
-- Compose ejecuta el servicio `migrate` una vez.
+- En la primera instalación Compose ejecuta `migrate` antes de iniciar API y worker.
+- En cada actualización ejecutar explícitamente:
+
+  ```bash
+  docker compose -f docker-compose.prod.yml -f docker-compose.nginx.yml run --rm migrate
+  ```
+
 - Rollback: restaurar dump (`gunzip -c backup.sql.gz | docker compose exec -T mysql mysql ...`) y redeploy de la imagen anterior.
 
 ## Restore de prueba
@@ -70,7 +114,7 @@ Rollback: volver el frontend al flujo `GET /videos/urls` y poner `APPOINTMENT_ME
 
 ## Incidentes
 
-1. Dejar de publicar Caddy `/api` si hay fuga.
+1. Deshabilitar temporalmente el `location /api/` de Nginx si hay una fuga.
 2. Rotar JWT, cookies y stream keys.
 3. Revisar logs redactados (no deberían contener cookies ni URLs firmadas).
 4. Comunicar a clubes si un video quedó expuesto más de 72 h.

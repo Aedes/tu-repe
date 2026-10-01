@@ -10,7 +10,7 @@
     "dev": "ts-node-dev --respawn src/server.ts",
     "dev:worker": "ts-node-dev --respawn src/worker.ts",
     "dev-test": "NODE_ENV=test ts-node-dev src/server.ts",
-    "test": "NODE_ENV=test jest --runInBand --testTimeout=30000 --testPathIgnorePatterns=external",
+    "test": "NODE_ENV=test jest --runInBand --testTimeout=30000",
     "test:integration": "NODE_ENV=test jest --runInBand --testTimeout=30000 tests/integration",
     "lint": "tsc --noEmit",
     "format:check": "tsc --noEmit",
