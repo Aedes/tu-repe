@@ -32,7 +32,7 @@
     "@aws-sdk/s3-request-presigner": "^3.901.0",
     "bcrypt": "^6.0.0",
     "chokidar": "^4.0.3",
-    "cloudinary": "^2.9.0",
+    "cloudinary": "^2.11.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
