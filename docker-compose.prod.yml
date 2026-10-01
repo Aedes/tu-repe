@@ -33,6 +33,7 @@ services:
     environment:
       TZ: UTC
       NODE_ENV: production
+      MYSQL_HOST: mysql
     depends_on:
       mysql:
         condition: service_healthy
@@ -47,6 +48,7 @@ services:
     environment:
       TZ: UTC
       NODE_ENV: production
+      PORT: 3000
       MYSQL_HOST: mysql
       MEDIA_SERVER_RTSP_BASE_URL: rtsp://mediamtx:8554
     depends_on:
@@ -55,6 +57,7 @@ services:
       migrate:
         condition: service_completed_successfully
     volumes:
+      - videos:/var/videos
       - clip_uploads:/app/uploads
     networks:
       - internal
@@ -109,6 +112,7 @@ services:
     environment:
       TZ: UTC
       MTX_RTSPTRANSPORTS: tcp
+      MTX_AUTHHTTPADDRESS: http://mtx:${MEDIA_AUTH_SECRET}@api:3000/internal/mediamtx/auth
     volumes:
       - ./deploy/mediamtx.yml:/mediamtx.yml:ro
     ports:

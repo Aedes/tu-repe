@@ -1,0 +1,70 @@
+server {
+    listen 80;
+    server_name turepe.aedestec.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name turepe.aedestec.com;
+
+    ssl_certificate /etc/letsencrypt/live/turepe.aedestec.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/turepe.aedestec.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    root /var/www/turepe/tu-repe-frontend/dist;
+    index index.html;
+    client_max_body_size 15M;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "no-referrer" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; media-src 'self' https:; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self' https:; style-src 'self' 'unsafe-inline'" always;
+
+    location = /api {
+        return 308 /api/;
+    }
+
+    # Estos endpoints sólo son para la red interna de Docker.
+    location ^~ /api/internal/ {
+        return 404;
+    }
+
+    # El slash final en proxy_pass elimina el prefijo /api/.
+    location /api/ {
+        proxy_pass http://127.0.0.1:5001/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+# Compatibilidad temporal con el dominio antiguo de la API.
+server {
+    listen 80;
+    server_name tu-repe-api.aedestec.com;
+    return 308 https://turepe.aedestec.com/api$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name tu-repe-api.aedestec.com;
+
+    ssl_certificate /etc/letsencrypt/live/turepe.aedestec.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/turepe.aedestec.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    return 308 https://turepe.aedestec.com/api$request_uri;
+}

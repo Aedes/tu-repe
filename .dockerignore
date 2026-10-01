@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+!.env.test.example
+.git
+.github
+node_modules
+build
+coverage
+mysql_data
+uploads
+*.log
+.DS_Store
