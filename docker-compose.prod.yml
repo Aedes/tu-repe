@@ -43,6 +43,7 @@ services:
 
   api:
     image: ${API_IMAGE:-tu-repe-api:latest}
+    init: true
     restart: unless-stopped
     env_file: .env
     environment:
@@ -78,6 +79,9 @@ services:
 
   worker:
     image: ${API_IMAGE:-tu-repe-api:latest}
+    init: true
+    profiles:
+      - cameras
     command: ["node", "build/src/worker.js"]
     restart: unless-stopped
     env_file: .env
@@ -108,6 +112,8 @@ services:
 
   mediamtx:
     image: bluenviron/mediamtx:1.11.3
+    profiles:
+      - cameras
     restart: unless-stopped
     environment:
       TZ: UTC
@@ -115,6 +121,9 @@ services:
       MTX_AUTHHTTPADDRESS: http://mtx:${MEDIA_AUTH_SECRET}@api:3000/internal/mediamtx/auth
     volumes:
       - ./deploy/mediamtx.yml:/mediamtx.yml:ro
+    depends_on:
+      api:
+        condition: service_healthy
     ports:
       - "1935:1935"
     networks:
@@ -128,6 +137,8 @@ services:
 
   caddy-frontend:
     image: ${FRONTEND_IMAGE:-tu-repe-frontend:latest}
+    profiles:
+      - caddy
     restart: unless-stopped
     environment:
       DOMAIN: ${DOMAIN}

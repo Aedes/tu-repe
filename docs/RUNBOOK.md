@@ -36,6 +36,10 @@ Frontend: copiar `.env.production.example` a `.env.production`, completar las UR
 
 ## Primera instalación con Nginx del host
 
+Para una instalación temporal sin cámaras, worker ni MediaMTX, seguir
+[`DEPLOYMENT_NO_CAMERAS.md`](DEPLOYMENT_NO_CAMERAS.md). Los pasos de esta
+sección describen el despliegue completo con cámaras.
+
 1. Instalar Docker Engine, el plugin Docker Compose, Nginx, Node.js 22 y Certbot. Clonar `tu-repe` y `tu-repe-frontend` bajo `/var/www/turepe/`.
 2. Completar el `.env` del backend y `.env.production` del frontend. No copiar secretos de desarrollo.
 3. En el frontend ejecutar `npm ci && npm run build`. Confirmar que existe `/var/www/turepe/tu-repe-frontend/dist/index.html`.
@@ -49,7 +53,9 @@ Frontend: copiar `.env.production.example` a `.env.production`, completar las UR
 6. Levantar el stack sin Caddy:
 
    ```bash
-   docker compose -f docker-compose.prod.yml -f docker-compose.nginx.yml up -d --remove-orphans
+   docker compose --profile cameras \
+     -f docker-compose.prod.yml -f docker-compose.nginx.yml \
+     up -d --remove-orphans
    ```
 
 7. Copiar `deploy/nginx/turepe.conf.example` a `/etc/nginx/sites-available/tu-repe`, habilitarlo, deshabilitar las configuraciones antiguas que repitan esos `server_name`, ejecutar `sudo nginx -t` y luego `sudo systemctl reload nginx`.

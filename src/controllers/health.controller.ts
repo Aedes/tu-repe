@@ -11,7 +11,7 @@ export const live = (_req: Request, res: Response) => {
 
 export const ready = async (_req: Request, res: Response) => {
     await pingDatabase()
-    if (!config.isTest) {
+    if (!config.isTest && config.workerRequired) {
         const workerOk = await HeartbeatService.isFresh("worker")
         if (!workerOk) {
             res.status(503).json({ status: "not_ready", reason: "worker" })

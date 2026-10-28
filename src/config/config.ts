@@ -33,6 +33,7 @@ const envSchema = z.object({
     CLOUDINARY_API_SECRET: z.string().min(1),
     MEDIA_SERVER_RTSP_BASE_URL: z.string().min(1),
     MEDIA_AUTH_SECRET: z.string().min(16),
+    WORKER_REQUIRED: z.enum(["true", "false"]).default("true"),
     TURNSTILE_SECRET_KEY: z.string().min(1),
     TURNSTILE_VERIFY_URL: z.string().url().default("https://challenges.cloudflare.com/turnstile/v0/siteverify"),
     VIDEO_RETENTION_HOURS: z.coerce.number().int().positive().default(72),
@@ -84,6 +85,7 @@ export const config = {
     cookieSecure: env.COOKIE_SECURE === "true" || env.NODE_ENV === "production",
     isProduction: env.NODE_ENV === "production",
     isTest: env.NODE_ENV === "test",
+    workerRequired: env.WORKER_REQUIRED === "true",
     appointmentMergeEnabled: env.APPOINTMENT_MERGE_ENABLED === "true",
 }
 
